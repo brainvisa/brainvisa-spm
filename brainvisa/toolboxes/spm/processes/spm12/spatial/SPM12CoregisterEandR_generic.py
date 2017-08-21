@@ -243,6 +243,12 @@ def execution(self, context):
         self.extractCoregisterMatrix(source_diskitem.fullPath(), reference_diskitem.fullPath(),
                                      self.coregister_matrix.fullPath())
 
+    if source_diskitem.isTemporary():
+        source_diskitem.eraseFiles()
+
+    if reference_diskitem.isTemporary():
+        reference_diskitem.eraseFiles()
+
 
 def extractCoregisterMatrix(self, source_path, reference_path, output_path):
     """ because of 'resetIfNecessary' method, reference_vol have exactly one transformation"""
