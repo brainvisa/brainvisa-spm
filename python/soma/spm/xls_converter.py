@@ -27,6 +27,8 @@ class XlsConverter():
         "align: wrap on, vert centre, horiz center;")
     self.row_header_cell_style = xlwt.easyxf(
         "pattern: pattern solid, fore_colour gray25;"
+        "borders: top_color white, bottom_color white, right_color white, left_color white, "
+                  "left thin, right thin, top thin, bottom thin;"
         "align: wrap on, vert centre, horiz center;")
     self.data_cell_style = xlwt.easyxf(
         "align: wrap on, vert centre, horiz center")
