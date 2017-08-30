@@ -12,7 +12,7 @@ from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.spm_main_module import SPM8MainModule, SPM12MainModule
 
 
-class SPMLauncher():
+class SPMLauncher(object):
     @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
     def setSPMScriptPath(self, spm_script_path):
         self.spm_script_path = spm_script_path
