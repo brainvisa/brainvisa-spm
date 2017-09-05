@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from distutils.spawn import find_executable
-from collections import deque
 import os
-import tempfile
-import sys
 import subprocess
+import sys
+import tempfile
+from collections import deque
+from distutils.spawn import find_executable
 
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
-from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.custom_decorator_pattern import singleton
+from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.spm_main_module import SPM8MainModule, SPM12MainModule
 
 
@@ -31,7 +31,7 @@ class SPMLauncher(object):
         if not os.path.exists(os.path.dirname(self.spm_script_path)):
             os.makedirs(os.path.dirname(self.spm_script_path))
         else:
-            pass#folder already exists
+            pass  # folder already exists
         spm_script_file = open(self.spm_script_path, 'w+')
         for batch_row in self.full_batch_deque:
             spm_script_file.write(batch_row + '\n')
@@ -44,7 +44,7 @@ class SPMLauncher(object):
             except Exception, e:
                 raise RuntimeError("Move SPM default paths failed :\n%s" % e)
 
-    #TODO : find an other way to re-initialize or destroy singleton function
+    # TODO : find an other way to re-initialize or destroy singleton function
     def resetExecutionQueue(self):
         """
         for avoid conflict during execution (if we start new module during first
@@ -53,9 +53,11 @@ class SPMLauncher(object):
         self.current_spm_job_index = 0
         self.full_batch_deque.clear()
         self.execution_module_deque.clear()
-#===========================================================================
+
+
+# ===========================================================================
 #
-#===========================================================================
+# ===========================================================================
 class SPM(SPMLauncher):
     def _getMatlabPathFromExecutable(self, matlab_executable):
         matlab_executable_path = find_executable(matlab_executable)
@@ -91,15 +93,15 @@ class SPM(SPMLauncher):
             raise ValueError("job path and batch path are required")
 
     def _writeMatlabScript(self):
-        #matlab_script_path is created in tmp with little NamedTemporaryFile
-        #because matlab namelengthmax is 63
+        # matlab_script_path is created in tmp with little NamedTemporaryFile
+        # because matlab namelengthmax is 63
         matlab_script_path = tempfile.NamedTemporaryFile(suffix=".m").name
         workspace_directory = os.path.dirname(self.spm_script_path)
 
         if not os.path.exists(os.path.dirname(matlab_script_path)):
             os.makedirs(os.path.dirname(matlab_script_path))
         else:
-            #folder already exists
+            # folder already exists
             pass
         if self.spm_path is not None:
             matlab_script_file = open(matlab_script_path, 'w+')
@@ -109,8 +111,8 @@ class SPM(SPMLauncher):
             for matlab_command in self.matlab_commands_before_list:
                 matlab_script_file.write(matlab_command + "\n")
             matlab_script_file.write("try\n")
-            matlab_script_file.write("  spm('%s');\n"%self.spm_defaults)
-            matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)#initialise job
+            matlab_script_file.write("  spm('%s');\n" % self.spm_defaults)
+            matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)  # initialise job
             matlab_script_file.write("  cfg_util('run', jobid);\n")
             matlab_script_file.write("catch\n")
             matlab_script_file.write("  disp('error running SPM');\n")
@@ -122,8 +124,8 @@ class SPM(SPMLauncher):
             matlab_script_file.write("exit\n")
             matlab_script_file.close()
         else:
-            raise ValueError('SPM path not found')#This raise is normally useless!!
-        #reset matlab_commands list
+            raise ValueError('SPM path not found')  # This raise is normally useless!!
+        # reset matlab_commands list
         self.matlab_commands_before_list = []
         self.matlab_commands_after_list = []
         return matlab_script_path
@@ -137,18 +139,20 @@ class SPM(SPMLauncher):
         else:
             matlab_run_options = self.matlab_options
 
-        matlab_commmand = ['bv_unenv', self.matlab_executable_path, matlab_run_options, "-r \"run('%s');\"" %matlab_script_path]  # bv_unenv is needed for CentOs 7 (LIB & Pitie)
+        matlab_commmand = ['bv_unenv', self.matlab_executable_path, matlab_run_options,
+                           "-r \"run('%s');\"" % matlab_script_path]  # bv_unenv is needed for CentOs 7 (LIB & Pitie)
         print('Running matlab command:', matlab_commmand)
         output = runCommand(matlab_commmand)
         os.chdir(cwd)
 
         return output
 
-#===========================================================================
-#===============================================================================
+
+# ===========================================================================
+# ===============================================================================
 # # SPM8 (Matlab needed)
-#===============================================================================
-#===========================================================================
+# ===============================================================================
+# ===========================================================================
 @singleton
 class SPM8(SPM):
     def __init__(self, spm_path, matlab_executable, matlab_options='', spm_defaults='PET'):
@@ -177,9 +181,10 @@ class SPM8(SPM):
         batch_list = spm_module.getStringListForBatch()
         self._addBatchListToExecutionQueue(batch_list)
 
-#===========================================================================
+
+# ===========================================================================
 # SPM12 (Matlab needed)
-#===========================================================================
+# ===========================================================================
 @singleton
 class SPM12(SPM):
     def __init__(self, spm_path, matlab_executable, matlab_options='', spm_defaults='PET'):
@@ -208,9 +213,10 @@ class SPM12(SPM):
         batch_list = spm_module.getStringListForBatch()
         self._addBatchListToExecutionQueue(batch_list)
 
-#===========================================================================
+
+# ===========================================================================
 #
-#===========================================================================
+# ===========================================================================
 class SPMStandalone(SPMLauncher):
     def run(self, initcfg=True):
         if self.spm_script_path is not None:
@@ -237,9 +243,10 @@ class SPMStandalone(SPMLauncher):
         else:
             raise ValueError("job path is required")
 
-#==============================================================================
+
+# ==============================================================================
 # SPM8 Standalone
-#==============================================================================
+# ==============================================================================
 @singleton
 class SPM8Standalone(SPMStandalone):
     def __init__(self, command, mcr_path, path, spm_defaults='PET'):
@@ -268,9 +275,9 @@ class SPM8Standalone(SPMStandalone):
         self._addBatchListToExecutionQueue(batch_list)
 
 
-#==============================================================================
+# ==============================================================================
 # SPM12 Standalone
-#==============================================================================
+# ==============================================================================
 @singleton
 class SPM12Standalone(SPMStandalone):
     def __init__(self, command, mcr_path, path, spm_defaults='PET'):
@@ -344,11 +351,12 @@ def spm12(spm12_standalone_command=None,
 
     return spm12
 
-#===========================================================================
-#===========================================================================
+
+# ===========================================================================
+# ===========================================================================
 # #
-#===========================================================================
-#===========================================================================
+# ===========================================================================
+# ===========================================================================
 
 
 def checkIfExists(path, configuration_name):
@@ -378,7 +386,7 @@ def checkIfSpmHasFailed(output):
 
 
 def runCommand(command_list):
-    #Popen run spm in background
+    # Popen run spm in background
     process = subprocess.Popen(command_list,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
