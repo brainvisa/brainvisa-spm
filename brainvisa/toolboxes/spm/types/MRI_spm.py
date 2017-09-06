@@ -53,3 +53,5 @@ FileType('T1 MRI tissue probability mask', 'Label volume')
 
 FileType('Subject Group', 'Any Type', 'JSON file')
 FileType('Covariate table for SPM', 'CSV file')
+
+FileType('PET dynamic SPM realign results', 'Text file')
