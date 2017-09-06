@@ -497,15 +497,15 @@ def execution( self, context ):
       raise ValueError('Unvalid bias_FWHM value')
 
     second_channel.setVolumePathList([diskitem.fullPath() for diskitem in self.second_channel])
-    if self.bias_saving == 'save nothing':
+    if self.bias_saving_2c == 'save nothing':
       second_channel.discardBiasCorrected()
-    elif self.bias_saving == 'save bias corrected':
+    elif self.bias_saving_2c == 'save bias corrected':
       second_channel.saveBiasCorrected()
       second_channel.setBiasCorrectedPathList([diskitem.fullPath() for diskitem in self.t1mri_bias_corrected_2c])
-    elif self.bias_saving == 'save bias field':
+    elif self.bias_saving_2c == 'save bias field':
       second_channel.saveBiasField()
       second_channel.setBiasFieldPathList([diskitem.fullPath() for diskitem in self.t1mri_bias_field_2c])
-    elif self.bias_saving == 'save field and corrected':
+    elif self.bias_saving_2c == 'save field and corrected':
       second_channel.saveBiasFieldAndBiasCorrected()
       second_channel.setBiasCorrectedPathList([diskitem.fullPath() for diskitem in self.t1mri_bias_corrected_2c])
       second_channel.setBiasFieldPathList([diskitem.fullPath() for diskitem in self.t1mri_bias_field_2c])
