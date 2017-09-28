@@ -172,7 +172,7 @@ def execution( self, context ):
   elif self.affine_regularisation == "No regularisation":
     estimate.unsetAffineRegularisation()
   else:
-    raise ValueError("Unvalid choice for affine_regularisation")
+    raise ValueError("Invalid choice for affine_regularisation")
 
   estimate.setNonLinearFrequencyCutOff(self.frequency_cutoff)
   estimate.setNonLinearIterations(self.iterations)
@@ -186,7 +186,7 @@ def execution( self, context ):
   elif self.preserve == "Preserve Amount":
     writing.setPreserveToAmount()
   else:
-    raise ValueError("Unvalid choice for preserve")
+    raise ValueError("Invalid choice for preserve")
 
   writing.setBoundingBox(numpy.array(self.bounding_box))
   writing.setVoxelSize(self.voxel_size)
@@ -208,7 +208,7 @@ def execution( self, context ):
   elif self.interpolation == "7th Degree B-Spline":
     writing.setInterpolationTo7thDegreeBSpline()
   else:
-    raise ValueError("Unvalid interpolation")
+    raise ValueError("Invalid interpolation")
 
   writing.setWrapping(self.wrappping[0], self.wrappping[1], self.wrappping[2])
   writing.setFilenamePrefix(self.filename_prefix)
