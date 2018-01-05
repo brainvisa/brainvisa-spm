@@ -12,7 +12,7 @@ __version__ = '%s.%s.%s%s' % (version_major,
                               version_extra)
 
 # Main setup parameters
-PROJECT = 'spm'  # Needed by BV
-NAME = 'spm'
+PROJECT = 'brainvisa_spm'  # Needed by BV
+NAME = 'brainvisa_spm'
 LICENSE = 'CeCILL-v2'
 VERSION = __version__
