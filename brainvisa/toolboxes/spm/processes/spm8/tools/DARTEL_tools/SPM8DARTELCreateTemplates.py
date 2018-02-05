@@ -159,7 +159,7 @@ def updateFlowFields(self, proc, dummy):
     for diskitem in self.images_1:
       d = diskitem.hierarchyAttributes()
       d['template'] = self.template_basename
-      output_diskitem_list.append(WriteDiskItem( 'DARTEL flow field', 'NIFTI-1 image' ).findValue(d))
+      output_diskitem_list.append(WriteDiskItem( 'HDW DARTEL flow field', 'NIFTI-1 image' ).findValue(d))
     return output_diskitem_list
 
 def updateDartelTemplate(self, proc, dummy):
@@ -170,7 +170,7 @@ def updateDartelTemplate(self, proc, dummy):
     d['template'] = self.template_basename
     for index in [1,2,3,4,5,6]:#TODO : 1->6 is the inner number...
       d['step'] = str(index)
-      output_diskitem_list.append(WriteDiskItem( 'DARTEL created template', 'NIFTI-1 image' ).findValue(d))
+      output_diskitem_list.append(WriteDiskItem( 'TPM HDW DARTEL created template', 'NIFTI-1 image' ).findValue(d))
     return output_diskitem_list
 
 def updateBatchPath(self, proc):
