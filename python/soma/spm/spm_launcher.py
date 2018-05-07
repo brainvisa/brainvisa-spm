@@ -41,7 +41,7 @@ class SPMLauncher(object):
         for module in current_execution_module_deque:
             try:
                 module._moveSPMDefaultPathsIfNeeded()
-            except Exception, e:
+            except Exception as e:
                 raise RuntimeError("Move SPM default paths failed :\n%s" % e)
 
     # TODO : find an other way to re-initialize or destroy singleton function
@@ -85,7 +85,7 @@ class SPM(SPMLauncher):
                 checkIfMatlabFailedBeforSpm(output)
                 checkIfSpmHasFailed(output)
                 self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
-            except Exception, e:
+            except Exception as e:
                 raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
 
             return output
@@ -236,7 +236,7 @@ class SPMStandalone(SPMLauncher):
             try:
                 checkIfSpmHasFailed(output)
                 self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
-            except Exception, e:
+            except Exception as e:
                 raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
 
             return output
@@ -394,6 +394,8 @@ def runCommand(command_list):
     output_lines = []
     while True:
         nextline = process.stdout.readline()
+        if sys.version_info[0] >= 3:
+            nextline = nextline.decode()
         if nextline == '' and process.poll() is not None:
             break
         output_lines.append(nextline)

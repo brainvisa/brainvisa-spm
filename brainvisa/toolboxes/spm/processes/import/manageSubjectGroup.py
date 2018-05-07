@@ -68,13 +68,13 @@ def removeOldSubjects(self, context, data, attr_needed):
             except KeyError, e:
                 context.error("subject has not all needed attributes")
                 raise KeyError(e)
-            except Exception, e:
+            except Exception as e:
                 context.error(e)
         try:
             data["group_list"].remove(subject_dict)
         except ValueError, e:
             context.error("old subject not found")
-        except Exception, e:
+        except Exception as e:
             context.error(e)
 
         return data
@@ -90,7 +90,7 @@ def addNewSubjects(self, context, data, attr_needed):
             except KeyError, e:
                 context.error("subject has not all needed attributes")
                 raise KeyError(e)
-            except Exception, e:
+            except Exception as e:
                 context.error(e)
 
         if not subject_dict in data["group_list"]:
