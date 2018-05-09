@@ -65,14 +65,14 @@ def removeOldSubjects(self, context, data, attr_needed):
         for attr in attr_needed:
             try:
                 subject_dict[attr] = diskitem_attr[attr]
-            except KeyError, e:
+            except KeyError as e:
                 context.error("subject has not all needed attributes")
                 raise KeyError(e)
             except Exception as e:
                 context.error(e)
         try:
             data["group_list"].remove(subject_dict)
-        except ValueError, e:
+        except ValueError as e:
             context.error("old subject not found")
         except Exception as e:
             context.error(e)
@@ -87,7 +87,7 @@ def addNewSubjects(self, context, data, attr_needed):
         for attr in attr_needed:
             try:
                 subject_dict[attr] = diskitem_attr[attr]
-            except KeyError, e:
+            except KeyError as e:
                 context.error("subject has not all needed attributes")
                 raise KeyError(e)
             except Exception as e:

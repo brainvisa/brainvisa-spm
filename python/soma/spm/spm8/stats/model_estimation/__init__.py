@@ -13,21 +13,21 @@ from soma.spm.spm8.stats.model_estimation.analysis_space import AnalysisSpaceVol
 #==============================================================================
 #
 #==============================================================================
-class ModelEstimationClassical(ModelEstimation, ModelEstimationClassical_virtual, SPM8MainModule):
+class ModelEstimationClassical(ModelEstimationClassical_virtual, SPM8MainModule):
   def __init__(self):
-    ModelEstimation.__init__(self)
+    super(ModelEstimationClassical, self).__init__()
 #==============================================================================
 #
 #==============================================================================
-class ModelEstimationBayesianSecondLevel(ModelEstimation, ModelEstimationBayesianSecondLevel_virtual, SPM8MainModule):
+class ModelEstimationBayesianSecondLevel(ModelEstimationBayesianSecondLevel_virtual, SPM8MainModule):
   def __init__(self):
-    ModelEstimation.__init__(self)
+    super(ModelEstimationBayesianSecondLevel, self).__init__()
 #==============================================================================
 #
 #==============================================================================
-class ModelEstimationBayesianFirstLevel(ModelEstimation, ModelEstimationBayesianFirstLevel_virtual, SPM8MainModule):
+class ModelEstimationBayesianFirstLevel(ModelEstimationBayesianFirstLevel_virtual, SPM8MainModule):
   def __init__(self):
-    ModelEstimation.__init__(self)
+    super(ModelEstimationBayesianFirstLevel, self).__init__()
     self.analysis_space = AnalysisSpaceVolume()
     self.possible_signal_priors_list = ['UGL', 'GMRF', 'LORETA', 'WGL', 'Global', 'Uninformative']
     self.signal_priors = 'UGL'
