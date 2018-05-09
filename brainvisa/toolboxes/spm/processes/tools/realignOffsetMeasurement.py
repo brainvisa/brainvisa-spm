@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 from brainvisa.processes import *
 import json
 
@@ -31,7 +33,7 @@ def execution(self, context):
         for line in f.readlines():
             index += 1
             transfo = self.buildAimsTransfo(line)
-            print transfo
+            print(transfo)
             offset = self.extractOffsetBetweenTwoTransformations(first_transfo, transfo)
             realign_offset_dict["t0 to t%i" % index] = offset
             context.write("Mean offset between t0 and t%i : <b>%s mm</b>" % (index, offset))
