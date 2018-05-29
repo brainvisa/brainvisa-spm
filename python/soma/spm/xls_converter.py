@@ -113,7 +113,7 @@ class XlsConverter():
     """
     extract all keys in value dict from column_values
     """
-    for key, value in column_values_dict.items():
+    for key, value in sorted(column_values_dict.items()):
       if first_key:
         header_dict = XlsConverter.mergeDict(header_dict,
                                              self._extractHeaderDict(value,
@@ -171,7 +171,7 @@ class XlsConverter():
     write data below headers
     """
     current_row_index = end_header_row_index+1
-    for row, row_dict in sorted(column_values_dict.items()):
+    for row, row_dict in column_values_dict.items():
       row_header_list = row.split(self.separator)
       for current_column_index, row_header in enumerate(row_header_list):
         sheet.write(current_row_index, current_column_index, row_header, self.row_header_cell_style)
@@ -179,7 +179,7 @@ class XlsConverter():
       current_row_index += 1
 
   def _writeRowData(self, sheet, row_dict, column_header_dict, current_row_index, current_column_index):
-    for key, value in sorted(column_header_dict.items()):
+    for key, value in column_header_dict.items():
       if key in row_dict.keys():
         if isinstance(value, dict):
           current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
