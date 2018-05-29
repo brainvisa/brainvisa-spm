@@ -70,7 +70,7 @@ class XlsConverter():
         else:
           end_header_row_index = max_header_level - 1
           self._writeRowHeader(sheet, sheet_dict["row_header"], end_header_row_index)
-          header_dict = {}
+          header_dict = OrderedDict()
           column_header_dict = self._extractHeaderDict(column_values_dict, header_dict)
           self._writeColumnHeader(sheet, sheet_dict["row_header"], column_header_dict, end_header_row_index)
           self._writeData(sheet, column_values_dict, column_header_dict, end_header_row_index)
