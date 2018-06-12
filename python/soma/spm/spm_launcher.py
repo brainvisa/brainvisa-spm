@@ -131,9 +131,7 @@ class SPM(SPMLauncher):
         return matlab_script_path
 
     def _runMatlabScript(self, use_matlab_options, matlab_script_path):
-        cwd = os.getcwd()
         batch_directory = os.path.dirname(matlab_script_path)
-        os.chdir(batch_directory)
         if not use_matlab_options:
             matlab_run_options = ''
         else:
@@ -142,8 +140,7 @@ class SPM(SPMLauncher):
         matlab_commmand = ['bv_unenv', self.matlab_executable_path, matlab_run_options,
                            "-r \"run('%s');\"" % matlab_script_path]  # bv_unenv is needed for CentOs 7 (LIB & Pitie)
         print('Running matlab command:', matlab_commmand)
-        output = runCommand(matlab_commmand)
-        os.chdir(cwd)
+        output = runCommand(matlab_commmand, cwd=batch_directory)
 
         return output
 
@@ -224,15 +221,12 @@ class SPMStandalone(SPMLauncher):
             if initcfg:
                 self.full_batch_deque.appendleft("spm_jobman('initcfg');")
             self._writeSPMScript()
-            cwd = os.getcwd()
             job_directory = os.path.dirname(self.spm_script_path)
-            os.chdir(job_directory)
             standalone_command = [self.standalone_command, self.standalone_mcr_path, 'run', self.spm_script_path]
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
             print('running SPM standalone command:', standalone_command)
-            output = runCommand(standalone_command)
-            os.chdir(cwd)
+            output = runCommand(standalone_command, cwd=job_directory)
             try:
                 checkIfSpmHasFailed(output)
                 self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
@@ -385,9 +379,10 @@ def checkIfSpmHasFailed(output):
             raise RuntimeError("SPM execution failed : %s" % common_spm_error)
 
 
-def runCommand(command_list):
+def runCommand(command_list, cwd=None):
     # Popen run spm in background
     process = subprocess.Popen(command_list,
+                               cwd=cwd,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     # Poll process for new output until finished
