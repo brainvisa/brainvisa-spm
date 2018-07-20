@@ -41,8 +41,6 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 from brainvisa.processes import *
-import numpy as np
-import json
 
 name = 'compute Grey / White / CSF / Skull / Scalp Mask'
 userLevel = 0
@@ -86,6 +84,7 @@ signature=Signature(
     'method', Choice(('threshold', 'threshold'),
                      ('max probability', 'maxProbability')),
     'threshold', Float(),
+    'grey_mask', Boolean(),
     'grey_native_mask', WriteDiskItem(
         'T1 MRI tissue probability mask',
         ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
@@ -124,7 +123,7 @@ signature=Signature(
 
 
 def initialization( self ):
-    self.setOptional('white_native', 'csf_native',
+    self.setOptional('grey_native_mask', 'white_native', 'csf_native',
                      'skull_native', 'scalp_native',
                      'white_native_mask', 'csf_native_mask',
                      'skull_native_mask', 'scalp_native_mask')
@@ -168,15 +167,16 @@ def execution( self, context ):
     #if (self.csf_mask or self.intracranial_labels or self.skull_mask or self.scalp_mask):
         #context.warning("only grey and white masks can be computed with threshold method.")
     else:
-        self.compareProbabilityMapToList(self.grey_native, self.grey_native_mask, [self.white_native, self.csf_native, self.skull_native, self.scalp_native ])
+        if (self.grey_mask):
+            self.compareProbabilityMapToList(context, self.grey_native, self.grey_native_mask, [self.white_native, self.csf_native, self.skull_native, self.scalp_native ])
         if (self.white_mask):
-            self.compareProbabilityMapToList(self.white_native, self.white_native_mask, [self.grey_native, self.csf_native, self.skull_native, self.scalp_native ])
+            self.compareProbabilityMapToList(context, self.white_native, self.white_native_mask, [self.grey_native, self.csf_native, self.skull_native, self.scalp_native ])
         if (self.csf_mask):
-            self.compareProbabilityMapToList(self.csf_native, self.csf_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.csf_native, self.csf_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
         if (self.skull_mask):
-            self.compareProbabilityMapToList(self.skull_native, self.skull_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.skull_native, self.skull_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
         if (self.scalp_mask):
-            self.compareProbabilityMapToList(self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
         #if self.intracranial_labels:
             #self.createIntracranialLabel(context)
 
@@ -215,81 +215,18 @@ def execution( self, context ):
   #f.close()
 
 
-def compareProbabilityMapToList(self, probabilityMap, mask, probMapsToCompare):
+
+def compareProbabilityMapToList(self, context, prob_map, prob_map_output, prob_maps_to_compare):
     """Function to create a mask from probability maps of different regions
-    
+
     Compare the probabilityMap to all the other probability maps in probMapsToCompare
     If a probability is higher than in probabilityMap, the value in the mask is 0, else it's 1
     Create a file with the mask in mask.fullPath()
-    
-    Parameters
-    ----------
-    probabilityMap : 
-        Probability map of the region to create a mask
-    mask :
-        Picture of the mask to be created
-    probMapsToCompare : list
-        List of all the others probability maps
     """
 
-    volume = aims.read(probabilityMap.fullPath())
-    array = np.array(volume, copy=False)
-    array[np.where(array < 0)] = 0
-    for probToCompare in probMapsToCompare:
-        self.compareProbabilityMap(array, probToCompare)
-    array[array > 10e-5] = 1  # 0 in nii.gz can be 4.65661e-10 in .nii after AimsFileConvert
-    aims.write(volume, mask.fullPath(), format='S16')
+    compute_one = getProcessInstance('computeOneTissueMask')
+    compute_one.native_prob_map = prob_map.fullPath()
+    compute_one.others_prob_maps = [i.fullPath() for i in prob_maps_to_compare]
+    compute_one.native_mask = prob_map_output.fullPath()
+    context.runProcess(compute_one)
 
-
-def compareProbabilityMap(self, array, probMap):
-    if probMap is None or not os.path.exists(probMap.fullPath()):
-        return
-    compArray = np.array(aims.read(probMap.fullPath()), copy=False)
-    if self.resolve_equal_proba:
-        if len(array.shape) == 4 and len(compArray.shape) == 4:
-            array = resolveEqualProbability(array, compArray)
-        else:
-            raise ValueError('this code is only implemented for 4D shape')
-    else:
-        pass
-    array[array < compArray] = 0
-
-
-def resolveEqualProbability(arr, comp_arr):
-    equal_arr = arr == comp_arr
-    empty_arr = arr.copy()
-    empty_arr.fill(0)
-    non_zero_array = arr != empty_arr  # to remove voxel equal to 0.0
-    equal_coord = np.where(equal_arr * non_zero_array)
-    for x, y, z, t in zip(equal_coord[0], equal_coord[1], equal_coord[2], equal_coord[3]):
-        if 0 < x < arr.shape[0] and 0 < y < arr.shape[1] and 0 < z < arr.shape[2] and 0 < t < arr.shape[3] :
-            neighbors_arr_mean = _computeNeighborsMean(arr, x, y, z, t)
-            neighbors_comp_arr_mean = _computeNeighborsMean(comp_arr, x, y, z, t)
-            if neighbors_arr_mean < neighbors_comp_arr_mean:
-                arr[x][y][z][t] = 0
-        else:
-            pass  # voxel neighbor is out of field of view
-    return arr
-
-
-def _computeNeighborsMean(arr, x, y, z, t):
-    "18 neighbors"
-    neighbors_6 = [[x-1, y, z, t],
-                   [x, y-1, z, t],
-                   [x, y, z-1, t],
-                   [x+1, y, z, t],
-                   [x, y+1, z, t],
-                   [x, y, z+1, t],
-                  ]
-    neighbors_18 = neighbors_6 +\
-                   [[x-1, y-1, z, t],
-                    [x, y-1, z-1, t],
-                    [x-1, y, z-1, t],
-                    [x+1, y+1, z, t],
-                    [x, y+1, z+1, t],
-                    [x+1, y, z+1, t],
-                   ]
-    neighbors_sum = 0
-    for n in neighbors_18:
-        neighbors_sum += arr[n[0]][n[1]][n[2]][n[3]]
-    return neighbors_sum / len(neighbors_18)
