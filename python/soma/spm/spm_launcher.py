@@ -362,9 +362,9 @@ def checkIfExists(path, configuration_name):
 
 def checkIfMatlabFailedBeforSpm(output):
     """check if output terminal contains "spm" """
-    if "License checkout failed" in output.lower():
+    if "license checkout failed" in output.lower():
         raise RuntimeError("Matlab execution failed : License checkout failed")
-    elif not "spm" in output.lower():
+    elif "spm" not in output.lower():
         raise RuntimeError("Matlab execution failed")
 
 
