@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import subprocess
+import soma.subprocess
 import sys
 import tempfile
 from collections import deque
@@ -381,10 +381,10 @@ def checkIfSpmHasFailed(output):
 
 def runCommand(command_list, cwd=None):
     # Popen run spm in background
-    process = subprocess.Popen(command_list,
+    process = soma.subprocess.Popen(command_list,
                                cwd=cwd,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                               stdout=soma.subprocess.PIPE,
+                               stderr=soma.subprocess.PIPE)
     # Poll process for new output until finished
     output_lines = []
     while True:
