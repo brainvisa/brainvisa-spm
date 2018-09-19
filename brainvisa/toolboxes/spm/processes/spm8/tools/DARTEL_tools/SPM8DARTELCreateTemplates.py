@@ -62,6 +62,8 @@ signature = Signature(
                                   'Membrane Energy',
                                   'Bending Energy'),
 
+    'outer_iterations', Integer(),
+
     # Outer Iteration 1
     'inner_iteration_1', Choice(1, 2, 3 ,4, 5 ,6 ,7 ,8, 9 ,10),
     'regularisation_parameters_1', ListOf(Float()),
@@ -106,6 +108,11 @@ signature = Signature(
     'batch_location', WriteDiskItem( 'Matlab SPM script', 'Matlab script', section='default SPM outputs'),
  )
 
+INNER_ITERATION_PARAM_PREFIXES = (
+    'inner_iteration_', 'regularisation_parameters_',
+    'time_step_', 'smoothing_parameter_',
+)
+
 #------------------------------------------------------------------------------
 
 def initialization(self):
@@ -115,9 +122,12 @@ def initialization(self):
     self.linkParameters('output_template', ('images_1', 'template_basename'), self.updateDartelTemplate)
 
     self.addLink("batch_location", "output_template", self.updateBatchPath)
+    self.addLink(None, "outer_iterations", self.updateSignature)
 
     self.template_basename = 'Template'
     self.regularisation_form = 'Linear Elastic Energy'
+
+    self.outer_iterations = 6
 
     self.inner_iteration_1 = 3
     self.regularisation_parameters_1 = [4, 2, 1e-06]
@@ -177,40 +187,27 @@ def updateBatchPath(self, proc):
   if self.output_template:
     directory_path = os.path.dirname(self.output_template[0].fullPath())
     return os.path.join(directory_path, 'spm8_DARTEL_create_template_job.m')
+
+
+def updateSignature(self, proc):
+  signature = self.signature
+
+  for i in range(2, self.outer_iterations + 1):
+    for prefix in INNER_ITERATION_PARAM_PREFIXES:
+      signature[prefix + str(i)] = signature[prefix + '1']
+
+  # delete extra parameters (if self.outer_iterations was decreased)
+  i = max(self.outer_iterations + 1, 2)
+  while 'inner_iteration_' + str(i) in signature:
+    for prefix in INNER_ITERATION_PARAM_PREFIXES:
+      del signature[prefix + str(i)]
+    i += 1
+
+  self.changeSignature(signature)
+
 #------------------------------------------------------------------------------
 def execution( self, context ):
-  context.runProcess('SPM8DARTELCreateTemplates_generic',
-                     images_1=self.images_1,
-                     images_2=self.images_2,
-                     output_flow_field=self.output_flow_field,
-                     output_template=self.output_template,
-                     template_basename=self.template_basename,
-                     regularisation_form=self.regularisation_form,
-                     inner_iteration_1=self.inner_iteration_1,
-                     regularisation_parameters_1=self.regularisation_parameters_1,
-                     time_step_1=self.time_step_1,
-                     smoothing_parameter_1=self.smoothing_parameter_1,
-                     inner_iteration_2=self.inner_iteration_2,
-                     regularisation_parameters_2=self.regularisation_parameters_2,
-                     time_step_2=self.time_step_2,
-                     smoothing_parameter_2=self.smoothing_parameter_2,
-                     inner_iteration_3=self.inner_iteration_3,
-                     regularisation_parameters_3=self.regularisation_parameters_3,
-                     time_step_3=self.time_step_3,
-                     smoothing_parameter_3=self.smoothing_parameter_3,
-                     inner_iteration_4=self.inner_iteration_4,
-                     regularisation_parameters_4=self.regularisation_parameters_4,
-                     time_step_4=self.time_step_4,
-                     smoothing_parameter_4=self.smoothing_parameter_4,
-                     inner_iteration_5=self.inner_iteration_5,
-                     regularisation_parameters_5=self.regularisation_parameters_5,
-                     time_step_5=self.time_step_5,
-                     smoothing_parameter_5=self.smoothing_parameter_5,
-                     inner_iteration_6=self.inner_iteration_6,
-                     regularisation_parameters_6=self.regularisation_parameters_6,
-                     time_step_6=self.time_step_6,
-                     smoothing_parameter_6=self.smoothing_parameter_6,
-                     LM_Regularisation=self.LM_Regularisation,
-                     cycles=self.cycles,
-                     iterations=self.iterations,
-                     batch_location=self.batch_location)
+  p = getProcessInstance('SPM12DARTELCreateTemplates_generic')
+  for param_name in self.signature:
+    p.setValue(param_name, getattr(self, param_name))
+  context.runProcess(p)
