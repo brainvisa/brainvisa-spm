@@ -2,7 +2,7 @@
 
 version_major = 4
 version_minor = 6
-version_micro = 0
+version_micro = 2
 version_extra = ''
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
