@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import os
 import json
 import csv
@@ -19,8 +21,8 @@ def convert( const_pydict, output_path, const_key_titles=[""], verbose=False ):
 
   generic_dict = createGenericDict( pydict, {} )
   if verbose:
-    print "*****JSON dict representing the generic model *****"
-    print json.dumps( generic_dict, sort_keys=True, indent=4, separators=(',', ': '))
+    print("*****JSON dict representing the generic model *****")
+    print(json.dumps( generic_dict, sort_keys=True, indent=4, separators=(',', ': ')))
 
   #Warning!! if the output file already exists it will be erased
   c = csv.writer(open(output_path, "w"), delimiter=';')
@@ -47,7 +49,7 @@ def checkPyDictCompliance( pydict, key_titles ):
   for key in pydict.keys():
     current_words_number = key.count( ';' ) + 1
     if current_words_number != words_number:
-      print 'ERROR : number of header words mismatch with key_titles'
+      print('ERROR : number of header words mismatch with key_titles')
       return [ " -- " ] * words_number
   return key_titles
 
@@ -65,7 +67,7 @@ def createGenericDict (  dictionary_list, subtree={} ):
       for subject in dictionary.keys():
         dictionary_list.append(dictionary[subject])
     else:
-      print """ERROR the argument "dictionary_list" has not a good value"""
+      print("""ERROR the argument "dictionary_list" has not a good value""")
 
   children_name_list = []
   #create list with all names available

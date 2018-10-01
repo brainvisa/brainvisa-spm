@@ -70,7 +70,7 @@ class XlsConverter():
         else:
           end_header_row_index = max_header_level - 1
           self._writeRowHeader(sheet, sheet_dict["row_header"], end_header_row_index)
-          header_dict = {}
+          header_dict = OrderedDict()
           column_header_dict = self._extractHeaderDict(column_values_dict, header_dict)
           self._writeColumnHeader(sheet, sheet_dict["row_header"], column_header_dict, end_header_row_index)
           self._writeData(sheet, column_values_dict, column_header_dict, end_header_row_index)
@@ -122,7 +122,7 @@ class XlsConverter():
                                              d2_erase_d1=True)
       elif isinstance(value, dict):
         if not key in header_dict.keys():
-          header_dict[key] = {}
+          header_dict[key] = OrderedDict()
         header_dict[key] = XlsConverter.mergeDict(header_dict[key],
                                                   self._extractHeaderDict(value,
                                                                           header_dict[key],
@@ -143,7 +143,7 @@ class XlsConverter():
     self._completeColumnHeader(sheet, end_header_row_index, column_header_dict, 0, current_column_index)
 
   def _completeColumnHeader(self, sheet, end_header_row_index, header_dict, current_row_index, current_column_index):
-    for header_title, value in sorted(header_dict.items()):
+    for header_title, value in header_dict.items():
       if value is not None:
         sheet.merge(current_row_index, current_row_index, current_column_index, current_column_index+self._countLeaves(value)-1)
         sheet.write(current_row_index, current_column_index, header_title, self.column_header_cell_style)
@@ -171,7 +171,7 @@ class XlsConverter():
     write data below headers
     """
     current_row_index = end_header_row_index+1
-    for row, row_dict in sorted(column_values_dict.items()):
+    for row, row_dict in column_values_dict.items():
       row_header_list = row.split(self.separator)
       for current_column_index, row_header in enumerate(row_header_list):
         sheet.write(current_row_index, current_column_index, row_header, self.row_header_cell_style)
@@ -179,7 +179,7 @@ class XlsConverter():
       current_row_index += 1
 
   def _writeRowData(self, sheet, row_dict, column_header_dict, current_row_index, current_column_index):
-    for key, value in sorted(column_header_dict.items()):
+    for key, value in column_header_dict.items():
       if key in row_dict.keys():
         if isinstance(value, dict):
           current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
@@ -353,9 +353,10 @@ class XlsConverter():
     without erase the deep keys, contrary to classical "update" method"""
     dict_merged = OrderedDict()
     key_list = []
+    key_set = set()
     key_list.extend( d1.keys() )
     key_list.extend( d2.keys() )
-    key_list = list( set( key_list ) )
+    key_list = [k for k in key_list if not (k in key_set or key_set.add(k))]
     for key in key_list:
       if isinstance( key, str ):
         new_key = key.replace( '\n', '' )
