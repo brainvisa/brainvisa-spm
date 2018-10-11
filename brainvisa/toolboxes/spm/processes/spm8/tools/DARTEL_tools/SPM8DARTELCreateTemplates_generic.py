@@ -68,6 +68,8 @@ signature = Signature(
                                   'Membrane Energy',
                                   'Bending Energy'),
 
+    'outer_iterations', Integer(),
+
     # Outer Iteration 1
     'inner_iteration_1', Choice(1, 2, 3 ,4, 5 ,6 ,7 ,8, 9 ,10),
     'regularisation_parameters_1', ListOf(Float()),
@@ -112,15 +114,23 @@ signature = Signature(
     'batch_location', WriteDiskItem( 'Matlab SPM script', 'Matlab script', section='default SPM outputs'),
  )
 
+INNER_ITERATION_PARAM_PREFIXES = (
+    'inner_iteration_', 'regularisation_parameters_',
+    'time_step_', 'smoothing_parameter_',
+)
+
 #------------------------------------------------------------------------------
 
 def initialization(self):
     self.setOptional('images_2', 'output_flow_field', 'output_template')
 
     self.addLink("batch_location", "output_template", self.updateBatchPath)
+    self.addLink(None, "outer_iterations", self.updateSignature)
 
     self.template_basename = 'Template'
     self.regularisation_form = 'Linear Elastic Energy'
+
+    self.outer_iterations = 6
 
     self.inner_iteration_1 = 3
     self.regularisation_parameters_1 = [4, 2, 1e-06]
@@ -160,6 +170,24 @@ def updateBatchPath(self, proc):
   if self.output_template:
     directory_path = os.path.dirname(self.output_template[0].fullPath())
     return os.path.join(directory_path, 'spm8_DARTEL_create_template_job.m')
+
+
+def updateSignature(self, proc):
+  signature = self.signature
+
+  for i in range(2, self.outer_iterations + 1):
+    for prefix in INNER_ITERATION_PARAM_PREFIXES:
+      signature[prefix + str(i)] = signature[prefix + '1']
+
+  # delete extra parameters (if self.outer_iterations was decreased)
+  i = max(self.outer_iterations + 1, 2)
+  while 'inner_iteration_' + str(i) in signature:
+    for prefix in INNER_ITERATION_PARAM_PREFIXES:
+      del signature[prefix + str(i)]
+    i += 1
+
+  self.changeSignature(signature)
+
 #------------------------------------------------------------------------------
 def execution( self, context ):
   if self.images_2:
@@ -200,48 +228,14 @@ def execution( self, context ):
   else:
     raise ValueError("Invalid choice for regularisation_form")
 
-  first_outer_iteration = OuterIteration()
-  first_outer_iteration.setInnerIterationsNumber(self.inner_iteration_1)
-  first_outer_iteration.setRegParams(self.regularisation_parameters_1)
-  first_outer_iteration.setTimeSteps(self.time_step_1)
-  first_outer_iteration.setSmoothingParameter(self.smoothing_parameter_1)
-  settings.appendOuterIteration(first_outer_iteration)
-
-  second_outer_iteration = OuterIteration()
-  second_outer_iteration.setInnerIterationsNumber(self.inner_iteration_2)
-  second_outer_iteration.setRegParams(self.regularisation_parameters_2)
-  second_outer_iteration.setTimeSteps(self.time_step_2)
-  second_outer_iteration.setSmoothingParameter(self.smoothing_parameter_2)
-  settings.appendOuterIteration(second_outer_iteration)
-
-  third_outer_iteration = OuterIteration()
-  third_outer_iteration.setInnerIterationsNumber(self.inner_iteration_3)
-  third_outer_iteration.setRegParams(self.regularisation_parameters_3)
-  third_outer_iteration.setTimeSteps(self.time_step_6)
-  third_outer_iteration.setSmoothingParameter(self.smoothing_parameter_3)
-  settings.appendOuterIteration(third_outer_iteration)
-
-  fourth_outer_iteration = OuterIteration()
-  fourth_outer_iteration.setInnerIterationsNumber(self.inner_iteration_4)
-  fourth_outer_iteration.setRegParams(self.regularisation_parameters_4)
-  fourth_outer_iteration.setTimeSteps(self.time_step_4)
-  fourth_outer_iteration.setSmoothingParameter(self.smoothing_parameter_4)
-  settings.appendOuterIteration(fourth_outer_iteration)
-
-  fifth_outer_iteration = OuterIteration()
-  fifth_outer_iteration.setInnerIterationsNumber(self.inner_iteration_5)
-  fifth_outer_iteration.setRegParams(self.regularisation_parameters_5)
-  fifth_outer_iteration.setTimeSteps(self.time_step_5)
-  fifth_outer_iteration.setSmoothingParameter(self.smoothing_parameter_5)
-  settings.appendOuterIteration(fifth_outer_iteration)
-
-  sixth_outer_iteration = OuterIteration()
-  sixth_outer_iteration.setInnerIterationsNumber(self.inner_iteration_6)
-  sixth_outer_iteration.setRegParams(self.regularisation_parameters_6)
-  sixth_outer_iteration.setTimeSteps(self.time_step_6)
-  sixth_outer_iteration.setSmoothingParameter(self.smoothing_parameter_6)
-  settings.appendOuterIteration(sixth_outer_iteration)
-
+  for i in range(1, self.outer_iterations + 1):
+    i_str = str(i)
+    outer_iteration = OuterIteration()
+    outer_iteration.setInnerIterationsNumber(getattr(self, 'inner_iteration_' + i_str))
+    outer_iteration.setRegParams(getattr(self, 'regularisation_parameters_' + i_str))
+    outer_iteration.setTimeSteps(getattr(self, 'time_step_' + i_str))
+    outer_iteration.setSmoothingParameter(getattr(self, 'smoothing_parameter_' + i_str))
+    settings.appendOuterIteration(outer_iteration)
 
   optimisation_settings = OptimisationSettings()
   optimisation_settings.setLMRegularisation(self.LM_Regularisation)
