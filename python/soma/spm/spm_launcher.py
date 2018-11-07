@@ -105,7 +105,6 @@ class SPM(SPMLauncher):
             pass
         if self.spm_path is not None:
             matlab_script_file = open(matlab_script_path, 'w+')
-            matlab_script_file.write("previous_pwd = pwd;\n")
             matlab_script_file.write("cd('%s');\n" % workspace_directory)
             matlab_script_file.write("addpath('%s');\n" % self.spm_path)
             for matlab_command in self.matlab_commands_before_list:
@@ -120,8 +119,11 @@ class SPM(SPMLauncher):
             matlab_script_file.write("end\n")
             for matlab_command in self.matlab_commands_after_list:
                 matlab_script_file.write(matlab_command + "\n")
-            matlab_script_file.write("cd(previous_pwd);\n")
-            matlab_script_file.write("exit\n")
+            # Add this line to make sure that the "SPM" string appears in the
+            # output of MATLAB, which is needed to make
+            # checkIfMatlabFailedBeforSpm happy.
+            matlab_script_file.write("disp('SPM finished successfully');\n")
+            matlab_script_file.write("exit(0);\n")
             matlab_script_file.close()
         else:
             raise ValueError('SPM path not found')  # This raise is normally useless!!
