@@ -243,7 +243,7 @@ class SPMStandalone(SPMLauncher):
                 self.full_batch_deque.appendleft("spm_jobman('initcfg');")
             self._writeSPMScript()
             job_directory = os.path.dirname(self.spm_script_path)
-            standalone_command = [self.standalone_command, self.standalone_mcr_path, 'run', self.spm_script_path]
+            standalone_command = [self.standalone_command, self.standalone_mcr_path, 'batch', self.spm_script_path]
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
             print('running SPM standalone command:', standalone_command)
