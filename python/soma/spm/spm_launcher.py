@@ -123,8 +123,9 @@ class SPM(SPMLauncher):
             matlab_script_file.write("  spm_jobman('initcfg');\n")
             matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)  # initialise job
             matlab_script_file.write("  cfg_util('run', jobid);\n")
-            matlab_script_file.write("catch\n")
+            matlab_script_file.write("catch exception\n")
             matlab_script_file.write("  disp('error running SPM');\n")
+            matlab_script_file.write("  disp(getReport(exception));\n")
             matlab_script_file.write("  exit(1);\n")
             matlab_script_file.write("end\n")
             for matlab_command in self.matlab_commands_after_list:
