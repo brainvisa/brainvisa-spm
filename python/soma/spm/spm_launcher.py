@@ -76,11 +76,16 @@ class SPM(SPMLauncher):
 
     def run(self, use_matlab_options=True):
         if self.spm_script_path is not None:
+            if not use_matlab_options:
+                matlab_run_options = ''
+            else:
+                matlab_run_options = self.matlab_options
+
             self._writeSPMScript()
-            matlab_script_path = self._writeMatlabScript()
+            matlab_script_path = self._writeMatlabScript(matlab_run_options)
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
-            output = self._runMatlabScript(use_matlab_options, matlab_script_path)
+            output = self._runMatlabScript(matlab_run_options, matlab_script_path)
             try:
                 checkIfMatlabFailedBeforSpm(output)
                 checkIfSpmHasFailed(output)
@@ -92,9 +97,10 @@ class SPM(SPMLauncher):
         else:
             raise ValueError("job path and batch path are required")
 
-    def _writeMatlabScript(self):
+    def _writeMatlabScript(self, matlab_run_options):
         # matlab_script_path is created in tmp with little NamedTemporaryFile
         # because matlab namelengthmax is 63
+        # TODO: make sure that this file is cleaned up after MATLAB runs.
         matlab_script_path = tempfile.NamedTemporaryFile(suffix=".m").name
         workspace_directory = os.path.dirname(self.spm_script_path)
 
@@ -110,7 +116,11 @@ class SPM(SPMLauncher):
             for matlab_command in self.matlab_commands_before_list:
                 matlab_script_file.write(matlab_command + "\n")
             matlab_script_file.write("try\n")
-            matlab_script_file.write("  spm('%s');\n" % self.spm_defaults)
+            matlab_script_file.write("  spm('defaults', '%s');\n" % self.spm_defaults)
+            if '-nodisplay' in matlab_run_options or '-nojvm' in matlab_run_options:
+                # SPM will not open any window
+                matlab_script_file.write("  spm_get_defaults('cmdline', true);\n")
+            matlab_script_file.write("  spm_jobman('initcfg');\n")
             matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)  # initialise job
             matlab_script_file.write("  cfg_util('run', jobid);\n")
             matlab_script_file.write("catch\n")
@@ -119,6 +129,7 @@ class SPM(SPMLauncher):
             matlab_script_file.write("end\n")
             for matlab_command in self.matlab_commands_after_list:
                 matlab_script_file.write(matlab_command + "\n")
+            matlab_script_file.write("spm('Quit');\n")
             # Add this line to make sure that the "SPM" string appears in the
             # output of MATLAB, which is needed to make
             # checkIfMatlabFailedBeforSpm happy.
@@ -132,15 +143,20 @@ class SPM(SPMLauncher):
         self.matlab_commands_after_list = []
         return matlab_script_path
 
-    def _runMatlabScript(self, use_matlab_options, matlab_script_path):
+    def _runMatlabScript(self, matlab_run_options, matlab_script_path):
         batch_directory = os.path.dirname(matlab_script_path)
-        if not use_matlab_options:
-            matlab_run_options = ''
-        else:
-            matlab_run_options = self.matlab_options
 
-        matlab_commmand = ['bv_unenv', self.matlab_executable_path, matlab_run_options,
-                           "-r \"run('%s');\"" % matlab_script_path]  # bv_unenv is needed for CentOs 7 (LIB & Pitie)
+        # The MATLAB launcher script does its own command-line option splitting
+        # with the 'eval' shell command, so matlab_run_options can be specified
+        # as a single argument even if it contains multiple options. However,
+        # it still takes care to quote the argument to '-r' correctly so eval
+        # does not mess it up.
+        matlab_commmand = [
+            # bv_unenv is needed for CentOs 7 (LIB & Pitie)
+            'bv_unenv', self.matlab_executable_path,
+            matlab_run_options,
+            '-r', "run('%s');" % matlab_script_path
+        ]
         print('Running matlab command:', matlab_commmand)
         output = runCommand(matlab_commmand, cwd=batch_directory)
 
@@ -220,6 +236,8 @@ class SPMStandalone(SPMLauncher):
     def run(self, initcfg=True):
         if self.spm_script_path is not None:
             self.full_batch_deque.appendleft("spm('defaults', '%s');" % self.spm_defaults)
+            # SPM will not open any window (do we always want this?)
+            self.full_batch_deque.appendleft("spm_get_defaults('cmdline', true);")
             if initcfg:
                 self.full_batch_deque.appendleft("spm_jobman('initcfg');")
             self._writeSPMScript()
