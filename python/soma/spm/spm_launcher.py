@@ -83,66 +83,61 @@ class SPM(SPMLauncher):
 
             self._writeSPMScript()
             matlab_script_path = self._writeMatlabScript(matlab_run_options)
-            current_execution_module_deque = deque(self.execution_module_deque)
-            self.resetExecutionQueue()
-            output = self._runMatlabScript(matlab_run_options, matlab_script_path)
             try:
-                checkIfMatlabFailedBeforSpm(output)
-                checkIfSpmHasFailed(output)
-                self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
-            except Exception as e:
-                raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
-
-            return output
+                current_execution_module_deque = deque(self.execution_module_deque)
+                self.resetExecutionQueue()
+                output = self._runMatlabScript(matlab_run_options, matlab_script_path)
+                try:
+                    checkIfMatlabFailedBeforSpm(output)
+                    checkIfSpmHasFailed(output)
+                    self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
+                except Exception as e:
+                    raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
+                return output
+            finally:
+                os.remove(matlab_script_path)
         else:
             raise ValueError("job path and batch path are required")
 
     def _writeMatlabScript(self, matlab_run_options):
-        # matlab_script_path is created in tmp with little NamedTemporaryFile
-        # because matlab namelengthmax is 63
-        # TODO: make sure that this file is cleaned up after MATLAB runs.
-        matlab_script_path = tempfile.NamedTemporaryFile(suffix=".m").name
+        if self.spm_path is None:
+            # This raise is normally useless!!
+            raise ValueError('SPM path not found')
         workspace_directory = os.path.dirname(self.spm_script_path)
-
-        if not os.path.exists(os.path.dirname(matlab_script_path)):
-            os.makedirs(os.path.dirname(matlab_script_path))
-        else:
-            # folder already exists
-            pass
-        if self.spm_path is not None:
-            matlab_script_file = open(matlab_script_path, 'w+')
-            matlab_script_file.write("cd('%s');\n" % workspace_directory)
-            matlab_script_file.write("addpath('%s');\n" % self.spm_path)
+        # matlab_script_path is created in tmp with a short name using
+        # NamedTemporaryFile because matlab namelengthmax is 63
+        with tempfile.NamedTemporaryFile("w", suffix=".m", delete=False) as f:
+            f.write("cd('%s');\n" % workspace_directory)
+            f.write("addpath('%s');\n" % self.spm_path)
             for matlab_command in self.matlab_commands_before_list:
-                matlab_script_file.write(matlab_command + "\n")
-            matlab_script_file.write("try\n")
-            matlab_script_file.write("  spm('defaults', '%s');\n" % self.spm_defaults)
-            if '-nodisplay' in matlab_run_options or '-nojvm' in matlab_run_options:
+                f.write(matlab_command + "\n")
+            f.write("try\n")
+            f.write("  spm('defaults', '%s');\n" % self.spm_defaults)
+            if ('-nodisplay' in matlab_run_options
+                    or '-nojvm' in matlab_run_options):
                 # SPM will not open any window
-                matlab_script_file.write("  spm_get_defaults('cmdline', true);\n")
-            matlab_script_file.write("  spm_jobman('initcfg');\n")
-            matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)  # initialise job
-            matlab_script_file.write("  cfg_util('run', jobid);\n")
-            matlab_script_file.write("catch exception\n")
-            matlab_script_file.write("  disp('error running SPM');\n")
-            matlab_script_file.write("  disp(getReport(exception));\n")
-            matlab_script_file.write("  exit(1);\n")
-            matlab_script_file.write("end\n")
+                f.write("  spm_get_defaults('cmdline', true);\n")
+            f.write("  spm_jobman('initcfg');\n")
+            f.write("  jobid = cfg_util('initjob', '%s');\n"
+                    % self.spm_script_path)  # initialise job
+            f.write("  cfg_util('run', jobid);\n")
+            f.write("catch exception\n")
+            f.write("  disp('error running SPM');\n")
+            f.write("  disp(getReport(exception));\n")
+            f.write("  exit(1);\n")
+            f.write("end\n")
             for matlab_command in self.matlab_commands_after_list:
-                matlab_script_file.write(matlab_command + "\n")
-            matlab_script_file.write("spm('Quit');\n")
+                f.write(matlab_command + "\n")
+            f.write("spm('Quit');\n")
             # Add this line to make sure that the "SPM" string appears in the
             # output of MATLAB, which is needed to make
             # checkIfMatlabFailedBeforSpm happy.
-            matlab_script_file.write("disp('SPM finished successfully');\n")
-            matlab_script_file.write("exit(0);\n")
-            matlab_script_file.close()
-        else:
-            raise ValueError('SPM path not found')  # This raise is normally useless!!
+            f.write("disp('SPM finished successfully');\n")
+            f.write("exit(0);\n")
         # reset matlab_commands list
         self.matlab_commands_before_list = []
         self.matlab_commands_after_list = []
-        return matlab_script_path
+        return f.name
 
     def _runMatlabScript(self, matlab_run_options, matlab_script_path):
         batch_directory = os.path.dirname(matlab_script_path)
