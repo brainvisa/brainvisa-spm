@@ -112,6 +112,8 @@ class SPM(SPMLauncher):
             for matlab_command in self.matlab_commands_before_list:
                 f.write(matlab_command + "\n")
             f.write("try\n")
+            f.write("  [vspm, rspm] = spm('Ver');\n")
+            f.write("  fprintf('%s, version %s\\n', vspm, rspm);\n")
             f.write("  spm('defaults', '%s');\n" % self.spm_defaults)
             if ('-nodisplay' in matlab_run_options
                     or '-nojvm' in matlab_run_options):
