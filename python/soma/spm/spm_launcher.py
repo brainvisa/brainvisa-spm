@@ -401,6 +401,7 @@ def runCommand(command_list, cwd=None):
     # Popen run spm in background
     process = soma.subprocess.Popen(command_list,
                                cwd=cwd,
+                               stdin=open(os.devnull),
                                stdout=soma.subprocess.PIPE,
                                stderr=soma.subprocess.PIPE)
     # Poll process for new output until finished
