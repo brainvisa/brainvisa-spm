@@ -9,7 +9,7 @@ templates = (
     '{template}_TPM', SetType('TPM template'),
   ),
 )
-insertFirst( '', 'templates', apply( SetContent, templates))
+insertFirst( '', 'templates', SetContent(*templates))
 
 #'analyzes/{analysis}/DARTEL_{template}'
 DARTEL_directory = (
@@ -23,21 +23,21 @@ DARTEL_directory = (
   ),
 )
 
-insert( 'analyzes/{analysis}', 'DARTEL_{template}', SetType('DARTEL analysis directory'), apply( SetContent, DARTEL_directory))
+insert( 'analyzes/{analysis}', 'DARTEL_{template}', SetType('DARTEL analysis directory'), SetContent(*DARTEL_directory))
 
 subject_groups = (
   '{modality}_group', SetContent(
     '{group_name}_group', SetType('Subject Group')
   ),
 )
-insertFirst( '', 'subject_groups', apply( SetContent, subject_groups))
+insertFirst( '', 'subject_groups', SetContent(*subject_groups))
 
 covariates = (
   'spm_covariate', SetContent(
     '{covariate_table}_table', SetType('Covariate table for SPM')
   )
 )
-insertFirst( '', 'covariates', apply( SetContent, covariates))
+insertFirst( '', 'covariates', SetContent(*covariates))
 
 #===============================================================================
 # subject specific
@@ -327,12 +327,17 @@ def createHierarchyTreeDependingOnNormalization(warping_method):
   )
 #{center}/{subject}/{analysis}/{acquisition}
 analysis_directory = (
-  'using_LDW_from_t1mri_to_{template}', apply( SetContent, LDW_directory +
-                                                createHierarchyTreeDependingOnNormalization(warping_method='low-dimensional')),
-  'using_HDW_from_t1mri_to_{template}', apply( SetContent, HDW_directory +
-                                                createHierarchyTreeDependingOnNormalization(warping_method='high-dimensional')),
+    'using_LDW_from_t1mri_to_{template}',
+    SetContent(*(LDW_directory +
+                 createHierarchyTreeDependingOnNormalization(
+                    warping_method='low-dimensional'))),
+    'using_HDW_from_t1mri_to_{template}',
+    SetContent(*(HDW_directory +
+                 createHierarchyTreeDependingOnNormalization(
+                    warping_method='high-dimensional'))),
 )
 
-insert( '{center}/{subject}/{analysis}', '{acquisition}', apply( SetContent, analysis_directory))
+insert('{center}/{subject}/{analysis}', '{acquisition}',
+       SetContent(*analysis_directory))
 
 

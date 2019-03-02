@@ -538,13 +538,13 @@ def updateT1MRIBiasCorrected(self, proc, dummy):
     d['bias_correction_process'] = 'spm12Segment'
     d['analysis'] = "default"
     d['template'] = self.TPM_template.hierarchyAttributes()['template']
-    return self.signature['t1mri_bias_corrected'].findValue(d)
+    return self.signature['t1mri_bias_corrected'].findValue(d, preferExisting=True)
 
 def updateGreyNative(self, proc, dummy):
   if self.t1mri_bias_corrected is not None:
     d = self.t1mri_bias_corrected.hierarchyAttributes()
     del d["space"]
-    return self.signature["grey_native"].findValue(d)
+    return self.signature['grey_native'].findValue(d, preferExisting=True)
 
 def updateBatchPath(self, proc):
   if self.grey_native is not None:

@@ -76,69 +76,85 @@ class SPM(SPMLauncher):
 
     def run(self, use_matlab_options=True):
         if self.spm_script_path is not None:
-            self._writeSPMScript()
-            matlab_script_path = self._writeMatlabScript()
-            current_execution_module_deque = deque(self.execution_module_deque)
-            self.resetExecutionQueue()
-            output = self._runMatlabScript(use_matlab_options, matlab_script_path)
-            try:
-                checkIfMatlabFailedBeforSpm(output)
-                checkIfSpmHasFailed(output)
-                self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
-            except Exception as e:
-                raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
+            if not use_matlab_options:
+                matlab_run_options = ''
+            else:
+                matlab_run_options = self.matlab_options
 
-            return output
+            self._writeSPMScript()
+            matlab_script_path = self._writeMatlabScript(matlab_run_options)
+            try:
+                current_execution_module_deque = deque(self.execution_module_deque)
+                self.resetExecutionQueue()
+                output = self._runMatlabScript(matlab_run_options, matlab_script_path)
+                try:
+                    checkIfMatlabFailedBeforSpm(output)
+                    checkIfSpmHasFailed(output)
+                    self._moveSPMDefaultPathsIfNeeded(current_execution_module_deque)
+                except Exception as e:
+                    raise RuntimeError("%s\n\nError after SPM finished :\n%s" % (output, e))
+                return output
+            finally:
+                os.remove(matlab_script_path)
         else:
             raise ValueError("job path and batch path are required")
 
-    def _writeMatlabScript(self):
-        # matlab_script_path is created in tmp with little NamedTemporaryFile
-        # because matlab namelengthmax is 63
-        matlab_script_path = tempfile.NamedTemporaryFile(suffix=".m").name
+    def _writeMatlabScript(self, matlab_run_options):
+        if self.spm_path is None:
+            # This raise is normally useless!!
+            raise ValueError('SPM path not found')
         workspace_directory = os.path.dirname(self.spm_script_path)
-
-        if not os.path.exists(os.path.dirname(matlab_script_path)):
-            os.makedirs(os.path.dirname(matlab_script_path))
-        else:
-            # folder already exists
-            pass
-        if self.spm_path is not None:
-            matlab_script_file = open(matlab_script_path, 'w+')
-            matlab_script_file.write("previous_pwd = pwd;\n")
-            matlab_script_file.write("cd('%s');\n" % workspace_directory)
-            matlab_script_file.write("addpath('%s');\n" % self.spm_path)
+        # matlab_script_path is created in tmp with a short name using
+        # NamedTemporaryFile because matlab namelengthmax is 63
+        with tempfile.NamedTemporaryFile("w", suffix=".m", delete=False) as f:
+            f.write("cd('%s');\n" % workspace_directory)
+            f.write("addpath('%s');\n" % self.spm_path)
             for matlab_command in self.matlab_commands_before_list:
-                matlab_script_file.write(matlab_command + "\n")
-            matlab_script_file.write("try\n")
-            matlab_script_file.write("  spm('%s');\n" % self.spm_defaults)
-            matlab_script_file.write("  jobid = cfg_util('initjob', '%s');\n" % self.spm_script_path)  # initialise job
-            matlab_script_file.write("  cfg_util('run', jobid);\n")
-            matlab_script_file.write("catch\n")
-            matlab_script_file.write("  disp('error running SPM');\n")
-            matlab_script_file.write("  exit(1);\n")
-            matlab_script_file.write("end\n")
+                f.write(matlab_command + "\n")
+            f.write("try\n")
+            f.write("  [vspm, rspm] = spm('Ver');\n")
+            f.write("  fprintf('%s, version %s\\n', vspm, rspm);\n")
+            f.write("  spm('defaults', '%s');\n" % self.spm_defaults)
+            if ('-nodisplay' in matlab_run_options
+                    or '-nojvm' in matlab_run_options):
+                # SPM will not open any window
+                f.write("  spm_get_defaults('cmdline', true);\n")
+            f.write("  spm_jobman('initcfg');\n")
+            f.write("  jobid = cfg_util('initjob', '%s');\n"
+                    % self.spm_script_path)  # initialise job
+            f.write("  cfg_util('run', jobid);\n")
+            f.write("catch exception\n")
+            f.write("  disp('error running SPM');\n")
+            f.write("  disp(getReport(exception));\n")
+            f.write("  exit(1);\n")
+            f.write("end\n")
             for matlab_command in self.matlab_commands_after_list:
-                matlab_script_file.write(matlab_command + "\n")
-            matlab_script_file.write("cd(previous_pwd);\n")
-            matlab_script_file.write("exit\n")
-            matlab_script_file.close()
-        else:
-            raise ValueError('SPM path not found')  # This raise is normally useless!!
+                f.write(matlab_command + "\n")
+            f.write("spm('Quit');\n")
+            # Add this line to make sure that the "SPM" string appears in the
+            # output of MATLAB, which is needed to make
+            # checkIfMatlabFailedBeforSpm happy.
+            f.write("disp('SPM finished successfully');\n")
+            f.write("exit(0);\n")
         # reset matlab_commands list
         self.matlab_commands_before_list = []
         self.matlab_commands_after_list = []
-        return matlab_script_path
+        return f.name
 
-    def _runMatlabScript(self, use_matlab_options, matlab_script_path):
+    def _runMatlabScript(self, matlab_run_options, matlab_script_path):
         batch_directory = os.path.dirname(matlab_script_path)
-        if not use_matlab_options:
-            matlab_run_options = ''
-        else:
-            matlab_run_options = self.matlab_options
 
-        matlab_commmand = ['bv_unenv', self.matlab_executable_path, matlab_run_options,
-                           "-r \"run('%s');\"" % matlab_script_path]  # bv_unenv is needed for CentOs 7 (LIB & Pitie)
+        # The MATLAB launcher script does its own command-line option splitting
+        # with the 'eval' shell command, so matlab_run_options can be specified
+        # as a single argument even if it contains multiple options. However,
+        # it still takes care to quote the argument to '-r' correctly so eval
+        # does not mess it up.
+        matlab_commmand = [
+            # bv_unenv is needed for CentOs 7 (LIB & Pitie)
+            'bv_unenv', self.matlab_executable_path,
+            matlab_run_options,
+            '-r', "run('%s');" % matlab_script_path
+        ]
         print('Running matlab command:', matlab_commmand)
         output = runCommand(matlab_commmand, cwd=batch_directory)
 
@@ -218,11 +234,13 @@ class SPMStandalone(SPMLauncher):
     def run(self, initcfg=True):
         if self.spm_script_path is not None:
             self.full_batch_deque.appendleft("spm('defaults', '%s');" % self.spm_defaults)
+            # SPM will not open any window (do we always want this?)
+            self.full_batch_deque.appendleft("spm_get_defaults('cmdline', true);")
             if initcfg:
                 self.full_batch_deque.appendleft("spm_jobman('initcfg');")
             self._writeSPMScript()
             job_directory = os.path.dirname(self.spm_script_path)
-            standalone_command = [self.standalone_command, self.standalone_mcr_path, 'run', self.spm_script_path]
+            standalone_command = [self.standalone_command, self.standalone_mcr_path, 'batch', self.spm_script_path]
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
             print('running SPM standalone command:', standalone_command)
@@ -383,6 +401,7 @@ def runCommand(command_list, cwd=None):
     # Popen run spm in background
     process = soma.subprocess.Popen(command_list,
                                cwd=cwd,
+                               stdin=open(os.devnull),
                                stdout=soma.subprocess.PIPE,
                                stderr=soma.subprocess.PIPE)
     # Poll process for new output until finished
