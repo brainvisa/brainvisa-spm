@@ -8,6 +8,7 @@ import os
 import xlrd
 import xlwt
 import numpy
+from openpyxl import Workbook
 from collections import deque, OrderedDict
 
 
@@ -59,9 +60,9 @@ class XlsConverter():
     if not self.sheet_dict_deque:
       raise ValueError("At least one sheet_dict is required")
     else:
-      book = xlwt.Workbook(style_compression=2)
+      book = Workbook()
       for sheet_dict in self.sheet_dict_deque:
-        sheet = book.add_sheet(sheet_dict["sheet_name"])
+        sheet = book.create_sheet(sheet_dict["sheet_name"])
         column_values_dict = sheet_dict["column_values"]
         max_header_level = self._extractHowManyHeaderLevelAtMaximum(column_values_dict)
         if max_header_level == 0:
@@ -106,8 +107,8 @@ class XlsConverter():
     """
     header_list = row_header.split(self.separator)
     for column_index, header_name in enumerate(header_list):
-      sheet.merge(0, end_header_row_index, column_index, column_index)
-      sheet.write(0, column_index, header_name, self.column_header_cell_style)
+      sheet.merge_cells(start_row=0+1, end_row=end_header_row_index+1, start_column=column_index+1, end_column=column_index+1)
+      sheet[self._index_column_to_letters(column_index)+str(1)] = header_name
 
   def _extractHeaderDict(self, column_values_dict, header_dict, first_key=True):
     """
@@ -145,13 +146,15 @@ class XlsConverter():
   def _completeColumnHeader(self, sheet, end_header_row_index, header_dict, current_row_index, current_column_index):
     for header_title, value in header_dict.items():
       if value is not None:
-        sheet.merge(current_row_index, current_row_index, current_column_index, current_column_index+self._countLeaves(value)-1)
-        sheet.write(current_row_index, current_column_index, header_title, self.column_header_cell_style)
+        sheet.merge_cells(start_row=1+current_row_index, end_row=1+current_row_index,
+                          start_column=1+current_column_index, end_column=1+current_column_index+self._countLeaves(value)-1)
+        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = header_title
         self._completeColumnHeader(sheet, end_header_row_index, value, current_row_index+1, current_column_index)
         current_column_index += self._countLeaves(value)
       else:
-        sheet.merge(current_row_index, end_header_row_index, current_column_index, current_column_index)
-        sheet.write(current_row_index, current_column_index, header_title, self.column_header_cell_style)
+        sheet.merge_cells(start_row=1+current_row_index, end_row=1+end_header_row_index,
+                          start_column=1+current_column_index, end_column=1+current_column_index)
+        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = header_title
         current_column_index += 1
 
   def _countLeaves(self, pydict, leaves=0):
@@ -174,7 +177,7 @@ class XlsConverter():
     for row, row_dict in column_values_dict.items():
       row_header_list = row.split(self.separator)
       for current_column_index, row_header in enumerate(row_header_list):
-        sheet.write(current_row_index, current_column_index, row_header, self.row_header_cell_style)
+        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = row_header
       self._writeRowData(sheet, row_dict, column_header_dict, current_row_index, current_column_index+1)
       current_row_index += 1
 
@@ -182,15 +185,15 @@ class XlsConverter():
     for key, value in column_header_dict.items():
       if key in row_dict.keys():
         if isinstance(value, dict):
-          current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
+          current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index, row_data)
         else:
           if isinstance(row_dict[key], bool) and self.interpret_boolean_values:
             if row_dict[key]:
-              sheet.write(current_row_index, current_column_index, str(row_dict[key]), self.boolean_true_data_cell_style)
+              sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = str(row_dict[key])
             else:
-              sheet.write(current_row_index, current_column_index, str(row_dict[key]), self.boolean_false_data_cell_style)
+              sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = str(row_dict[key])
           else:
-            sheet.write(current_row_index, current_column_index, row_dict[key], self.data_cell_style)
+            sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = row_dict[key]
           current_column_index += 1
       else:
         if isinstance(value, dict):
@@ -344,6 +347,20 @@ class XlsConverter():
 
   def _isEmptyCell(self, sheet, row_index, column_index):
       return sheet.cell_type(row_index, column_index) in (xlrd.XL_CELL_EMPTY, xlrd.XL_CELL_BLANK)
+
+  def _index_column_to_letters(self, column_index):
+    column_number = column_index +1
+    r = ''
+    first = column_number//26
+    sec = column_number%26
+    if sec == 0:
+      first -= 1
+      sec = 26
+    if first > 0 and sec != 0:
+      r += chr(64+first)
+    r += chr(64+sec)
+    return r
+
 #==============================================================================
 # Static method
 #==============================================================================
