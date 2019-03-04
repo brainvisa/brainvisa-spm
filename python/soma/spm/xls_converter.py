@@ -9,6 +9,7 @@ import xlrd
 import xlwt
 import numpy
 from openpyxl import Workbook
+from openpyxl.styles import Alignment
 from collections import deque, OrderedDict
 
 
@@ -26,6 +27,9 @@ class XlsConverter():
 
     self.column_header_cell_style = xlwt.easyxf(
         "align: wrap on, vert centre, horiz center;")
+    self.column_header_cell_style = Alignment(horizontal='center',
+                                              vertical='center',
+                                              wrap_text=True)
     self.row_header_cell_style = xlwt.easyxf(
         "pattern: pattern solid, fore_colour gray25;"
         "borders: top_color white, bottom_color white, right_color white, left_color white, "
@@ -108,7 +112,7 @@ class XlsConverter():
     header_list = row_header.split(self.separator)
     for column_index, header_name in enumerate(header_list):
       sheet.merge_cells(start_row=0+1, end_row=end_header_row_index+1, start_column=column_index+1, end_column=column_index+1)
-      sheet[self._index_column_to_letters(column_index)+str(1)] = header_name
+      sheet[self._indexes_to_cell(column_index, 0)] = header_name
 
   def _extractHeaderDict(self, column_values_dict, header_dict, first_key=True):
     """
@@ -148,13 +152,13 @@ class XlsConverter():
       if value is not None:
         sheet.merge_cells(start_row=1+current_row_index, end_row=1+current_row_index,
                           start_column=1+current_column_index, end_column=1+current_column_index+self._countLeaves(value)-1)
-        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = header_title
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)] = header_title
         self._completeColumnHeader(sheet, end_header_row_index, value, current_row_index+1, current_column_index)
         current_column_index += self._countLeaves(value)
       else:
         sheet.merge_cells(start_row=1+current_row_index, end_row=1+end_header_row_index,
                           start_column=1+current_column_index, end_column=1+current_column_index)
-        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = header_title
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)] = header_title
         current_column_index += 1
 
   def _countLeaves(self, pydict, leaves=0):
@@ -177,7 +181,7 @@ class XlsConverter():
     for row, row_dict in column_values_dict.items():
       row_header_list = row.split(self.separator)
       for current_column_index, row_header in enumerate(row_header_list):
-        sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = row_header
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)] = row_header
       self._writeRowData(sheet, row_dict, column_header_dict, current_row_index, current_column_index+1)
       current_row_index += 1
 
@@ -185,15 +189,15 @@ class XlsConverter():
     for key, value in column_header_dict.items():
       if key in row_dict.keys():
         if isinstance(value, dict):
-          current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index, row_data)
+          current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
         else:
           if isinstance(row_dict[key], bool) and self.interpret_boolean_values:
             if row_dict[key]:
-              sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = str(row_dict[key])
+              sheet[self._indexes_to_cell(current_column_index, current_row_index)] = str(row_dict[key])
             else:
-              sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = str(row_dict[key])
+              sheet[self._indexes_to_cell(current_column_index, current_row_index)] = str(row_dict[key])
           else:
-            sheet[self._index_column_to_letters(current_column_index)+str(current_row_index+1)] = row_dict[key]
+            sheet[self._indexes_to_cell(current_column_index, current_row_index)] = row_dict[key]
           current_column_index += 1
       else:
         if isinstance(value, dict):
@@ -360,6 +364,10 @@ class XlsConverter():
       r += chr(64+first)
     r += chr(64+sec)
     return r
+
+  def _indexes_to_cell(self, column_index, row_index):
+    col = self._index_column_to_letters(column_index)
+    return '%s%s' % (col, str(row_index+1))
 
 #==============================================================================
 # Static method
