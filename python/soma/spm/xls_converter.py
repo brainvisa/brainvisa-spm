@@ -9,7 +9,7 @@ import xlrd
 import xlwt
 import numpy
 from openpyxl import Workbook
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font, Border, NamedStyle
 from collections import deque, OrderedDict
 
 
@@ -25,26 +25,20 @@ class XlsConverter():
     self.interpret_boolean_values = interpret_boolean_values
     self.sheet_dict_deque = deque()
 
-    self.column_header_cell_style = xlwt.easyxf(
-        "align: wrap on, vert centre, horiz center;")
-    self.column_header_cell_style = Alignment(horizontal='center',
-                                              vertical='center',
-                                              wrap_text=True)
-    self.row_header_cell_style = xlwt.easyxf(
-        "pattern: pattern solid, fore_colour gray25;"
-        "borders: top_color white, bottom_color white, right_color white, left_color white, "
-                  "left thin, right thin, top thin, bottom thin;"
-        "align: wrap on, vert centre, horiz center;")
-    self.data_cell_style = xlwt.easyxf(
-        "align: wrap on, vert centre, horiz center")
-    self.boolean_true_data_cell_style = xlwt.easyxf(
-        "pattern: pattern solid, fore_colour green;"
-        "font: colour green;"
-        "align: wrap on, vert centre, horiz center")
-    self.boolean_false_data_cell_style = xlwt.easyxf(
-        "pattern: pattern solid, fore_colour red;"
-        "font: colour red;"
-        "align: wrap on, vert centre, horiz center")
+    self.column_header_cell_style = NamedStyle(name='column_header_cell_style')
+    self.column_header_cell_style.alignment = Alignment(horizontal='center',
+                                                        vertical='center',
+                                                        shrink_to_fit=True)
+    self.column_header_cell_style.font = Font(bold=True)
+
+    self.row_header_cell_style = NamedStyle(name='row_header_cell')
+    self.row_header_cell_style.alignment = Alignment(horizontal='center',
+                                                     vertical='center',
+                                                     wrap_text=True)
+
+    self.data_cell_style = NamedStyle(name="data_cell")
+    self.data_cell_style.alignment = Alignment(horizontal='center',
+                                               vertical='center')
 
   def addDictToConvert(self, sheet_dict):
     """
@@ -113,6 +107,7 @@ class XlsConverter():
     for column_index, header_name in enumerate(header_list):
       sheet.merge_cells(start_row=0+1, end_row=end_header_row_index+1, start_column=column_index+1, end_column=column_index+1)
       sheet[self._indexes_to_cell(column_index, 0)] = header_name
+      sheet[self._indexes_to_cell(column_index, 0)].style = self.column_header_cell_style
 
   def _extractHeaderDict(self, column_values_dict, header_dict, first_key=True):
     """
@@ -153,12 +148,14 @@ class XlsConverter():
         sheet.merge_cells(start_row=1+current_row_index, end_row=1+current_row_index,
                           start_column=1+current_column_index, end_column=1+current_column_index+self._countLeaves(value)-1)
         sheet[self._indexes_to_cell(current_column_index, current_row_index)] = header_title
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.column_header_cell_style
         self._completeColumnHeader(sheet, end_header_row_index, value, current_row_index+1, current_column_index)
         current_column_index += self._countLeaves(value)
       else:
         sheet.merge_cells(start_row=1+current_row_index, end_row=1+end_header_row_index,
                           start_column=1+current_column_index, end_column=1+current_column_index)
         sheet[self._indexes_to_cell(current_column_index, current_row_index)] = header_title
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.column_header_cell_style
         current_column_index += 1
 
   def _countLeaves(self, pydict, leaves=0):
@@ -182,6 +179,7 @@ class XlsConverter():
       row_header_list = row.split(self.separator)
       for current_column_index, row_header in enumerate(row_header_list):
         sheet[self._indexes_to_cell(current_column_index, current_row_index)] = row_header
+        sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.row_header_cell_style
       self._writeRowData(sheet, row_dict, column_header_dict, current_row_index, current_column_index+1)
       current_row_index += 1
 
@@ -198,6 +196,7 @@ class XlsConverter():
               sheet[self._indexes_to_cell(current_column_index, current_row_index)] = str(row_dict[key])
           else:
             sheet[self._indexes_to_cell(current_column_index, current_row_index)] = row_dict[key]
+          sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.data_cell_style
           current_column_index += 1
       else:
         if isinstance(value, dict):
