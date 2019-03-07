@@ -535,7 +535,6 @@ def updateT1MRIBiasCorrected(self, proc, dummy):
     d["subject"] = attr["subject"]
     d["acquisition"] = attr["acquisition"]
     d['processing'] = 'spm12Segment'
-    d['bias_correction_process'] = 'spm12Segment'
     d['analysis'] = "default"
     d['template'] = self.TPM_template.hierarchyAttributes()['template']
     return self.signature['t1mri_bias_corrected'].findValue(d, preferExisting=True)
