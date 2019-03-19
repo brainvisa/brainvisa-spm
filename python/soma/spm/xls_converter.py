@@ -10,7 +10,7 @@ import xlwt
 import numpy
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, Border
-from opentpyxl.styles import named_styles as NamedStyle
+from openpyxl.styles import named_styles as NamedStyle
 from collections import deque, OrderedDict
 
 
