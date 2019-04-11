@@ -226,7 +226,7 @@ def compareProbabilityMapToList(self, context, prob_map, prob_map_output, prob_m
 
     compute_one = getProcessInstance('computeOneTissueMask')
     compute_one.native_prob_map = prob_map.fullPath()
-    compute_one.others_prob_maps = [i.fullPath() for i in prob_maps_to_compare]
+    compute_one.others_prob_maps = [i.fullPath() for i in prob_maps_to_compare if i]
     compute_one.native_mask = prob_map_output.fullPath()
     context.runProcess(compute_one)
 
