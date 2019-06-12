@@ -9,7 +9,7 @@ import xlrd
 import xlwt
 import numpy
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, Border
+from openpyxl.styles import Alignment, Font, Border, PatternFill
 from openpyxl.styles.named_styles import NamedStyle
 from collections import deque, OrderedDict
 
@@ -40,6 +40,10 @@ class XlsConverter():
     self.data_cell_style = NamedStyle(name="data_cell")
     self.data_cell_style.alignment = Alignment(horizontal='center',
                                                vertical='center')
+    self.data_true_fill = PatternFill(fill_type='solid',
+                                      fgColor='00DF08')
+    self.data_false_fill = PatternFill(fill_type='solid',
+                                       fgColor='FF0000')
 
   def addDictToConvert(self, sheet_dict):
     """
@@ -190,14 +194,14 @@ class XlsConverter():
         if isinstance(value, dict):
           current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
         else:
+          sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.data_cell_style
           if isinstance(row_dict[key], bool) and self.interpret_boolean_values:
             if row_dict[key]:
-              sheet[self._indexes_to_cell(current_column_index, current_row_index)] = str(row_dict[key])
+              sheet[self._indexes_to_cell(current_column_index, current_row_index)].fill = self.data_true_fill
             else:
-              sheet[self._indexes_to_cell(current_column_index, current_row_index)] = str(row_dict[key])
+              sheet[self._indexes_to_cell(current_column_index, current_row_index)].fill = self.data_false_fill
           else:
             sheet[self._indexes_to_cell(current_column_index, current_row_index)] = row_dict[key]
-          sheet[self._indexes_to_cell(current_column_index, current_row_index)].style = self.data_cell_style
           current_column_index += 1
       else:
         if isinstance(value, dict):
