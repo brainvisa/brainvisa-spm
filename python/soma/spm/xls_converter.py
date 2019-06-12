@@ -64,7 +64,7 @@ class XlsConverter():
       raise ValueError("At least one sheet_dict is required")
     else:
       book = Workbook()
-      book.remove(book.active)  # Delete default sheet created
+      book.remove_sheet(book.active)  # Delete default sheet created
       for sheet_dict in self.sheet_dict_deque:
         sheet = book.create_sheet(sheet_dict["sheet_name"])
         column_values_dict = sheet_dict["column_values"]
