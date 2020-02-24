@@ -127,7 +127,8 @@ def updateBatchPath(self, proc):
 
 def execution(self, context):
   if str(self.deformation_field.format) == "gz compressed NIFTI-1 image":
-    deformation_fullpath = tempfile.NamedTemporaryFile(prefix="y_", suffix=".nii").name
+    deformation = context.temporary('NIFTI-1 image', prefix='y_bv')
+    deformation_fullpath = deformation.fullPath()
     copyNifti(self.deformation_field.fullPath(), deformation_fullpath)
   else:
     deformation_fullpath = self.deformation_field.fullPath()
