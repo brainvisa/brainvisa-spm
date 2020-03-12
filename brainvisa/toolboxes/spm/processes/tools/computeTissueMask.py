@@ -126,16 +126,21 @@ signature=Signature(
         'T1 MRI tissue probability mask',
         ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
         requiredAttributes={'tissue_class': 'scalp'}),
+    'background_mask', Boolean(),
+    'background_native_mask', WriteDiskItem(
+        'T1 MRI tissue probability mask',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
+        requiredAttributes={'tissue_class': 'background'}),
     'resolve_equal_proba', Boolean(),
 )
 
 
 def initialization(self):
     self.setOptional('grey_native_mask', 'white_native', 'csf_native',
-                     'skull_native', 'scalp_native',
+                     'skull_native', 'scalp_native', 'background_native'
                      'white_native_mask', 'csf_native_mask',
                      'skull_native_mask', 'scalp_native_mask',
-                     'background_native')
+                     'background_native_mask')
 
     self.linkParameters('white_native', 'grey_native')
     self.linkParameters('csf_native', 'grey_native')
@@ -147,6 +152,7 @@ def initialization(self):
     self.linkParameters("csf_native_mask", "grey_native_mask")
     self.linkParameters("skull_native_mask", "grey_native_mask")
     self.linkParameters("scalp_native_mask", "grey_native_mask")
+    self.linkParameters("background_native_mask", "grey_native_mask")
     self.linkParameters("intracranial_native_labels", "grey_native_mask")
     self.linkParameters("intracranial_native_translation", "grey_native_mask")
     
@@ -189,6 +195,8 @@ def execution(self, context):
             self.compareProbabilityMapToList(context, self.skull_native, self.skull_native_mask, [self.grey_native, self.white_native, self.csf_native, self.scalp_native, self.background_native])
         if (self.scalp_mask):
             self.compareProbabilityMapToList(context, self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.csf_native, self.skull_native, self.background_native])
+        if (self.background_mask):
+            self.compareProbabilityMapToList(context, self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.csf_native, self.skull_native, self.scalp_native])
         if self.intracranial_labels:
             self.createIntracranialLabel(context)
 
