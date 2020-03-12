@@ -82,6 +82,13 @@ signature=Signature(
                             'transformation': 'none',
                             'modulation': 'none',
                             'warping_method': 'none'}),
+    'background_native', ReadDiskItem(
+        'T1 MRI tissue probability map',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
+        requiredAttributes={'tissue_class': 'background',
+                            'transformation': 'none',
+                            'modulation': 'none',
+                            'warping_method': 'none'}),
     'method', Choice(('threshold', 'threshold'),
                      ('max probability', 'maxProbability')),
     'threshold', Float(),
@@ -127,12 +134,14 @@ def initialization(self):
     self.setOptional('grey_native_mask', 'white_native', 'csf_native',
                      'skull_native', 'scalp_native',
                      'white_native_mask', 'csf_native_mask',
-                     'skull_native_mask', 'scalp_native_mask')
+                     'skull_native_mask', 'scalp_native_mask',
+                     'background_native')
 
     self.linkParameters('white_native', 'grey_native')
     self.linkParameters('csf_native', 'grey_native')
     self.linkParameters('skull_native', 'grey_native')
     self.linkParameters('scalp_native', 'grey_native')
+    self.linkParameters('background_native', 'grey_native')
 
     self.linkParameters("white_native_mask", "grey_native_mask")
     self.linkParameters("csf_native_mask", "grey_native_mask")
@@ -171,15 +180,15 @@ def execution(self, context):
             context.warning("only grey and white masks can be computed with threshold method.")
     else:
         if (self.grey_mask):
-            self.compareProbabilityMapToList(context, self.grey_native, self.grey_native_mask, [self.white_native, self.csf_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.grey_native, self.grey_native_mask, [self.white_native, self.csf_native, self.skull_native, self.scalp_native, self.background_native])
         if (self.white_mask):
-            self.compareProbabilityMapToList(context, self.white_native, self.white_native_mask, [self.grey_native, self.csf_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.white_native, self.white_native_mask, [self.grey_native, self.csf_native, self.skull_native, self.scalp_native, self.background_native])
         if (self.csf_mask):
-            self.compareProbabilityMapToList(context, self.csf_native, self.csf_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.csf_native, self.csf_native_mask, [self.grey_native, self.white_native, self.skull_native, self.scalp_native, self.background_native])
         if (self.skull_mask):
-            self.compareProbabilityMapToList(context, self.skull_native, self.skull_native_mask, [self.grey_native, self.white_native, self.csf_native, self.scalp_native])
+            self.compareProbabilityMapToList(context, self.skull_native, self.skull_native_mask, [self.grey_native, self.white_native, self.csf_native, self.scalp_native, self.background_native])
         if (self.scalp_mask):
-            self.compareProbabilityMapToList(context, self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.csf_native, self.skull_native])
+            self.compareProbabilityMapToList(context, self.scalp_native, self.scalp_native_mask, [self.grey_native, self.white_native, self.csf_native, self.skull_native, self.background_native])
         if self.intracranial_labels:
             self.createIntracranialLabel(context)
 
