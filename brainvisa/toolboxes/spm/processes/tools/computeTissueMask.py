@@ -140,6 +140,8 @@ def initialization(self):
     self.linkParameters("scalp_native_mask", "grey_native_mask")
     self.linkParameters("intracranial_native_labels", "grey_native_mask")
     self.linkParameters("intracranial_native_translation", "grey_native_mask")
+    
+    self.linkParameters(None, 'intracranial_labels', self._update_icl)
 
     self.threshold = 0.2 # Chetelat G, Desgranges B, Landeau B, Mezenge F, Poline JB, de la Sayette V, et al. Direct voxel- based comparison between grey matter hypometabolism and atrophy in Alzheimer's disease. Brain 2008; 131: 60-71.
     self.method = 'maxProbability'
@@ -230,3 +232,11 @@ def compareProbabilityMapToList(self, context, prob_map, prob_map_output, prob_m
     compute_one.others_prob_maps = [i.fullPath() for i in prob_maps_to_compare if i]
     compute_one.native_mask = prob_map_output.fullPath()
     context.runProcess(compute_one)
+
+
+def _update_icl(self, *sources):
+    if self.intracranial_labels:
+        self.setEnable('intracranial_native_labels', 'intracranial_native_translation')
+    else:
+        self.setDisable('intracranial_native_labels', 'intracranial_native_translation')
+    self.changeSignature(self.signature)
