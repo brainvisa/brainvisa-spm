@@ -1,7 +1,8 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class BiasCorrectionOptions():
+class BiasCorrectionOptions(object):
   """
   MR  images  are  usually  corrupted  by  a  smooth,  spatially  varying artifact that
   modulates  the intensity of the image (bias). These artifacts, although not usually

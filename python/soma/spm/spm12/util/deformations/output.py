@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode, checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem,\
   convertlistToSPMString, convertPathListToSPMBatchString,\
@@ -9,15 +10,16 @@ import abc
 import numbers
 import numpy
 import os
+import six
+from six.moves import zip
 
-class Output():
+class Output(six.with_metaclass(abc.ABCMeta)):
   """
   Various  output  options  are  available.    The  deformation  may  be  saved to disk as a ``y_*.nii'' file.Images may be
   warped  using  the  resulting deformation, either using a ``pullback'' procedure, or a ``pushforward''.The old style of
   spatial normalisation involved the pullback, whereas the pushforward requires the inverse of the deformation used by
   the pullback.  Finally, the deformation may be used to warp a GIFTI surface file.
   """
-  __metaclass__ = abc.ABCMeta
 #===============================================================================
 # 
 #===============================================================================
@@ -469,7 +471,7 @@ class SaveJacobianDeterminants(Output):
 # # 
 #===============================================================================
 #===============================================================================
-class OutputDestination():
+class OutputDestination(object):
   """
   Output destination
   """
@@ -508,7 +510,7 @@ class OutputDestination():
     else:
       return self.ouput_directory
   
-class OutputDestinationWithSources():
+class OutputDestinationWithSources(object):
   """
   Output destination with sources possibility
   """

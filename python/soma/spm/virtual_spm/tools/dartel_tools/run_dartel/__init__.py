@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel.settings import Settings
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.spm_batch_maker_utils import moveSPMPath, moveFileAndCreateFoldersIfNeeded
 
 import os
+from six.moves import zip
 
-class RunDartel():
+class RunDartel(object):
   """
   Run  the  DARTEL  nonlinear  image  registration  procedure.  This  involves  iteratively  matching  all  the  selected images to a template
   generated  from  their  own  mean.  A  series  of  Template*.nii  files  are generated, which become increasingly crisp as the registration

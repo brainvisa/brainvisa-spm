@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-class Options():
+class Options(object):
   """
   Options for image calculator
   """

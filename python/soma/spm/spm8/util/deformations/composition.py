@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.util.deformations.composition import Composition as Composition_virtual
 from soma.spm.virtual_spm.util.deformations.composition import MatFileImported as MatFileImported_virtual
 from soma.spm.virtual_spm.util.deformations.composition import DartelFlow as DartelFlow_virtual
@@ -12,9 +13,10 @@ from soma.spm.spm_container import SPMContainer
 
 import abc
 import numpy
+import six
 
-class Deformation():
-  __metaclass__ = abc.ABCMeta
+class Deformation(six.with_metaclass(abc.ABCMeta)):
+  pass
 
 class Composition(Composition_virtual, SPMContainer, Deformation):
   def __init__(self):

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
 
 
-class WriteFilteredImages():
+class WriteFilteredImages(object):
   """Write filtered images"""
   def __init__(self):
     self.basename = None

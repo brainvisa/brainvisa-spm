@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numbers
 
-class ExtendedOptions():
+class ExtendedOptions(object):
   def __init__(self):
     self.spatial_normalization = DartelSpatialNormalization()
     self.SANLM_denoising_filter = 2
@@ -121,7 +122,7 @@ class ExtendedOptions():
     return batch_list
     
 #========================================================================
-class DartelSpatialNormalization():
+class DartelSpatialNormalization(object):
   def __init__(self):
     self.dartel_template_path = None
     
@@ -136,7 +137,7 @@ class DartelSpatialNormalization():
       raise ValueError('dartel template path is required')
     
 #========================================================================
-class SPMDefaultSpatialNormalization():
+class SPMDefaultSpatialNormalization(object):
   def __init__(self):
     pass
   

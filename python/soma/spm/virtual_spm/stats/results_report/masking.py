@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class Masking():
+class Masking(object):
   @checkIfArgumentTypeIsAllowed(list, 1)
   def setContrastIndexList(self, contrast_index_list):
     self.contrast_index_list = contrast_index_list

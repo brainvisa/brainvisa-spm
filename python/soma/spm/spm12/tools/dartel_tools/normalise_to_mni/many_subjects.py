@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.normalise_to_mni.many_subjects import ManySubjects as ManySubjects_virtual
 
 class ManySubjects(ManySubjects_virtual):

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, convertPathListToSPMBatchString
 
 from soma.spm.virtual_spm.stats.model_estimation.analysis_space import AnalysisSpace
 
-class ModelEstimation():
+class ModelEstimation(object):
   """
   Model  parameters  can be estimated using classical (ReML - Restricted Maximum
   Likelihood)  or  Bayesian  algorithms.  After  parameter  estimation,  the  RESULTS

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.normalise_to_mni import NormaliseToMNI as NormaliseToMNI_virtual
 from soma.spm.spm_main_module import SPM12MainModule
 from soma.spm.spm_batch_maker_utils import convertlistToSPMString

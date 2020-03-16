@@ -1,4 +1,5 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.new_segment import NewSegment as NewSegment_virtual
 from soma.spm.spm_main_module import SPM12MainModule
 

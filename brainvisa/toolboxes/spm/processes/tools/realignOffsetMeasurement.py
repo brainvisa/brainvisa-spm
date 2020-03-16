@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from brainvisa.processes import *
 import json
 
@@ -47,8 +48,8 @@ def execution(self, context):
     
         offset_dict_key = "dynamic offset (mm)"
         spm_version_dict_key = "%s realign" % self.spm_version
-        if offset_dict_key in  data.keys():
-            if spm_version_dict_key in data[offset_dict_key].keys():
+        if offset_dict_key in  list(data.keys()):
+            if spm_version_dict_key in list(data[offset_dict_key].keys()):
                 data[offset_dict_key][spm_version_dict_key][str(self.box_size)] = realign_offset_dict
             else:
                 data[offset_dict_key][spm_version_dict_key] = {str(self.box_size): realign_offset_dict}

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class TContrast():
+class TContrast(object):
   """
   * Simple one-dimensional contrasts for an SPM{T}
   A  simple  contrast  for  an  SPM{T}  tests  the  null  hypothesis  c'B=0 against the
@@ -15,10 +16,10 @@ class TContrast():
     self.vector = vector
 
   def setReplicateOverSessions(self, option):
-    if option in self.possible_options.keys():
+    if option in list(self.possible_options.keys()):
       self.replicate_over_sessions = self.possible_options[option]
     else:
-      raise ValueError('Replicate over sessions possibilities are : ' + str(self.possible_options.keys()))
+      raise ValueError('Replicate over sessions possibilities are : ' + str(list(self.possible_options.keys())))
   
   def getStringListForBatch( self ):
     if not None in [self.vector, self.name]:

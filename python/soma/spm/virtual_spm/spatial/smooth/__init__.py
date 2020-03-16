@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import moveSPMPath, convertlistToSPMString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numbers
+from six.moves import zip
 
-class Smooth():
+class Smooth(object):
   """
   This  is  for smoothing (or convolving) image volumes with a Gaussian kernel of a
   specified  width.  It is used as a preprocessing step to suppress noise and effects

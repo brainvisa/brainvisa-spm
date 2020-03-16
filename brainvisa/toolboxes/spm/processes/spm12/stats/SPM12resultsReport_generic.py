@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm12.stats.results_report import ResultsReport
 from soma.spm.spm12.stats.results_report.contrast_query import ContrastQuery
@@ -37,6 +38,7 @@ from soma.spm.spm12.stats.results_report.masking import Contrast, Image
 from soma.spm.spm12.stats.results_report.write_filtered_images import ThresholdedSPM, AllClustersBinary, AllClustersNAry
 
 from soma.spm.spm_launcher import SPM12Standalone, SPM12
+from six.moves import range
 
 #------------------------------------------------------------------------------
 configuration = Application().configuration

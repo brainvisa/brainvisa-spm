@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 import json
 
@@ -67,7 +68,7 @@ def updateSignatureAboutTypeAndFormat(self, proc):
 
 def updateSignatureAboutFieldNeeded(self, proc):
   if self.subjects:
-    self.signature[ 'field_needed' ] = ListOf(Choice(*self.subjects[0].hierarchyAttributes().keys()))
+    self.signature[ 'field_needed' ] = ListOf(Choice(*list(self.subjects[0].hierarchyAttributes().keys())))
     self.changeSignature(self.signature)
   else:
     pass

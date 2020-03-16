@@ -30,6 +30,8 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
+from __future__ import print_function
 from brainvisa.processes import *
 from soma.spm import csv_converter
 
@@ -62,7 +64,7 @@ def initialization(self):
   self.doing_if_exists = "keep old"
 
 def updateSignatureAboutTypeAndFormat(self, proc):
-  print(self.diskitem_type, self.diskitem_format)
+  print((self.diskitem_type, self.diskitem_format))
   if self.diskitem_type in all_available_types and self.diskitem_format in all_available_formats:
     self.signature["subjects"] = ListOf(ReadDiskItem(self.diskitem_type, self.diskitem_format))
     self.changeSignature(self.signature)
@@ -71,7 +73,7 @@ def updateSignatureAboutTypeAndFormat(self, proc):
 
 def updateSignatureAboutFieldNeeded(self, proc):
   if self.subjects:
-    self.signature[ 'field_needed' ] = ListOf(Choice(*self.subjects[0].hierarchyAttributes().keys()))
+    self.signature[ 'field_needed' ] = ListOf(Choice(*list(self.subjects[0].hierarchyAttributes().keys())))
     self.changeSignature(self.signature)
   else:
     pass
@@ -80,7 +82,7 @@ def execution( self, context ):
   if not self.unique_database or self.onlyOneDatabaseUsed():
     if os.path.exists(self.covariate_table.fullPath()):
       csv_dict, csv_row_header = csv_converter.reverse( self.covariate_table.fullPath() )
-      covariate_list = csv_dict[csv_dict.keys()[0]].keys()
+      covariate_list = list(csv_dict[list(csv_dict.keys())[0]].keys())
       if sorted(csv_row_header) != sorted(self.field_needed):
         raise ValueError("old and new field_need are different")
       else:
@@ -89,7 +91,7 @@ def execution( self, context ):
       csv_dict = {}
       covariate_list = ['covariate']
 
-    old_subject_id_list = csv_dict.keys()
+    old_subject_id_list = list(csv_dict.keys())
     new_subject_id_list = []
     for diskitem in self.subjects:
       subject_id_list = []
@@ -97,7 +99,7 @@ def execution( self, context ):
         subject_id_list.append(diskitem.hierarchyAttributes()[field])
       subject_id = ';'.join(subject_id_list)
       new_subject_id_list.append(subject_id)
-      if not subject_id in csv_dict.keys():
+      if not subject_id in list(csv_dict.keys()):
         csv_dict[subject_id] = {}
         for covariate in covariate_list:
           csv_dict[subject_id][covariate] = ''

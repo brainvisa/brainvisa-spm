@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import moveSPMPath, convertlistToSPMString
 from soma.spm.spm_batch_maker_utils import convertPathListToSPMBatchString
+from six.moves import zip
 
-class Channel():
+class Channel(object):
   """
   Specify  a  channel  for  processing.  If  multiple  channels are used (eg PD & T2), then the
   same  order  of  subjects  must be specified for each channel and they must be in register

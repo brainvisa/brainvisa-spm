@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.model_estimation.analysis_space import AnalysisSpace as AnalysisSpace_virtual
 from soma.spm.virtual_spm.stats.model_estimation.analysis_space import AnalysisSpaceVolume as AnalysisSpaceVolume_virtual
 from soma.spm.virtual_spm.stats.model_estimation.analysis_space import AnalysisSpaceSlices as AnalysisSpaceSlices_virtual

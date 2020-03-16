@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import soma.subprocess
 import sys
@@ -155,7 +157,7 @@ class SPM(SPMLauncher):
             matlab_run_options,
             '-r', "run('%s');" % matlab_script_path
         ]
-        print('Running matlab command:', matlab_commmand)
+        print(('Running matlab command:', matlab_commmand))
         output = runCommand(matlab_commmand, cwd=batch_directory)
 
         return output
@@ -243,7 +245,7 @@ class SPMStandalone(SPMLauncher):
             standalone_command = [self.standalone_command, self.standalone_mcr_path, 'batch', self.spm_script_path]
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
-            print('running SPM standalone command:', standalone_command)
+            print(('running SPM standalone command:', standalone_command))
             output = runCommand(standalone_command, cwd=job_directory)
             try:
                 checkIfSpmHasFailed(output)

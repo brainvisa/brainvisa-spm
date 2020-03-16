@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.normalise.subject import SubjectToEstimate as SubjectToEstimate_virtual
 from soma.spm.virtual_spm.spatial.normalise.subject import SubjectToEstimateAndWrite as SubjectToEstimateAndWrite_virtual
 from soma.spm.virtual_spm.spatial.normalise.subject import SubjectToWrite as SubjectToWrite_virtual
 
 import abc
-class Subject():
-  __metaclass__ = abc.ABCMeta
+import six
+class Subject(six.with_metaclass(abc.ABCMeta)):
+  pass
 
 class SubjectToEstimate(SubjectToEstimate_virtual, Subject):
   def __init__(self):

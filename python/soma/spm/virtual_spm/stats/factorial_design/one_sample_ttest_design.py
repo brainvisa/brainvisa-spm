@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class OneSampleTTestDesign():
+class OneSampleTTestDesign(object):
   @checkIfArgumentTypeIsAllowed(list, 1)
   def setScans(self, scans):
     self.scans = scans

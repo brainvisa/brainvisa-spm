@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class ContrastManager():
+class ContrastManager(object):
   """
   Set up T and F contrasts.
   """

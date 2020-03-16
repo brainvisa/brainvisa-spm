@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.normalise_to_mni.subject import Subject
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
@@ -8,7 +9,7 @@ from soma.spm.spm_batch_maker_utils import convertNumpyArrayToSPMString
 import numbers
 import numpy
 
-class NormaliseToMNI():
+class NormaliseToMNI(object):
   """
   Normally,  DARTEL  generates  warped images that align with the average-shaped
   template.  This  routine  includes  an  initial affine regisration of the template (the

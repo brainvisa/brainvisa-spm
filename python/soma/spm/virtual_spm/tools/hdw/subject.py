@@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import moveSPMPath
 
-class Subject():
+class Subject(object):
   """
   Two  images  of  the  same  subject, which are to be registered together.  Prior to
   nonlinear  high-dimensional warping, the images should be rigidly registered with

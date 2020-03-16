@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel.optimisation_settings import OptimisationSettings
 
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class Settings():
+class Settings(object):
   """
   Various settings for the optimisation. The default values should work reasonably well for aligning tissue class images together.
   """

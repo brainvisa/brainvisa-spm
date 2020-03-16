@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.hdw import HDW as HDW_virtual
 from soma.spm.spm8.tools.hdw.subject_container import SubjectContainer
 from soma.spm.spm8.tools.hdw.bias_correction_options import BiasCorrectionOptions

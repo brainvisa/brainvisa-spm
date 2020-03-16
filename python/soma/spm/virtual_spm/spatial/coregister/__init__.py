@@ -1,11 +1,13 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, moveSPMPath
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
 from soma.spm.virtual_spm.spatial.coregister.estimation_options import EstimationOptions
 from soma.spm.virtual_spm.spatial.coregister.reslice_options import ResliceOptions
+from six.moves import zip
 
-class Coregister():
+class Coregister(object):
   @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
   def setReferenceVolumePath(self, reference_volume_path):
     """

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.util.image_calculator import ImageCalculator as ImageCalculator_virtual
 from soma.spm.spm8.util.image_calculator.options import Options
 from soma.spm.spm_main_module import SPM8MainModule

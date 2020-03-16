@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
 
-class Directory():
+class Directory(object):
   @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
   def setDirectory( self, directory_path ):
     if directory_path[-1] == '/':

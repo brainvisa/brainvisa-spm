@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.new_segment.tissue_container import TissueContainer as TissueContainer_virtual
 from soma.spm.spm12.spatial.segment.tissue import Tissue
 

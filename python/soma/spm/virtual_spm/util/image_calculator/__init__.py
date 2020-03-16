@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import tempfile
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, moveFileAndCreateFoldersIfNeeded
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class ImageCalculator():
+class ImageCalculator(object):
   """
   The  image calculator is for performing user-specified algebraic manipulations on
   a  set  of  images,  with  the  result  being  written  out  as  an image. The user is

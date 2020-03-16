@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numbers
 
-class EstimationOptions():
+class EstimationOptions(object):
   """
   Various  options  can  be  adjusted  in  order to improve the performance of the algorithm
   with your data.  Knowing what works best should be a matter of empirical exploration. For

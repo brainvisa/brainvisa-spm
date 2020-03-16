@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.realign import EstimateAndReslice as EstimateAndReslice_virtual
 from soma.spm.spm12.spatial.realign.estimation_options import EstimationOptions
 from soma.spm.spm12.spatial.realign.reslice_options import ResliceOptions

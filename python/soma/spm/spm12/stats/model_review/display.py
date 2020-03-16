@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
 from soma.spm.spm_batch_maker_utils import convertlistToSPMString
 
 
-class Display():
+class Display(object):
   """Select graphical report"""
 #==============================================================================
 #

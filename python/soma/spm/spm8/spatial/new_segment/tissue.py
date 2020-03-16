@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.new_segment.tissue import Tissue as Tissue_virtual
 
 class Tissue(Tissue_virtual):

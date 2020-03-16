@@ -1,4 +1,5 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.hdw.subject import Subject as Subject_virtual
 
 class Subject(Subject_virtual):

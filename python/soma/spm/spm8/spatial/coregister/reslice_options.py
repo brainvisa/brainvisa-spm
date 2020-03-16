@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.coregister.reslice_options import ResliceOptions as ResliceOptions_virtual
 
 class ResliceOptions(ResliceOptions_virtual):

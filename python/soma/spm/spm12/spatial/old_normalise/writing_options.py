@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.normalise.writing_options import WritingOptions as WritingOptions_virtual
 import numpy
 

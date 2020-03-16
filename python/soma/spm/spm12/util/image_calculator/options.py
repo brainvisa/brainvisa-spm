@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.util.image_calculator.options import Options as Options_virtual
 
 class Options(Options_virtual):

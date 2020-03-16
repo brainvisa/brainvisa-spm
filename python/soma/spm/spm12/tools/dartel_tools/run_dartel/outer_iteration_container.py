@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm12.tools.dartel_tools.run_dartel.outer_iteration import OuterIteration
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel.outer_iteration_container import OuterIterationContainer as OuterIterationContainer_virtual
 

@@ -1,7 +1,8 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class SubjectContainer():
+class SubjectContainer(object):
   """
   List of subjects. Images of each subject should be warped differently.
   """

@@ -4,6 +4,8 @@ Created on Wed Sep 28 11:20:25 2016
 
 @author: ml236783
 """
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import xlrd
 import xlwt
@@ -12,9 +14,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, Border, PatternFill
 from openpyxl.styles.named_styles import NamedStyle
 from collections import deque, OrderedDict
+from six.moves import range
 
 
-class XlsConverter():
+class XlsConverter(object):
   """
   This converter class convert JSON dictionary to XLS file with some
   specificity, it mostly use in Nuclear Imaging - Axon toolbox.
@@ -74,7 +77,7 @@ class XlsConverter():
         max_header_level = self._extractHowManyHeaderLevelAtMaximum(column_values_dict)
         if max_header_level == 0:
           continue
-          print("no data found for %s" % sheet_dict["sheet_name"])
+          print(("no data found for %s" % sheet_dict["sheet_name"]))
         else:
           end_header_row_index = max_header_level - 1
           self._writeRowHeader(sheet, sheet_dict["row_header"], end_header_row_index)
@@ -139,7 +142,7 @@ class XlsConverter():
                                                                      False),
                                              d2_erase_d1=True)
       elif isinstance(value, dict):
-        if not key in header_dict.keys():
+        if not key in list(header_dict.keys()):
           header_dict[key] = OrderedDict()
         header_dict[key] = XlsConverter.mergeDict(header_dict[key],
                                                   self._extractHeaderDict(value,
@@ -148,7 +151,7 @@ class XlsConverter():
                                                   d2_erase_d1=True)
 
       else:
-        if not key in header_dict.keys():
+        if not key in list(header_dict.keys()):
           header_dict[key] = None
         pass
     return header_dict
@@ -203,7 +206,7 @@ class XlsConverter():
 
   def _writeRowData(self, sheet, row_dict, column_header_dict, current_row_index, current_column_index):
     for key, value in column_header_dict.items():
-      if key in row_dict.keys():
+      if key in list(row_dict.keys()):
         if isinstance(value, dict):
           current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
         else:
@@ -396,15 +399,15 @@ class XlsConverter():
     dict_merged = OrderedDict()
     key_list = []
     key_set = set()
-    key_list.extend( d1.keys() )
-    key_list.extend( d2.keys() )
+    key_list.extend( list(d1.keys()) )
+    key_list.extend( list(d2.keys()) )
     key_list = [k for k in key_list if not (k in key_set or key_set.add(k))]
     for key in key_list:
       if isinstance( key, str ):
         new_key = key.replace( '\n', '' )
       else:
         new_key = key
-      if key in d1.keys() and key in d2.keys():
+      if key in list(d1.keys()) and key in list(d2.keys()):
         if isinstance( d1[key], dict ) and isinstance( d2[key], dict ):
           dict_merged[new_key] = XlsConverter.mergeDict( d1[key], d2[key], d2_erase_d1 )
         else:
@@ -413,8 +416,8 @@ class XlsConverter():
             dict_merged[new_key] = d2[key]
           else:
             dict_merged[new_key] = '** data merged **'
-      elif key in d1.keys() and not key in d2.keys():
+      elif key in list(d1.keys()) and not key in list(d2.keys()):
         dict_merged[new_key] = d1[key]
-      elif not key in d1.keys() and key in d2.keys():
+      elif not key in list(d1.keys()) and key in list(d2.keys()):
         dict_merged[new_key] = d2[key]
     return dict_merged

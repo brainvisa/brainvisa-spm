@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import moveFileAndCreateFoldersIfNeeded,\
   convertPathListToSPMBatchString
 
 import os
+from six.moves import zip
 
-class CreateInverseWarped():
+class CreateInverseWarped(object):
   """
   Create   inverse   normalised   versions   of   some  image(s).  The  image  that  is
   inverse-normalised  should  be  in  alignment with the template (generated during

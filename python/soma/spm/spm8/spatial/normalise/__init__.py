@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.normalise import Estimate as Estimate_virtual
 from soma.spm.virtual_spm.spatial.normalise import Write as Write_virtual
 from soma.spm.virtual_spm.spatial.normalise import EstimateAndWrite as EstimateAndWrite_virtual

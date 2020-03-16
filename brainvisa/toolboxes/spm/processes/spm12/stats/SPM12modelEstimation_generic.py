@@ -30,11 +30,13 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm12.stats.model_estimation import ModelEstimationClassical, ModelEstimationBayesianSecondLevel, ModelEstimationBayesianFirstLevel
 from soma.spm.spm12.stats.model_estimation.analysis_space import AnalysisSpaceVolume, AnalysisSpaceSlices, AnalysisSpaceClusters
 from soma.spm.spm12.stats.model_estimation.simple_contrast import SimpleContrast
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
+from six.moves import range
 #------------------------------------------------------------------------------
 configuration = Application().configuration
 #------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.results_report import ResultsReport as ResultsReport_virtual
 from soma.spm.spm_main_module import SPM12MainModule
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed

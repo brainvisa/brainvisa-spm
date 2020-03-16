@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design.masking import Masking as Masking_virtual
 from soma.spm.virtual_spm.stats.factorial_design.masking import ThresholdMasking as ThresholdMasking_virtual
 

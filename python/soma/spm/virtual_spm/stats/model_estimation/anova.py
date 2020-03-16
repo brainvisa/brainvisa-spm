@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-class ANOVA():
+class ANOVA(object):
   """
   Perform 1st or 2nd level Analysis of Variance.
   """

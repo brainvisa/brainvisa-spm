@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.results_report.masking import Masking as Masking_virtual
 from soma.spm.spm_batch_maker_utils import convertPathListToSPMBatchString
 
-class Masking():
+class Masking(object):
   """Results report - Masking - SPM12"""
 
 

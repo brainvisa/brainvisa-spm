@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, moveSPMPath, convertlistToSPMString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
 import numbers
+from six.moves import zip
 
-class NewSegment():
+class NewSegment(object):
   """
   This  toolbox  is  currently only work in progress, and is an extension of the default unified
   segmentation.    The  algorithm  is  essentially  the  same  as  that  described in the Unified

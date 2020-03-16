@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.model_estimation import ModelEstimation
 from soma.spm.virtual_spm.stats.model_estimation import ModelEstimationClassical as ModelEstimationClassical_virtual
 from soma.spm.virtual_spm.stats.model_estimation import ModelEstimationBayesianSecondLevel as ModelEstimationBayesianSecondLevel_virtual

@@ -1,10 +1,11 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.virtual_spm.spatial.normalise.estimation_options import EstimationOptions
 from soma.spm.virtual_spm.spatial.normalise.writing_options import WritingOptions
 
-class Normalise():
+class Normalise(object):
   def appendSubject(self, subject):
     self.subject_container.append(subject)
 

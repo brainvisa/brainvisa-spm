@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design.paired_ttest_design import PairedTTestDesign as PairedTTestDesign_virtual
 from soma.spm.virtual_spm.stats.factorial_design.paired_ttest_design import ScansPair as ScansPair_virtual
 

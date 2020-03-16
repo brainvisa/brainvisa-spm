@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.results_report.contrast_query import ContrastQuery as ContrastQuery_virtual
 
 from soma.spm.spm8.stats.results_report.masking_container import MaskingContainer

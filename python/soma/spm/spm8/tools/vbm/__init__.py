@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_main_module import SPM8MainModule
 
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.hdw.subject_container import SubjectContainer
 from soma.spm.virtual_spm.tools.hdw.bias_correction_options import BiasCorrectionOptions
 from soma.spm.virtual_spm.tools.hdw.warping_options import WarpingOptions
@@ -6,7 +7,7 @@ from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
 
-class HDW():
+class HDW(object):
   """
   This  toolbox  is  a  Bayesian  method  for  three dimensional registration of brain
   images.  A  finite  element  approach  is  used  to  obtain a maximum a posteriori

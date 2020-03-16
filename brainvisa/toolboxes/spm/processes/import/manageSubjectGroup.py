@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from brainvisa.processes import *
 import json
 
@@ -45,7 +46,7 @@ def execution(self, context):
     f.close()
 
     first_subject_dict = data["group_list"][0]
-    attr_needed = first_subject_dict.keys()
+    attr_needed = list(first_subject_dict.keys())
 
     if self.subjects_to_remove:
         data = self.removeOldSubjects(context, data, attr_needed)

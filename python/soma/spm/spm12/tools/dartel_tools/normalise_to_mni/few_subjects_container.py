@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm12.tools.dartel_tools.normalise_to_mni.subject import Subject
 from soma.spm.virtual_spm.tools.dartel_tools.normalise_to_mni.few_subjects_container import FewSubjectsContainer as FewSubjectsContainer_virtual
 

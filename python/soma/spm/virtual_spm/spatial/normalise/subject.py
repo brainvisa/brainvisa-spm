@@ -1,8 +1,10 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import convertPathListToSPMBatchString, moveSPMPath
+from six.moves import zip
 
-class SubjectToEstimate():
+class SubjectToEstimate(object):
   """
   Data for this subject.  The same parameters are used within subject.
   """
@@ -77,7 +79,7 @@ class SubjectToEstimateAndWrite(SubjectToEstimate):
     else:
       pass#default prefix is used
 
-class SubjectToWrite():
+class SubjectToWrite(object):
   """
   Data for this subject.  The same parameters are used within subject.
   """

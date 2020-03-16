@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm8.spatial.coregister.reslice_options import ResliceOptions
 from soma.spm.spm8.spatial.coregister.estimation_options import EstimationOptions
