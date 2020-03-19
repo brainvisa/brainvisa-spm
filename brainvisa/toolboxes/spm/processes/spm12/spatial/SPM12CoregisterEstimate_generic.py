@@ -111,8 +111,8 @@ def updateBatchPath(self, proc):
 
 
 def execution(self, context):
-    source_diskitem = self.resetIfNecessary(context, self.source)
-    reference_diskitem = self.resetIfNecessary(context, self.reference)
+    source_diskitem = self.source
+    reference_diskitem = self.reference
 
     estimation_options = EstimationOptions()
     if self.objective_function == "Mutual Information":
@@ -162,17 +162,3 @@ def extractCoregisterMatrix(self, source_path, reference_path, output_path):
     reference_trm = reference_scanner_trm.inverse()
 
     aims.write(reference_trm * source_aligned_trm, output_path)
-
-
-def resetIfNecessary(self, context, diskitem):
-    vol = aims.read(diskitem.fullPath())
-    ref = vol.header()['referentials']
-    transfo = vol.header()['transformations']
-    if ref[0] != 'Scanner-based anatomical coordinates' or len(ref) >1 or len(transfo) > 1:
-        tmp_diskitem = context.temporary(diskitem.format)
-        context.runProcess('resetInternalImageTransformation',
-                           input_image = diskitem,
-                           output_image = tmp_diskitem)
-        return tmp_diskitem
-    else:
-        return diskitem
