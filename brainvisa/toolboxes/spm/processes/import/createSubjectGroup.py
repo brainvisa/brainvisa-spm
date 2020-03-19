@@ -68,7 +68,7 @@ def updateSignatureAboutTypeAndFormat(self, proc):
 
 def updateSignatureAboutFieldNeeded(self, proc):
   if self.subjects:
-    self.signature[ 'field_needed' ] = ListOf(Choice(*list(self.subjects[0].hierarchyAttributes().keys())))
+    self.signature[ 'field_needed' ] = ListOf(Choice(*self.subjects[0].hierarchyAttributes().keys()))
     self.changeSignature(self.signature)
   else:
     pass

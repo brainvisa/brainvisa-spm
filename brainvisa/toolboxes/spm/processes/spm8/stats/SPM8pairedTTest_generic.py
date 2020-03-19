@@ -310,7 +310,7 @@ def checkImagesPairs(self, context):
 def removeUselessAttributeForComparison(pydict):
   useless_attribute_list = ['reconstruction']
   for useless_attribute in useless_attribute_list:
-    if useless_attribute in list(pydict.keys()):
+    if useless_attribute in pydict:
       del pydict[useless_attribute]
     else:
       pass
@@ -319,7 +319,7 @@ def removeUselessAttributeForComparison(pydict):
 def checkIfAttributesUsedForComparaisontAreDifferent(first_attribute_dict, second_attribute_dict):
   attribute_used_list = ['acquisition']
   for attribute_used in attribute_used_list:
-    if attribute_used in list(first_attribute_dict.keys()) and attribute_used in list(second_attribute_dict.keys()):
+    if attribute_used in first_attribute_dict and attribute_used in second_attribute_dict:
       if first_attribute_dict[attribute_used] != second_attribute_dict[attribute_used]:
         del first_attribute_dict[attribute_used]
         del second_attribute_dict[attribute_used]

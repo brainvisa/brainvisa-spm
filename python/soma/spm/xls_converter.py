@@ -77,7 +77,7 @@ class XlsConverter(object):
         max_header_level = self._extractHowManyHeaderLevelAtMaximum(column_values_dict)
         if max_header_level == 0:
           continue
-          print(("no data found for %s" % sheet_dict["sheet_name"]))
+          print("no data found for %s" % sheet_dict["sheet_name"])
         else:
           end_header_row_index = max_header_level - 1
           self._writeRowHeader(sheet, sheet_dict["row_header"], end_header_row_index)
@@ -142,7 +142,7 @@ class XlsConverter(object):
                                                                      False),
                                              d2_erase_d1=True)
       elif isinstance(value, dict):
-        if not key in list(header_dict.keys()):
+        if key not in header_dict:
           header_dict[key] = OrderedDict()
         header_dict[key] = XlsConverter.mergeDict(header_dict[key],
                                                   self._extractHeaderDict(value,
@@ -151,7 +151,7 @@ class XlsConverter(object):
                                                   d2_erase_d1=True)
 
       else:
-        if not key in list(header_dict.keys()):
+        if key not in header_dict:
           header_dict[key] = None
         pass
     return header_dict
@@ -206,7 +206,7 @@ class XlsConverter(object):
 
   def _writeRowData(self, sheet, row_dict, column_header_dict, current_row_index, current_column_index):
     for key, value in column_header_dict.items():
-      if key in list(row_dict.keys()):
+      if key in row_dict:
         if isinstance(value, dict):
           current_column_index = self._writeRowData(sheet, row_dict[key], column_header_dict[key], current_row_index, current_column_index)
         else:
@@ -407,7 +407,7 @@ class XlsConverter(object):
         new_key = key.replace( '\n', '' )
       else:
         new_key = key
-      if key in list(d1.keys()) and key in list(d2.keys()):
+      if key in d1 and key in d2:
         if isinstance( d1[key], dict ) and isinstance( d2[key], dict ):
           dict_merged[new_key] = XlsConverter.mergeDict( d1[key], d2[key], d2_erase_d1 )
         else:
@@ -416,8 +416,8 @@ class XlsConverter(object):
             dict_merged[new_key] = d2[key]
           else:
             dict_merged[new_key] = '** data merged **'
-      elif key in list(d1.keys()) and not key in list(d2.keys()):
+      elif key in d1 and key not in d2:
         dict_merged[new_key] = d1[key]
-      elif not key in list(d1.keys()) and key in list(d2.keys()):
+      elif key not in d1 and key in d2:
         dict_merged[new_key] = d2[key]
     return dict_merged

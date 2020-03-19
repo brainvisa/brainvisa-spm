@@ -13,6 +13,7 @@ import os
 import six
 from six.moves import zip
 
+
 class Output(six.with_metaclass(abc.ABCMeta)):
   """
   Various  output  options  are  available.    The  deformation  may  be  saved to disk as a ``y_*.nii'' file.Images may be
@@ -20,6 +21,8 @@ class Output(six.with_metaclass(abc.ABCMeta)):
   spatial normalisation involved the pullback, whereas the pushforward requires the inverse of the deformation used by
   the pullback.  Finally, the deformation may be used to warp a GIFTI surface file.
   """
+  pass
+
 #===============================================================================
 # 
 #===============================================================================

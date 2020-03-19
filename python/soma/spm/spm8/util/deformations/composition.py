@@ -12,8 +12,10 @@ from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_container import SPMContainer
 
 import abc
+
 import numpy
 import six
+
 
 class Deformation(six.with_metaclass(abc.ABCMeta)):
   pass

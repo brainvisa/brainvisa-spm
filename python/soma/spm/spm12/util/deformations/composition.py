@@ -13,6 +13,7 @@ from soma.spm.spm_batch_maker_utils import convertlistToSPMString, addBatchKeyWo
 from soma.spm.spm_container import SPMContainer
 
 import abc
+
 import numpy
 import six
 

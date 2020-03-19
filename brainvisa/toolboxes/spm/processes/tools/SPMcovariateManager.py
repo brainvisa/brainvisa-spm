@@ -170,7 +170,7 @@ class CSVEditor(QDialog):
 
     def _fillHeaderTable(self):
         self.csv_column_header = sorted(self.csv_column_header)
-        row_count = len(list(self.csv_dict.keys()))
+        row_count = len(self.csv_dict)
         self.table.setRowCount(row_count)
         self.table.setColumnCount(len(self.csv_row_header + self.csv_column_header))
         self.table.setHorizontalHeaderLabels(self.csv_row_header + self.csv_column_header)
@@ -213,7 +213,7 @@ class CSVEditor(QDialog):
             tmp_value_dict = self.csv_dict[row_id]
             while column_index < self.table.columnCount():
                 column_header = str(self.table.horizontalHeaderItem(column_index).text())
-                if column_header in list(tmp_value_dict.keys()):
+                if column_header in tmp_value_dict:
                     cell = QTableWidgetItem(tmp_value_dict[column_header])
                 else:
                     cell = QTableWidgetItem('')
@@ -224,7 +224,7 @@ class CSVEditor(QDialog):
 
     def _getAllColumnHeader(self):
         column_header_list = []
-        for row_id in self.csv_dict.keys():
+        for row_id in self.csv_dict:
             column_header_list = list(set(column_header_list + list(self.csv_dict[row_id].keys())))
         return sorted(column_header_list)
 
@@ -341,7 +341,7 @@ class CSVEditor(QDialog):
     def _updateTable(self, item_selected_dict):
 
         covariate_selected_list = item_selected_dict['covariate']
-        length_header = len(list(item_selected_dict.keys())) - 1  # without covariate
+        length_header = len(item_selected_dict) - 1  # without covariate
         for column_header_index in range(length_header, self.table.columnCount()):
             if str(self.table.horizontalHeaderItem(column_header_index).text()) in covariate_selected_list:
                 self.table.setColumnHidden(column_header_index, False)

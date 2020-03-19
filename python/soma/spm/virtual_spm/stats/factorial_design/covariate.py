@@ -36,7 +36,7 @@ class Covariate(object):
     additional  regressor  that  is  the  interaction between the covariate and a chosen
     experimental factor.
     """
-    if interaction in list(self.possible_interaction_dict.keys()):
+    if interaction in self.possible_interaction_dict:
       self.interactions = interaction
     else:
       raise ValueError('Covariates interactions possibilities are : ' + str(list(self.possible_interaction_dict.keys())))
@@ -48,7 +48,7 @@ class Covariate(object):
     affected  by the covariate. You are advised to choose this option, unless you have
     other modelling considerations.
     """
-    if centering in list(self.possible_centering_dict.keys()):
+    if centering in self.possible_centering_dict:
       self.centering = centering
     else:
       raise ValueError('Covariates centering possibilities are : ' + str(list(self.possible_centering_dict.keys())))

@@ -36,7 +36,7 @@ class FContrast(object):
     padding   up   to   the  length  of  each  session  and  the  block  effects  is  done
     automatically.
     """
-    if option in list(self.possible_options.keys()):
+    if option in self.possible_options:
       self.replicate_over_sessions = self.possible_options[option]
     else:
       raise ValueError('Replicate over sessions possibilities are : ' + str(list(self.possible_options.keys())))

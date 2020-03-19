@@ -32,6 +32,9 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 from __future__ import absolute_import
 from __future__ import print_function
+
+import six
+
 from brainvisa.processes import *
 from soma.spm import csv_converter
 
@@ -73,7 +76,7 @@ def updateSignatureAboutTypeAndFormat(self, proc):
 
 def updateSignatureAboutFieldNeeded(self, proc):
   if self.subjects:
-    self.signature[ 'field_needed' ] = ListOf(Choice(*list(self.subjects[0].hierarchyAttributes().keys())))
+    self.signature[ 'field_needed' ] = ListOf(Choice(*self.subjects[0].hierarchyAttributes().keys()))
     self.changeSignature(self.signature)
   else:
     pass
@@ -82,7 +85,7 @@ def execution( self, context ):
   if not self.unique_database or self.onlyOneDatabaseUsed():
     if os.path.exists(self.covariate_table.fullPath()):
       csv_dict, csv_row_header = csv_converter.reverse( self.covariate_table.fullPath() )
-      covariate_list = list(csv_dict[list(csv_dict.keys())[0]].keys())
+      covariate_list = list(next(iter(six.itervalues(csv_dict))).keys())
       if sorted(csv_row_header) != sorted(self.field_needed):
         raise ValueError("old and new field_need are different")
       else:
@@ -99,7 +102,7 @@ def execution( self, context ):
         subject_id_list.append(diskitem.hierarchyAttributes()[field])
       subject_id = ';'.join(subject_id_list)
       new_subject_id_list.append(subject_id)
-      if not subject_id in list(csv_dict.keys()):
+      if subject_id not in csv_dict:
         csv_dict[subject_id] = {}
         for covariate in covariate_list:
           csv_dict[subject_id][covariate] = ''

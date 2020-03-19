@@ -5,7 +5,10 @@ from soma.spm.virtual_spm.spatial.normalise.subject import SubjectToEstimateAndW
 from soma.spm.virtual_spm.spatial.normalise.subject import SubjectToWrite as SubjectToWrite_virtual
 
 import abc
+
 import six
+
+
 class Subject(six.with_metaclass(abc.ABCMeta)):
   pass
 

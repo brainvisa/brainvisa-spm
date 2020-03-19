@@ -16,7 +16,7 @@ class TContrast(object):
     self.vector = vector
 
   def setReplicateOverSessions(self, option):
-    if option in list(self.possible_options.keys()):
+    if option in self.possible_options:
       self.replicate_over_sessions = self.possible_options[option]
     else:
       raise ValueError('Replicate over sessions possibilities are : ' + str(list(self.possible_options.keys())))

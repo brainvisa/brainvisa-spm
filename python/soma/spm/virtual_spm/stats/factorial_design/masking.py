@@ -43,7 +43,7 @@ class Masking(object):
     neighbour  interpolation  of a mask image is used if the voxel centers of the input
     images do not coincide with that of the mask image.
     """
-    if isinstance(explicit_mask_path, str) or isinstance(explicit_mask_path, six.text_type):
+    if isinstance(explicit_mask_path, six.string_types):
       self.explicit_mask_path = explicit_mask_path
     else:
       raise ValueError('Explicit mask value must be a file path not ' + str(type(explicit_mask_path)))
