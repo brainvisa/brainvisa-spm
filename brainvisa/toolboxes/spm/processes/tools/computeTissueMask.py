@@ -254,10 +254,10 @@ def createIntracranialLabel(self, context):
     volume = aims.read(self.grey_native_mask.fullPath())
     array = np.array(volume, copy=False)
     white_volume = aims.read(self.white_native_mask.fullPath())
-    white_array = np.array(white_volume, copy=False)
+    white_array = np.array(white_volume, copy=False).astype(array.dtype)
     white_array *= 2
     csf_volume = aims.read(self.csf_native_mask.fullPath())
-    csf_array = np.array(csf_volume, copy=False)
+    csf_array = np.array(csf_volume, copy=False).astype(array.dtype)
     csf_array *= 3
 
     array += white_array
@@ -289,16 +289,16 @@ def create_cranial_label(self, context):
     volume = aims.read(self.grey_native_mask.fullPath())
     array = np.array(volume, copy=False)
     white_volume = aims.read(self.white_native_mask.fullPath())
-    white_array = np.array(white_volume, copy=False)
+    white_array = np.array(white_volume, copy=False).astype(array.dtype)
     white_array *= 2
     csf_volume = aims.read(self.csf_native_mask.fullPath())
-    csf_array = np.array(csf_volume, copy=False)
+    csf_array = np.array(csf_volume, copy=False).astype(array.dtype)
     csf_array *= 3
     skull_volume = aims.read(self.skull_native_mask.fullPath())
-    skull_array = np.array(skull_volume, copy=False)
+    skull_array = np.array(skull_volume, copy=False).astype(array.dtype)
     skull_array *= 4
     scalp_volume = aims.read(self.scalp_native_mask.fullPath())
-    scalp_array = np.array(scalp_volume, copy=False)
+    scalp_array = np.array(scalp_volume, copy=False).astype(array.dtype)
     scalp_array *= 5
     
     array += white_array
