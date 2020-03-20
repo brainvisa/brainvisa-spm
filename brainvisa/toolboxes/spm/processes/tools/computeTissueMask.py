@@ -168,6 +168,15 @@ signature = Signature(
 
 
 def initialization(self):
+    self.tissues_choices = {
+        'grey_mask': 'grey_native_mask',
+        'white_mask': 'white_native_mask',
+        'csf_mask': 'csf_native_mask',
+        'skull_mask': 'skull_native_mask',
+        'scalp_mask': 'scalp_native_mask',
+        'background_mask': 'background_native_mask'
+    }
+    
     self.setOptional('grey_native_mask', 'white_native', 'csf_native',
                      'skull_native', 'scalp_native', 'background_native',
                      'white_native_mask', 'csf_native_mask',
@@ -359,19 +368,13 @@ def _update_method(self, *source):
 
 
 def _update_tissue_mask(self, *sources):
-    tissues_choices = {
-        self.grey_mask: 'grey_native_mask',
-        self.white_mask: 'white_native_mask',
-        self.csf_mask: 'csf_native_mask',
-        self.skull_mask: 'skull_native_mask',
-        self.scalp_mask: 'scalp_native_mask',
-        self.background_mask: 'background_native_mask'
-    }
     
-    for choice, mask in tissues_choices.items():
-        if choice:
+    for choice, mask in self.tissues_choices.items():
+        if getattr(self, choice):
+            self.setMandatory(mask)
             self.setEnable(mask)
         else:
+            self.setOptional(mask)
             self.setDisable(mask)
     
     self.changeSignature(self.signature)
