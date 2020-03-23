@@ -90,8 +90,8 @@ def initialization(self):
     
     self.addLink(None, "extract_coregister_matrix", self.updateSignatureAboutCoregisterMatrix)
     
-    self.addLink("source_output", "source")
-    self.addLink("others_output", "others")
+    self.linkParameters("source_output", "source")
+    self.linkParameters("others_output", "others")
 
     self.addLink("batch_location", "source", self.updateBatchPath)
 
