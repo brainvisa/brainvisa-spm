@@ -157,9 +157,6 @@ signature = Signature(
     'white_lesion_mask', ReadDiskItem('4D Volume',
                                       ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
                                       section=labels),
-    'volbrain_nucleus', ReadDiskItem('4D Volume',
-                                     ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
-                                     section=labels),
     'cranial_native_labels', WriteDiskItem(
         'T1 MRI intracranial labels',
         'NIFTI-1 image',
@@ -188,7 +185,7 @@ def initialization(self):
                      'white_native_mask', 'csf_native_mask',
                      'skull_native_mask', 'scalp_native_mask',
                      'background_native_mask',
-                     'white_lesion_mask', 'volbrain_nucleus')
+                     'white_lesion_mask')
 
     self.linkParameters('white_native', 'grey_native')
     self.linkParameters('csf_native', 'grey_native')
@@ -334,11 +331,7 @@ def create_cranial_label(self, context):
     if self.white_lesion_mask:
         lesions = aims.read(self.white_lesion_mask.fullPath())
         lesions_array = np.array(lesions)
-        if self.volbrain_nucleus:
-            nucleus = aims.read(self.volbrain_nucleus.fullPath())
-            nucleus_array = np.array(nucleus)
-            lesions_array[np.where(nucleus_array > 0)] = 0
-        array[np.where(lesions_array > 0)] = 6
+        array[np.where(np.logical_and(lesions_array > 0, array != 1))] = 6
         data['6'] = 'white_lesions'
         
     aims.write(volume, self.cranial_native_labels.fullPath())
@@ -370,11 +363,11 @@ def _update_labels(self, *sources):
         self.setDisable('intracranial_native_labels', 'intracranial_native_translation')
     
     if self.cranial_labels:
-        self.setEnable('white_lesion_mask', 'volbrain_nucleus',
+        self.setEnable('white_lesion_mask',
                        'cranial_native_labels', 'cranial_native_translation')
-        self.setOptional('white_lesion_mask', 'volbrain_nucleus')
+        self.setOptional('white_lesion_mask')
     else:
-        self.setDisable('white_lesion_mask', 'volbrain_nucleus',
+        self.setDisable('white_lesion_mask',
                         'cranial_native_labels', 'cranial_native_translation')
     
     self.changeSignature(self.signature)
