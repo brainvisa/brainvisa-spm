@@ -333,12 +333,12 @@ def create_cranial_label(self, context):
     # Enhanced cranial labels with white lesions
     if self.white_lesion_mask:
         lesions = aims.read(self.white_lesion_mask.fullPath())
-        lesions_array = lesions.arraydata()
+        lesions_array = np.array(lesions)
         if self.volbrain_nucleus:
             nucleus = aims.read(self.volbrain_nucleus.fullPath())
-            nucleus_array = nucleus.arraydata()
+            nucleus_array = np.array(nucleus)
             lesions_array[np.where(nucleus_array > 0)] = 0
-        array[np.where(lesions > 0)] = 6
+        array[np.where(lesions_array > 0)] = 6
         data['6'] = 'white_lesions'
         
     aims.write(volume, self.cranial_native_labels.fullPath())
