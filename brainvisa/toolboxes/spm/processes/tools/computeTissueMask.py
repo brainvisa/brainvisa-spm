@@ -154,6 +154,12 @@ signature = Signature(
         requiredAttributes={'space': 't1mri'},
         section=labels),
     'cranial_labels', Boolean(section=labels),
+    'white_lesion_mask', ReadDiskItem('4D Volume',
+                                      ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
+                                      section=labels),
+    'volbrain_nucleus', ReadDiskItem('4D Volume',
+                                     ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
+                                     section=labels),
     'cranial_native_labels', WriteDiskItem(
         'T1 MRI intracranial labels',
         'NIFTI-1 image',
@@ -181,7 +187,8 @@ def initialization(self):
                      'skull_native', 'scalp_native', 'background_native',
                      'white_native_mask', 'csf_native_mask',
                      'skull_native_mask', 'scalp_native_mask',
-                     'background_native_mask')
+                     'background_native_mask',
+                     'white_lesion_mask', 'volbrain_nucleus')
 
     self.linkParameters('white_native', 'grey_native')
     self.linkParameters('csf_native', 'grey_native')
@@ -320,10 +327,22 @@ def create_cranial_label(self, context):
     if array.max() > 5:
         context.warning("scalp overlaps, the voxels will be set to 0")
         array[array > 5] = 0
+    
+    data = {'1': 'grey', '2': 'white', '3': 'csf', '4': 'skull', '5': 'scalp'}
+    
+    # Enhanced cranial labels with white lesions
+    if self.white_lesion_mask:
+        lesions = aims.read(self.white_lesion_mask.fullPath())
+        lesions_array = lesions.arraydata()
+        if self.volbrain_nucleus:
+            nucleus = aims.read(self.volbrain_nucleus.fullPath())
+            nucleus_array = nucleus.arraydata()
+            lesions_array[np.where(nucleus_array > 0)] = 0
+        array[np.where(lesions > 0)] = 6
+        data['6'] = 'white_lesions'
         
     aims.write(volume, self.cranial_native_labels.fullPath())
 
-    data = {'1': 'grey', '2': 'white', '3': 'csf', '4': 'skull', '5': 'scalp'}
     f = open(self.cranial_native_translation.fullPath(), 'w')
     json.dump(data, f, indent=2)
     f.close()
@@ -351,9 +370,12 @@ def _update_labels(self, *sources):
         self.setDisable('intracranial_native_labels', 'intracranial_native_translation')
     
     if self.cranial_labels:
-        self.setEnable('cranial_native_labels', 'cranial_native_translation')
+        self.setEnable('white_lesion_mask', 'volbrain_nucleus',
+                       'cranial_native_labels', 'cranial_native_translation')
+        self.setOptional('white_lesion_mask', 'volbrain_nucleus')
     else:
-        self.setDisable('cranial_native_labels', 'cranial_native_translation')
+        self.setDisable('white_lesion_mask', 'volbrain_nucleus',
+                        'cranial_native_labels', 'cranial_native_translation')
     
     self.changeSignature(self.signature)
     
