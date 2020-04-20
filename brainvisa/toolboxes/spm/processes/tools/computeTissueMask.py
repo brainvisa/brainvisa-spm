@@ -255,6 +255,12 @@ def execution(self, context):
 
 
 def createIntracranialLabel(self, context):
+    """
+    Function to create intracranial labels image from masks.
+    
+    The labels used are gre, white and csf. This intracranial label is usefull for partial
+    volume correction in nuclear imaging toolbox.
+    """
     volume = aims.read(self.grey_native_mask.fullPath())
     array = np.array(volume, copy=False)
     white_volume = aims.read(self.white_native_mask.fullPath())
@@ -290,6 +296,13 @@ def createIntracranialLabel(self, context):
 
 
 def create_cranial_label(self, context):
+    """
+    Function to create cranial labels image from masks.
+    
+    The labels used are gre, white, csf, skull and scalp. If present it uses white lesions
+    to create another label. This cranial label is usefull for partial volume correction
+    in nuclear imaging toolbox.
+    """
     volume = aims.read(self.grey_native_mask.fullPath())
     array = np.array(volume, copy=False)
     white_volume = aims.read(self.white_native_mask.fullPath())
@@ -331,6 +344,7 @@ def create_cranial_label(self, context):
     if self.white_lesion_mask:
         lesions = aims.read(self.white_lesion_mask.fullPath())
         lesions_array = np.array(lesions)
+        # Create lesion label if not already grey
         array[np.where(np.logical_and(lesions_array > 0, array != 1))] = 6
         data['6'] = 'white_lesions'
         
