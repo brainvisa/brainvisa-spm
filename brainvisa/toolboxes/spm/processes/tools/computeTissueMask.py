@@ -200,6 +200,7 @@ def initialization(self):
     self.linkParameters("background_native_mask", "grey_native_mask")
     self.linkParameters("intracranial_native_labels", "grey_native_mask")
     self.linkParameters("intracranial_native_translation", "grey_native_mask")
+    self.linkParameters("cranial_native_translation", "cranial_native_labels")
     
     self.linkParameters(None,
                         ("grey_mask", "white_mask", "csf_mask", "skull_mask", "scalp_mask", "background_mask"),
@@ -303,56 +304,59 @@ def create_cranial_label(self, context):
     to create another label. This cranial label is usefull for partial volume correction
     in nuclear imaging toolbox.
     """
-    volume = aims.read(self.grey_native_mask.fullPath())
-    array = np.array(volume, copy=False)
-    white_volume = aims.read(self.white_native_mask.fullPath())
-    white_array = np.array(white_volume, copy=False).astype(array.dtype)
-    white_array *= 2
-    csf_volume = aims.read(self.csf_native_mask.fullPath())
-    csf_array = np.array(csf_volume, copy=False).astype(array.dtype)
-    csf_array *= 3
-    skull_volume = aims.read(self.skull_native_mask.fullPath())
-    skull_array = np.array(skull_volume, copy=False).astype(array.dtype)
-    skull_array *= 4
-    scalp_volume = aims.read(self.scalp_native_mask.fullPath())
-    scalp_array = np.array(scalp_volume, copy=False).astype(array.dtype)
-    scalp_array *= 5
-    
-    array += white_array
-    if array.max() == 3:
-        context.warning("grey and white overlaps, the voxels will be set to 0")
-        array[array == 3] = 0
+    if self.grey_native_mask and self.white_native_mask and self.csf_native_mask and self.skull_native_mask and self.scalp_native_mask:
+        volume = aims.read(self.grey_native_mask.fullPath())
+        array = np.array(volume, copy=False)
+        white_volume = aims.read(self.white_native_mask.fullPath())
+        white_array = np.array(white_volume, copy=False).astype(array.dtype)
+        white_array *= 2
+        csf_volume = aims.read(self.csf_native_mask.fullPath())
+        csf_array = np.array(csf_volume, copy=False).astype(array.dtype)
+        csf_array *= 3
+        skull_volume = aims.read(self.skull_native_mask.fullPath())
+        skull_array = np.array(skull_volume, copy=False).astype(array.dtype)
+        skull_array *= 4
+        scalp_volume = aims.read(self.scalp_native_mask.fullPath())
+        scalp_array = np.array(scalp_volume, copy=False).astype(array.dtype)
+        scalp_array *= 5
         
-    array += csf_array
-    if array.max() > 3:
-        context.warning("csf overlaps, the voxels will be set to 0")
-        array[array > 3] = 0
+        array += white_array
+        if array.max() == 3:
+            context.warning("grey and white overlaps, the voxels will be set to 0")
+            array[array == 3] = 0
+            
+        array += csf_array
+        if array.max() > 3:
+            context.warning("csf overlaps, the voxels will be set to 0")
+            array[array > 3] = 0
+            
+        array += skull_array
+        if array.max() > 4:
+            context.warning("skull overlaps, the voxels will be set to 0")
+            array[array > 4] = 0
+            
+        array += scalp_array
+        if array.max() > 5:
+            context.warning("scalp overlaps, the voxels will be set to 0")
+            array[array > 5] = 0
         
-    array += skull_array
-    if array.max() > 4:
-        context.warning("skull overlaps, the voxels will be set to 0")
-        array[array > 4] = 0
+        data = {'1': 'grey', '2': 'white', '3': 'csf', '4': 'skull', '5': 'scalp'}
         
-    array += scalp_array
-    if array.max() > 5:
-        context.warning("scalp overlaps, the voxels will be set to 0")
-        array[array > 5] = 0
-    
-    data = {'1': 'grey', '2': 'white', '3': 'csf', '4': 'skull', '5': 'scalp'}
-    
-    # Enhanced cranial labels with white lesions
-    if self.white_lesion_mask:
-        lesions = aims.read(self.white_lesion_mask.fullPath())
-        lesions_array = np.array(lesions)
-        # Create lesion label if not already grey
-        array[np.where(np.logical_and(lesions_array > 0, array != 1))] = 6
-        data['6'] = 'white_lesions'
-        
-    aims.write(volume, self.cranial_native_labels.fullPath())
+        # Enhanced cranial labels with white lesions
+        if self.white_lesion_mask:
+            lesions = aims.read(self.white_lesion_mask.fullPath())
+            lesions_array = np.array(lesions)
+            # Create lesion label if not already grey
+            array[np.where(np.logical_and(lesions_array > 0, array != 1))] = 6
+            data['6'] = 'white_lesions'
+            
+        aims.write(volume, self.cranial_native_labels.fullPath())
 
-    f = open(self.cranial_native_translation.fullPath(), 'w')
-    json.dump(data, f, indent=2)
-    f.close()
+        f = open(self.cranial_native_translation.fullPath(), 'w')
+        json.dump(data, f, indent=2)
+        f.close()
+    else:
+        context.error("Cranial labels needs grey, white, csf, skull and scalp mask to be created!")
 
 
 def compareProbabilityMapToList(self, context, prob_map, prob_map_output, prob_maps_to_compare):
