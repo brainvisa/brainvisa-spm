@@ -338,3 +338,12 @@ analysis_directory = (
 )
 
 insert( '{center}/{subject}/spm/{processing}', '{acquisition}', SetContent(*analysis_directory))
+insert('{center}/{subject}/nuclear_imaging/{processing}', '{acquisition}', 
+       SetContent('t1mri',
+                  SetContent('{analysis}_from_{segmentation_method}',
+                             SetContent("t1mri_space", 
+                                        SetContent('<subject>_intracranial_labels',
+                                                   SetType('T1 MRI intracranial labels'),
+                                                   SetWeakAttr('space', 't1mri'),
+                                                   '<subject>_intracranial_labels', SetType('T1 MRI intracranial labels translation'), SetWeakAttr('space', 't1mri'),
+                                                   )))))
