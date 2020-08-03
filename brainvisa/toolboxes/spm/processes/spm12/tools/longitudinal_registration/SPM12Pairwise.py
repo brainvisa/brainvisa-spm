@@ -55,6 +55,8 @@ name = 'spm12 - Pairwise longitudinal registration'
 
 
 signature = Signature(
+    'modality', Choice(('T1 MRI', 'Raw T1 MRI'),
+                       ('FLAIR MRI', 'Raw FLAIR MRI')),
     'time_1_volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'time_2_volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'time_difference', ListOf(Float()),
@@ -96,6 +98,7 @@ def initialization(self):
     self.addLink("batch_location", "time_1_volumes", self.updateBatchPath)
     
     self.addLink(None, ("time_1_volumes", "time_2_volumes"), self.update_outputs)
+    self.addLink(None, "modality", self.update_modality)
 
     # SPM default initialisation
     self.time_difference = [1]
@@ -158,6 +161,12 @@ def updateBatchPath(self, proc):
         return os.path.join(directory_path, 'spm12_pairwaise_job.m')
 
 
+def update_modality(self, proc):
+    self.signature['time_1_volumes'] = ListOf(ReadDiskItem(self.modality, ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.signature['time_2_volumes'] = ListOf(ReadDiskItem(self.modality, ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.changeSignature(self.signature)
+
+
 def update_outputs(self, *proc):
     mpa_list = []
     jacobian_list = []
@@ -171,6 +180,8 @@ def update_outputs(self, *proc):
             attr['baseline'] = attr.pop('acquisition')
             attr_2 = time_2_vol.hierarchyAttributes()
             attr['followup'] = attr_2['acquisition']
+            
+            attr['analysis'] = attr['modality']
             
             mpa_list.append(self.signature['MPA'].contentType.findValue(attr))
             jacobian_list.append(self.signature['jacobian_rate'].contentType.findValue(attr))
