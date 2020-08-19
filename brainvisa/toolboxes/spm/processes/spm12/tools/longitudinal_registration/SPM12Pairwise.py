@@ -55,8 +55,8 @@ name = 'spm12 - Pairwise longitudinal registration'
 
 
 signature = Signature(
-    'modality', Choice(('T1 MRI', 'Raw T1 MRI'),
-                       ('FLAIR MRI', 'Raw FLAIR MRI')),
+    'modality', Choice(('T1 MRI', ['Raw T1 MRI', 'T1 MRI mid-point average']),
+                       ('FLAIR MRI', ['Raw FLAIR MRI', 'FLAIR MRI mid-point average'])),
     'time_1_volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'time_2_volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'time_difference', ListOf(Float()),
@@ -162,8 +162,11 @@ def updateBatchPath(self, proc):
 
 
 def update_modality(self, proc):
-    self.signature['time_1_volumes'] = ListOf(ReadDiskItem(self.modality, ['NIFTI-1 image', 'SPM image', 'MINC image']))
-    self.signature['time_2_volumes'] = ListOf(ReadDiskItem(self.modality, ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.signature['time_1_volumes'] = ListOf(ReadDiskItem(self.modality[0], ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.signature['time_2_volumes'] = ListOf(ReadDiskItem(self.modality[0], ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.signature['MPA'] = ListOf(WriteDiskItem(self.modality[1],
+                                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                 requiredAttributes={'processing': 'spm12Pairwise'}))
     self.changeSignature(self.signature)
 
 

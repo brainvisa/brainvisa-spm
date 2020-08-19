@@ -54,6 +54,8 @@ name = 'spm12 - serial longitudinal registration'
 
 
 signature = Signature(
+    'modality', Choice(('T1 MRI', ['Raw T1 MRI', 'T1 MRI mid-point average']),
+                       ('FLAIR MRI', ['Raw FLAIR MRI', 'FLAIR MRI mid-point average'])),
     'volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'times', ListOf(Float()),
     'noise_estimate', Choice("NaN", "Scalar", "Matrix"),
@@ -81,6 +83,7 @@ signature = Signature(
 
 
 def initialization(self):
+    self.addLink(None, "modality", self.update_modality)
     self.addLink(None, "noise_estimate", self.updateSignatureAboutNoise)
     self.addLink(None, "save_MPA", self.updateSignatureAboutMPA)
     self.addLink(None, "customs_outputs", self.updateSignatureAboutMPA)
@@ -92,7 +95,7 @@ def initialization(self):
     self.addLink(None, "customs_outputs", self.updateSignatureAboutDeformationField)
     self.addLink(None, "volumes", self.update_outputs)
     self.addLink("batch_location", "volumes", self.updateBatchPath)
-    
+
     # SPM default initialisation
     self.warping_regularisation = [0, 0, 100, 25, 100]
     self.bias_regularisation = 1000000
@@ -100,6 +103,14 @@ def initialization(self):
     self.save_jacobian_rate = False
     self.save_divergence_rate = True
     self.save_deformation_fields = False
+
+
+def update_modality(self, proc):
+    self.signature['volumes'] = ListOf(ReadDiskItem(self.modality[0], ['NIFTI-1 image', 'SPM image', 'MINC image']))
+    self.signature['MPA'] = ListOf(WriteDiskItem(self.modality[1],
+                                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                 requiredAttributes={'processing': 'spm12Serial'}))
+    self.changeSignature(self.signature)
 
 
 def updateSignatureAboutNoise(self, proc):
@@ -158,11 +169,10 @@ def update_outputs(self, proc):
                 attr['acquisition'] = vol.hierarchyAttributes()['acquisition']
                 param_list.append(self.signature[param].contentType.findValue(attr))
             setattr(self, param, param_list)
-        print(acquisitions)
     else:
         for param in outputs_params:
             setattr(self, param, None)
-    
+
 
 def updateBatchPath(self, proc):
     if self.volumes:
