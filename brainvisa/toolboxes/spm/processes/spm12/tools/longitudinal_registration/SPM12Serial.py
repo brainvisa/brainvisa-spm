@@ -107,9 +107,9 @@ def initialization(self):
 
 def update_modality(self, proc):
     self.signature['volumes'] = ListOf(ReadDiskItem(self.modality[0], ['NIFTI-1 image', 'SPM image', 'MINC image']))
-    self.signature['MPA'] = ListOf(WriteDiskItem(self.modality[1],
-                                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
-                                                 requiredAttributes={'processing': 'spm12Serial'}))
+    self.signature['MPA'] = WriteDiskItem(self.modality[1],
+                                          ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                          requiredAttributes={'processing': 'spm12Serial'})
     self.changeSignature(self.signature)
 
 
@@ -161,6 +161,7 @@ def update_outputs(self, proc):
         attr = self.volumes[0].hierarchyAttributes()
         acquisitions = sorted([a.hierarchyAttributes()['acquisition'] for a in self.volumes])
         del attr['acquisition']
+        attr['analysis'] = attr['modality'] + '_default_analysis'
         attr['acquisition_sequence'] = '_'.join(acquisitions)
         self.MPA = self.signature['MPA'].findValue(attr)
         for param in outputs_params[1:]:
