@@ -181,7 +181,7 @@ def update_outputs(self, *proc):
             attr_2 = time_2_vol.hierarchyAttributes()
             attr['followup'] = attr_2['acquisition']
             
-            attr['analysis'] = attr['modality']
+            attr['analysis'] = attr['modality'] + '_default_analysis'
             
             mpa_list.append(self.signature['MPA'].contentType.findValue(attr))
             jacobian_list.append(self.signature['jacobian_rate'].contentType.findValue(attr))
