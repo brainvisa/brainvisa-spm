@@ -87,7 +87,7 @@ def extractOffsetBetweenTwoTransformations(self, first_transfo, second_transfo):
                   [self.box_size[0], self.box_size[1], 0],
                   [0, self.box_size[1], self.box_size[2]],
                   [self.box_size[0], self.box_size[1], self.box_size[2]],
-                  [self.box_size[0]/2, self.box_size[1]/2, self.box_size[2]/2],
+                  [self.box_size[0]//2, self.box_size[1]//2, self.box_size[2]//2],
                  ]
     norm_sum = 0
     for coord in coord_list:
