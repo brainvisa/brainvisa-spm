@@ -55,7 +55,7 @@ name = 'spm12 - serial longitudinal registration - generic'
 
 
 signature = Signature(
-  'volumes', ListOf(ReadDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"]))),
+  'volumes', ListOf(ReadDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
   'times', ListOf(Float()),
   'noise_estimate', Choice("NaN", "Scalar", "Matrix"),
   'noise_estimate_value', Matrix(),
