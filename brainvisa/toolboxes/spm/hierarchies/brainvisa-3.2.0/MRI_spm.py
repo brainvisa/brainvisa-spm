@@ -191,8 +191,8 @@ HDW_directory = (
 #{center}/{subject}/{processing}/{acquisition}/{analysis}_HDW_to_{template} ==> warping_method : high-dimensional
 def createHierarchyTreeDependingOnNormalization(warping_method):
   return (
-#Warped on template, LDW(ex: TPM)/or/HDW(ex : DARTEL) depending on warping_method (low-dimensional/or/high-dimensional)
-  #-T1 MRI probability map warped on LDW/or/HDW template with non-linear only modulation->
+  #Warped on template, LDW(ex: TPM)/or/HDW(ex : DARTEL) depending on warping_method (low-dimensional/or/high-dimensional)
+    #-T1 MRI probability map warped on LDW/or/HDW template with non-linear only modulation->
   '<subject>_grey_proba_warped_with_non_linear_modulation',
 	SetType('T1 MRI tissue probability map'),
 	SetWeakAttr('tissue_class', 'grey',
@@ -328,6 +328,70 @@ def createHierarchyTreeDependingOnNormalization(warping_method):
 HDW_DARTEL = (
   '<subject>_HDW_DARTEL_flow_field', SetType('HDW DARTEL flow field'),
 )
+
+CAT12_directory = (
+  'mri', SetContent(
+    'p1<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'grey',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'p2<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'white',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'p3<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'csf',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'p4<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'skull',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'p5<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'scalp',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'p6<subject>',
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', 'none',
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    
+    'y_<subject>',
+      SetType('SPM deformation field'),
+      SetWeakAttr('direction', 'forward',
+                  'warping_method', 'none'),
+    'iy_<subject>',
+      SetType('SPM deformation field'),
+      SetWeakAttr('direction', 'inverse',
+                  'warping_method', 'none'),
+    't_<subject>_{transformation}_reorient',
+      SetType('SPM transformation'),
+      SetWeakAttr('direction', 'forward'),
+    'it_<subject>_{transformation}_reorient',
+      SetType('SPM transformation'),
+      SetWeakAttr('direction', 'inverse'),
+  ),
+  # SetWeakAttr('processing', 'cat12Segment'),
+)
+cat12_analysis_directory = (
+  '{analysis}_from_t1mri_to_TPM',
+    SetContent(*CAT12_directory),
+    # SetDefaultAttributeValue('analysis', 'default'),
+    SetWeakAttr('template', 'TPM')
+)
+
 #{center}/{subject}/{processing}/{acquisition}
 analysis_directory = (
   '{analysis}_LDW_from_t1mri_to_{template}', SetContent(*(LDW_directory +
@@ -335,9 +399,22 @@ analysis_directory = (
   '{analysis}_HDW_from_t1mri_to_{template}', SetContent(*(HDW_directory +
                                                    createHierarchyTreeDependingOnNormalization(warping_method='high-dimensional'))),
   '{analysis}_HDW_DARTEL_from_t1mri_to_{template}', SetContent(*HDW_DARTEL),
+  # '{analysis}_from_t1mri_to_TPM',
+  #   SetContent(*CAT12_directory),
+  #   SetDefaultAttributeValue('analysis', 'default'),
+  #   SetWeakAttr('template', 'TPM',
+  #               'spm_hierarchy', 'yes'),
 )
 
-insert( '{center}/{subject}/spm/{processing}', '{acquisition}', SetContent(*analysis_directory))
+insert('{center}/{subject}/spm/cat12Segment', '{acquisition}', SetContent(*cat12_analysis_directory),
+       SetWeakAttr('processing', 'cat12Segment'))
+insert('{center}/{subject}/spm/spm12Segment', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm12Segment'))
+insert('{center}/{subject}/spm/spm8VBMSegmentation', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm8VBMSegmentation'))
+insert('{center}/{subject}/spm/spm8NewSegment', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm8NewSegment'))
+
 insert('{center}/{subject}/nuclear_imaging/{processing}', '{acquisition}', 
        SetContent('t1mri',
                   SetContent('{analysis}_from_{segmentation_method}',
