@@ -34,6 +34,8 @@ from __future__ import absolute_import
 from brainvisa.tools import spm_utils
 from brainvisa.processes import *
 import os
+import shutil
+from distutils.dir_util import copy_tree
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.tools.cat12 import EstimateAndWrite
 
@@ -244,7 +246,6 @@ signature = Signature(
 
 def initialization(self):
     self.setOptional('template', 'voxel_size', 'spatial_registration_template')
-    self.spatial_registration_template = '/home/hb261775/Softwares/spm12_cat12_standalone/MCR_Linux/spm12_mcr/home/gaser/gaser/spm/spm12/toolbox/cat12/templates_volumes/Template_0_IXI555_MNI152_GS.nii'
     
     self.addLink('batch_location', 't1mri', self.update_batch_path)
     self.addLink(None, 'surface_thickness_estimation', self.update_surface_selection)
@@ -497,5 +498,8 @@ def execution(self, context):
         for folder in ['mri', 'report', 'label', 'surf']:
             src = os.path.join(native_folder, folder)
             dest = os.path.join(output_folder, folder)
-            spm_utils.movePath(src, dest)
-        
+            if os.path.exists(src):
+                if not os.path.exists(dest):
+                    os.makedirs(dest)
+                copy_tree(src, dest)
+                shutil.rmtree(src)
