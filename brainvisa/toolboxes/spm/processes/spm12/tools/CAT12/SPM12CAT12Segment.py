@@ -195,6 +195,24 @@ signature = Signature(
                                           section=grey_output),
     "grey_dartel_export", Choice("no", "rigid", "affine", "both",
                                  section=grey_output),
+    "grey_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                              requiredAttributes={'tissue_class': 'grey',
+                                                                  'transformation': 'rigid',
+                                                                  'modulation': 'none',
+                                                                  'warping_method': 'none',
+                                                                  'processing': 'cat12Segment',
+                                                                  'analysis': 'default'},
+                                              section=grey_output),
+    "grey_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                               requiredAttributes={'tissue_class': 'grey',
+                                                                   'transformation': 'affine',
+                                                                   'modulation': 'none',
+                                                                   'warping_method': 'none',
+                                                                   'processing': 'cat12Segment',
+                                                                   'analysis': 'default'},
+                                               section=grey_output),
     
     "white_native_space", Boolean(section=white_output),
     "white_native", WriteDiskItem('T1 MRI tissue probability map',
@@ -231,6 +249,24 @@ signature = Signature(
                                            section=white_output),
     "white_dartel_export", Choice("no", "rigid", "affine", "both",
                                   section=white_output),
+    "white_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                               requiredAttributes={'tissue_class': 'white',
+                                                                   'transformation': 'rigid',
+                                                                   'modulation': 'none',
+                                                                   'warping_method': 'none',
+                                                                   'processing': 'cat12Segment',
+                                                                   'analysis': 'default'},
+                                               section=white_output),
+    "white_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                requiredAttributes={'tissue_class': 'white',
+                                                                    'transformation': 'affine',
+                                                                    'modulation': 'none',
+                                                                    'warping_method': 'none',
+                                                                    'processing': 'cat12Segment',
+                                                                    'analysis': 'default'},
+                                                section=white_output),
     
     "csf_native_space", Boolean(section=csf_output),
     "csf_native", WriteDiskItem('T1 MRI tissue probability map',
@@ -267,6 +303,24 @@ signature = Signature(
                                          section=csf_output),
     "csf_dartel_export", Choice("no", "rigid", "affine", "both",
                                 section=csf_output),
+    "csf_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                             requiredAttributes={'tissue_class': 'csf',
+                                                                 'transformation': 'rigid',
+                                                                 'modulation': 'none',
+                                                                 'warping_method': 'none',
+                                                                 'processing': 'cat12Segment',
+                                                                 'analysis': 'default'},
+                                             section=csf_output),
+    "csf_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                              requiredAttributes={'tissue_class': 'csf',
+                                                                  'transformation': 'affine',
+                                                                  'modulation': 'none',
+                                                                  'warping_method': 'none',
+                                                                  'processing': 'cat12Segment',
+                                                                  'analysis': 'default'},
+                                              section=csf_output),
     
     # "wmh_native_space", Boolean(section=wmh_output),
     # "wmh_normalized", Boolean(section=wmh_output),
@@ -371,6 +425,60 @@ signature = Signature(
                                                 section=other_tissue_output),
     "other_tissue_proba_map_dartel_export", Choice("no", "rigid", "affine", "both",
                                                    section=other_tissue_output),
+    "skull_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                               requiredAttributes={'tissue_class': 'skull',
+                                                                   'transformation': 'rigid',
+                                                                   'modulation': 'none',
+                                                                   'warping_method': 'none',
+                                                                   'processing': 'cat12Segment',
+                                                                   'analysis': 'default'},
+                                               section=other_tissue_output),
+    "skull_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                requiredAttributes={'tissue_class': 'skull',
+                                                                    'transformation': 'affine',
+                                                                    'modulation': 'none',
+                                                                    'warping_method': 'none',
+                                                                    'processing': 'cat12Segment',
+                                                                    'analysis': 'default'},
+                                                section=other_tissue_output),
+    "scalp_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                               requiredAttributes={'tissue_class': 'scalp',
+                                                                   'transformation': 'rigid',
+                                                                   'modulation': 'none',
+                                                                   'warping_method': 'none',
+                                                                   'processing': 'cat12Segment',
+                                                                   'analysis': 'default'},
+                                               section=other_tissue_output),
+    "scalp_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                requiredAttributes={'tissue_class': 'scalp',
+                                                                    'transformation': 'affine',
+                                                                    'modulation': 'none',
+                                                                    'warping_method': 'none',
+                                                                    'processing': 'cat12Segment',
+                                                                    'analysis': 'default'},
+                                                section=other_tissue_output),
+    "background_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                                    ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                    requiredAttributes={'tissue_class': 'none',
+                                                                        'transformation': 'rigid',
+                                                                        'modulation': 'none',
+                                                                        'warping_method': 'none',
+                                                                        'processing': 'cat12Segment',
+                                                                        'analysis': 'default'},
+                                                    section=other_tissue_output),
+    "background_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                                     ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                     requiredAttributes={'tissue_class': 'none',
+                                                                         'transformation': 'affine',
+                                                                         'modulation': 'none',
+                                                                         'warping_method': 'none',
+                                                                         'processing': 'cat12Segment',
+                                                                         'analysis': 'default'},
+                                                     section=other_tissue_output),
     
     # "roi_evaluation_native_space", Boolean(),
     # "roi_evaluation_dartel_export", Choice("no", "rigid", "affine", "both"),
@@ -523,17 +631,20 @@ def initialization(self):
     self.deformation_field_type = 'Neither'
     self.registration_matrix = False
     
-    self.addLink(None, 'output_options', self.update_output_dir)
-    
+    self.addLink(None, 'output_options', self.update_output_dir)    
+        
     self.addLink(None, 'grey_native_space', lambda x: self.update_bool_output_signature(x, 'grey_native'))
     self.addLink(None, 'grey_normalized', lambda x: self.update_bool_output_signature(x, 'grey_normalized_output'))
     self.addLink(None, 'grey_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'grey_mod_norm_output'))
+    self.addLink(None, 'grey_dartel_export', lambda x: self.update_dartel_export_signature(x, 'grey_dartel_rigid_output', 'grey_dartel_affine_output'))
     self.addLink(None, 'white_native_space', lambda x: self.update_bool_output_signature(x, 'white_native'))
     self.addLink(None, 'white_normalized', lambda x: self.update_bool_output_signature(x, 'white_normalized_output'))
     self.addLink(None, 'white_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'white_mod_norm_output'))
+    self.addLink(None, 'white_dartel_export', lambda x: self.update_dartel_export_signature(x, 'white_dartel_rigid_output', 'white_dartel_affine_output'))
     self.addLink(None, 'csf_native_space', lambda x: self.update_bool_output_signature(x, 'csf_native'))
     self.addLink(None, 'csf_normalized', lambda x: self.update_bool_output_signature(x, 'csf_normalized_output'))
     self.addLink(None, 'csf_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'csf_mod_norm_output'))
+    self.addLink(None, 'csf_dartel_export', lambda x: self.update_dartel_export_signature(x, 'csf_dartel_rigid_output', 'csf_dartel_affine_output'))
     self.addLink(None, 'other_tissue_proba_map_native_space',
                  lambda x: self.update_bool_output_signature(x, ['skull_native', 'scalp_native', 'background_native']))
     self.addLink(None, 'other_tissue_proba_map_normalized',
@@ -544,6 +655,10 @@ def initialization(self):
                  lambda x: self.update_modulation_output_signature(x, ['skull_mod_norm_output',
                                                                        'scalp_mod_norm_output',
                                                                        'background_mod_norm_output']))
+    self.addLink(None, 'other_tissue_proba_map_dartel_export',
+                 lambda x: self.update_dartel_export_signature(x,
+                                                               ['skull_dartel_rigid_output', 'scalp_dartel_rigid_output', 'background_dartel_rigid_output'],
+                                                               ['skull_dartel_affine_output', 'scalp_dartel_affine_output', 'background_dartel_affine_output']))
     self.addLink(None, 'deformation_field_type', self.update_deformation_field_signature)
     self.addLink(None, 'registration_matrix',
                  lambda x: self.update_bool_output_signature(x, ['forward_registration_affine',
@@ -551,24 +666,13 @@ def initialization(self):
                                                                  'forward_registration_rigid',
                                                                  'inverse_registration_rigid']))
     
-    self.addLink('grey_native', 't1mri')
-    self.addLink('grey_normalized_output', 't1mri')
-    self.addLink('grey_mod_norm_output', 't1mri')
-    self.addLink('white_native', 't1mri')
-    self.addLink('white_normalized_output', 't1mri')
-    self.addLink('white_mod_norm_output', 't1mri')
-    self.addLink('csf_native', 't1mri')
-    self.addLink('csf_normalized_output', 't1mri')
-    self.addLink('csf_mod_norm_output', 't1mri')
-    self.addLink('skull_native', 't1mri')
-    self.addLink('skull_normalized_output', 't1mri')
-    self.addLink('skull_mod_norm_output', 't1mri')
-    self.addLink('scalp_native', 't1mri')
-    self.addLink('scalp_normalized_output', 't1mri')
-    self.addLink('scalp_mod_norm_output', 't1mri')
-    self.addLink('background_native', 't1mri')
-    self.addLink('background_normalized_output', 't1mri')
-    self.addLink('background_mod_norm_output', 't1mri')
+    for tissues in ['grey', 'white', 'csf', 'skull', 'scalp', 'background']:
+        self.addLink('%s_native' % tissues, 't1mri')
+        self.addLink('%s_normalized_output' % tissues, 't1mri')
+        self.addLink('%s_mod_norm_output' % tissues, 't1mri')
+        self.addLink('%s_dartel_rigid_output' % tissues, 't1mri')
+        self.addLink('%s_dartel_affine_output' % tissues, 't1mri')
+    
     self.addLink('forward_field', 't1mri')
     self.addLink('inverse_field', 't1mri')
     self.addLink('forward_registration_affine', 't1mri')
@@ -650,6 +754,25 @@ def update_modulation_output_signature(self, proc, output):
                 setattr(self, output, self.signature[output].findValue(self.t1mri.hierarchyAttributes()))
         self.changeSignature(signature)
             
+
+def update_dartel_export_signature(self, proc, output_rigid, output_affine):
+    if isinstance(output_rigid, list) and isinstance(output_affine, list):
+        for rigid, affine in zip(output_rigid, output_affine):
+            self.update_dartel_export_signature(proc, rigid, affine)
+    else:
+        if proc == 'no':
+            self.setDisable(output_rigid, output_affine)
+        elif proc == 'rigid':
+            self.setEnable(output_rigid)
+            self.setDisable(output_affine)
+        elif proc == 'affine':
+            self.setEnable(output_affine)
+            self.setDisable(output_rigid)
+        else:
+            self.setEnable(output_rigid, output_affine)
+            
+        self.changeSignature(signature)
+    
 
 def update_deformation_field_signature(self, proc):
     if 'Forward' in proc:
