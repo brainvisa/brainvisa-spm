@@ -37,7 +37,6 @@ from soma.spm.spm_launcher import SPM12, SPM12Standalone
 import gzip
 import os
 import shutil
-import pudb
 
 
 configuration = Application().configuration
@@ -578,17 +577,6 @@ def initialization(self):
     self.addLink('inverse_registration_rigid', 't1mri')
 
 
-def _test(self, proc):
-    attr = self.t1mri.hierarchyAttributes()
-    with open('/tmp/log.log', 'w') as log_file:
-        print(self.signature['inverse_field'].requiredAttributes)
-        d = self.signature['inverse_field'].findValue(attr,
-                                                      _debug=log_file)
-        self.signature['inverse_registration_rigid'].findValue(attr,
-                                                               _debug=log_file)
-        print('DDD', d)
-
-
 def update_batch_path(self, proc):
     if self.t1mri is not None:
         directory_path = os.path.dirname(self.t1mri.fullPath())
@@ -651,7 +639,6 @@ def update_modulation_output_signature(self, proc, output):
         if proc == 'no':
             self.setDisable(output)
         else:
-            # pudb.set_trace()
             self.setEnable(output)
             if proc == 'affine_non_linear':
                 self.signature[output].requiredAttributes['modulation'] = 'affine and non-linear'
