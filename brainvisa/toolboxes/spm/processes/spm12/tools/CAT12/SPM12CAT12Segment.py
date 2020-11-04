@@ -499,6 +499,12 @@ signature = Signature(
                                        section=bias_output),
     
     "jacobian_determinant", Boolean(section=other_output),
+    "jacobian_determinant_output", WriteDiskItem('Jacobian determinant',
+                                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                                 requiredAttributes={'space': 't1mri',
+                                                                     'processing': 'cat12Segment',
+                                                                     'analysis': 'default'},
+                                                 section=other_output),
     'deformation_field_type', Choice("Neither", 'Inverse', 'Forward', 'Inverse + Forward',
                                      section=other_output),
     "forward_field", WriteDiskItem('SPM deformation field',
@@ -659,6 +665,7 @@ def initialization(self):
                  lambda x: self.update_dartel_export_signature(x,
                                                                ['skull_dartel_rigid_output', 'scalp_dartel_rigid_output', 'background_dartel_rigid_output'],
                                                                ['skull_dartel_affine_output', 'scalp_dartel_affine_output', 'background_dartel_affine_output']))
+    self.addLink(None, 'jacobian_determinant', lambda x: self.update_bool_output_signature(x, 'jacobian_determinant_output'))
     self.addLink(None, 'deformation_field_type', self.update_deformation_field_signature)
     self.addLink(None, 'registration_matrix',
                  lambda x: self.update_bool_output_signature(x, ['forward_registration_affine',
@@ -673,6 +680,7 @@ def initialization(self):
         self.addLink('%s_dartel_rigid_output' % tissues, 't1mri')
         self.addLink('%s_dartel_affine_output' % tissues, 't1mri')
     
+    self.addLink('jacobian_determinant_output', 't1mri')
     self.addLink('forward_field', 't1mri')
     self.addLink('inverse_field', 't1mri')
     self.addLink('forward_registration_affine', 't1mri')
