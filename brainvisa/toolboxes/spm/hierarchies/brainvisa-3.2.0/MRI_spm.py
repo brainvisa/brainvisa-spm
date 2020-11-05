@@ -445,7 +445,7 @@ analysis_directory = (
   #               'spm_hierarchy', 'yes'),
 )
 
-insert('{center}/{subject}/spm/cat12Segment', '{acquisition}',SetContent(*cat12_analysis_directory),
+insert('{center}/{subject}/spm/cat12Segment', '{acquisition}', SetContent(*cat12_analysis_directory),
        SetWeakAttr('processing', 'cat12Segment'))
 insert('{center}/{subject}/spm/spm12Segment', '{acquisition}', SetContent(*analysis_directory),
        SetWeakAttr('processing', 'spm12Segment'))
