@@ -418,6 +418,19 @@ cat12_analysis_directory = (
     SetWeakAttr('template', 'TPM')
 )
 
+shoot_analysis_directory = (
+  '{analysis}', SetContent(
+    # 'v_<subject>_<acquisition>_{space}_Template',
+    # SetType(),
+    
+    'y_<subject>_<acquisition>_{space}_Template',  # FIXME keep rp<subject> ? But specific to diamond or is it generic ?
+    SetType('SPM deformation field'),
+    
+    'j_<subject>_<acquisition>_{space}_Template',
+    SetType('Jacobian determinant'),
+  )
+)
+
 #{center}/{subject}/{processing}/{acquisition}
 analysis_directory = (
   '{analysis}_LDW_from_t1mri_to_{template}', SetContent(*(LDW_directory +
@@ -432,7 +445,7 @@ analysis_directory = (
   #               'spm_hierarchy', 'yes'),
 )
 
-insert('{center}/{subject}/spm/cat12Segment', '{acquisition}', SetContent(*cat12_analysis_directory),
+insert('{center}/{subject}/spm/cat12Segment', '{acquisition}',SetContent(*cat12_analysis_directory),
        SetWeakAttr('processing', 'cat12Segment'))
 insert('{center}/{subject}/spm/spm12Segment', '{acquisition}', SetContent(*analysis_directory),
        SetWeakAttr('processing', 'spm12Segment'))
@@ -440,6 +453,8 @@ insert('{center}/{subject}/spm/spm8VBMSegmentation', '{acquisition}', SetContent
        SetWeakAttr('processing', 'spm8VBMSegmentation'))
 insert('{center}/{subject}/spm/spm8NewSegment', '{acquisition}', SetContent(*analysis_directory),
        SetWeakAttr('processing', 'spm8NewSegment'))
+insert('{center}/{subject}/spm/spm12Shoot', '{acquisition}', SetContent(*shoot_analysis_directory),
+       SetWeakAttr('processing', 'spm12Shoot'))
 
 insert('{center}/{subject}/nuclear_imaging/{processing}', '{acquisition}', 
        SetContent('t1mri',
