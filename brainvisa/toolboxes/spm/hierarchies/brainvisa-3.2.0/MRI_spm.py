@@ -340,19 +340,19 @@ def cat_tissue_outputs(tissue_prefix, tissue_class):
     'wp%s<subject>' % tissue_prefix,
     SetType('T1 MRI tissue probability map'),
     SetWeakAttr('tissue_class', tissue_class,
-                'warping_method', 'low-dimensional',
+                'warping_method', 'high-dimensional',
                 'modulation', 'none',
                 'transformation', 'none'),
     'mwp%s<subject>' % tissue_prefix,
     SetType('T1 MRI tissue probability map'),
     SetWeakAttr('tissue_class', tissue_class,
-                'warping_method', 'low-dimensional',
+                'warping_method', 'high-dimensional',
                 'modulation', 'affine and non-linear',
                 'transformation', 'none'),
     'm0wp%s<subject>' % tissue_prefix,
     SetType('T1 MRI tissue probability map'),
     SetWeakAttr('tissue_class', tissue_class,
-                'warping_method', 'low-dimensional',
+                'warping_method', 'high-dimensional',
                 'modulation', 'non-linear only',
                 'transformation', 'none'),
     
@@ -406,16 +406,15 @@ CAT12_directory = (
     'wm<subject>',
     SetType('T1 MRI Bias corrected'),
     SetWeakAttr('transformation', 'none',
-                'warping_method', 'low-dimensional',
+                'warping_method', 'high-dimensional',
                 'space', 't1mri'),
   ),
   # SetWeakAttr('processing', 'cat12Segment'),
 )
 cat12_analysis_directory = (
-  '{analysis}_from_t1mri_to_TPM',
+  '{analysis}',
     SetContent(*CAT12_directory),
     # SetDefaultAttributeValue('analysis', 'default'),
-    SetWeakAttr('template', 'TPM')
 )
 
 shoot_analysis_directory = (
