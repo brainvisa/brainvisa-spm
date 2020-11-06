@@ -38,9 +38,9 @@ import shutil
 from distutils.dir_util import copy_tree
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.tools.shoot_tools import RunShoot
-import pudb
 
 configuration = Application().configuration
+
 
 def validation():
     try:
@@ -53,12 +53,12 @@ def validation():
                     configuration.matlab.options)
     return spm
 
+
 userLevel = 1
 name = 'SPM12 - Run Shoot - generic'
 
-signature = Signature(
-    "nb_images", Integer(),
-    "images_1", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
+SIGNATURE_BEGIN = ["nb_images", Integer()]
+SIGNATURE_END = [
     "templates", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     
     "custom_outputs", Boolean(),
@@ -68,6 +68,12 @@ signature = Signature(
     "deformation_outputs", ListOf(WriteDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     
     "batch_location", WriteDiskItem('Matlab SPM script', 'Matlab script'),
+]
+
+signature = Signature(
+    *SIGNATURE_BEGIN,
+    "images_1", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
+    *SIGNATURE_END,
 )
 
 
@@ -76,36 +82,33 @@ def initialization(self):
     self.addLink('batch_location', 'images_1', self.update_batch_path)
     self.addLink(None, 'nb_images', self.update_nb_images)
     self.addLink(None, 'custom_outputs', self.update_outputs_choice)
+    self.custom_outputs = False
 
 
 def update_batch_path(self, proc):
+    """
+    Place batch file next to the first image of image_1 param
+    """
     if self.images_1:
         directory_path = os.path.dirname(self.images_1[0].fullPath())
         return os.path.join(directory_path, 'spm12_shoot_job.m')
 
 
 def update_nb_images(self, proc):
-    new_signature = ["nb_images", Integer()]
+    new_signature = [*SIGNATURE_BEGIN]
     for i in range(proc):
         new_signature += ["images_%d" % (i + 1),
                           ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image']))]
-    new_signature += ["templates", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
-                      "custom_outputs", Boolean(),
-                      "jacobian_outputs", ListOf(WriteDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
-                      "velocity_outputs", ListOf(WriteDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
-                      "deformation_outputs", ListOf(WriteDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
-                      "batch_location", WriteDiskItem('Matlab SPM script', 'Matlab script')]
+    new_signature += SIGNATURE_END
     signature = Signature(*new_signature)
     self.changeSignature(signature)
 
 
 def update_outputs_choice(self, proc):
-    print('PROC', proc)
     if proc:
         self.setEnable('jacobian_outputs', 'velocity_outputs', 'deformation_outputs')
     else:
         self.setDisable('jacobian_outputs', 'velocity_outputs', 'deformation_outputs')
-    #pudb.set_trace()
     self.changeSignature(self.signature)
 
 
@@ -119,15 +122,12 @@ def execution(self, context):
     run_shoot.templates_path_list = [template.fullPath() for template in self.templates]
     
     if self.custom_outputs:
-        j = []
         run_shoot.jacobian_output_path_list = [j.fullPath() for j in self.jacobian_outputs]
         run_shoot.velocity_output_path_list = [v.fullPath() for v in self.velocity_outputs]
         run_shoot.deformation_output_path_list = [d.fullPath() for d in self.deformation_outputs]
-    context.write('<br>'.join(run_shoot.getStringListForBatch()))
     
     spm = validation()
     spm.addModuleToExecutionQueue(run_shoot)
     spm.setSPMScriptPath(self.batch_location.fullPath())
     output = spm.run()
     context.log(name, html=output)
-    
