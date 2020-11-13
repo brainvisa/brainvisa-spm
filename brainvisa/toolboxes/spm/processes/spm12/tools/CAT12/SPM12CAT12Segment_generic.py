@@ -110,10 +110,10 @@ signature = Signature(
                               section=seg_options_section),
     "clean_up", Choice('none', 'light', 'medium', 'strong', 'heavy',
                        section=seg_options_section),
-    "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
-                                             ("set WMH temporary as WM", "temporary"),
-                                             #  ("set WMH as WM", "save"),
-                                             section=seg_options_section),
+    # "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
+    #                                          ("set WMH temporary as WM", "temporary"),
+    #                                          #  ("set WMH as WM", "save"),
+    #                                          section=seg_options_section),
     # "stroke_lesion_correction", Choice(),
     "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
                                  ('Native resolution', 'native'),
@@ -258,7 +258,7 @@ def initialization(self):
     self.local_adaptative_segmentation = 'medium'
     self.skull_stripping = 'aprg'
     self.clean_up = 'medium'
-    self.wm_hyperintensities_correction = 'temporary'
+    # self.wm_hyperintensities_correction = 'temporary'
     self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
     self.optimal_resolution = 'optimal'
     self.optimal_resolution_value = [1, 0.1]

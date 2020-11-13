@@ -37,6 +37,8 @@ from soma.spm.spm_launcher import SPM12, SPM12Standalone
 import gzip
 import os
 import shutil
+import glob
+from distutils.dir_util import copy_tree
 
 
 configuration = Application().configuration
@@ -109,10 +111,10 @@ signature = Signature(
                               section=seg_options_section),
     "clean_up", Choice('none', 'light', 'medium', 'strong', 'heavy',
                        section=seg_options_section),
-    "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
-                                             ("set WMH temporary as WM", "temporary"),
-                                             #  ("set WMH as WM", "save"),
-                                             section=seg_options_section),
+    # "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
+    #                                          ("set WMH temporary as WM", "temporary"),
+    #                                          #  ("set WMH as WM", "save"),
+    #                                          section=seg_options_section),
     # "stroke_lesion_correction", Choice(),
     "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
                                  ('Native resolution', 'native'),
@@ -162,7 +164,7 @@ signature = Signature(
     
     "grey_native_space", Boolean(section=grey_output),
     "grey_native", WriteDiskItem('T1 MRI tissue probability map',
-                                 ["NIFTI-1 image"],
+                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                  requiredAttributes={'tissue_class': 'grey',
                                                      'transformation': 'none',
                                                      'modulation': 'none',
@@ -172,7 +174,7 @@ signature = Signature(
                                  section=grey_output),
     "grey_normalized", Boolean(section=grey_output),
     "grey_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                            ["NIFTI-1 image"],
+                                            ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                             requiredAttributes={'tissue_class': 'grey',
                                                                 'transformation': 'none',
                                                                 'modulation': 'none',
@@ -185,7 +187,7 @@ signature = Signature(
                                         ("non-linear only", 'non_linear'),
                                         section=grey_output),
     "grey_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                          ["NIFTI-1 image"],
+                                          ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                           requiredAttributes={'tissue_class': 'grey',
                                                               'transformation': 'none',
                                                               'modulation': 'affine and non-linear',
@@ -196,7 +198,7 @@ signature = Signature(
     "grey_dartel_export", Choice("no", "rigid", "affine", "both",
                                  section=grey_output),
     "grey_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                              ["NIFTI-1 image"],
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                               requiredAttributes={'tissue_class': 'grey',
                                                                   'transformation': 'rigid',
                                                                   'modulation': 'none',
@@ -205,7 +207,7 @@ signature = Signature(
                                                                   'analysis': 'default'},
                                               section=grey_output),
     "grey_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                               ["NIFTI-1 image"],
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                requiredAttributes={'tissue_class': 'grey',
                                                                    'transformation': 'affine',
                                                                    'modulation': 'none',
@@ -216,7 +218,7 @@ signature = Signature(
     
     "white_native_space", Boolean(section=white_output),
     "white_native", WriteDiskItem('T1 MRI tissue probability map',
-                                  ["NIFTI-1 image"],
+                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                   requiredAttributes={'tissue_class': 'white',
                                                       'transformation': 'none',
                                                       'modulation': 'none',
@@ -226,7 +228,7 @@ signature = Signature(
                                   section=white_output),
     "white_normalized", Boolean(section=white_output),
     "white_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                             ["NIFTI-1 image"],
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                              requiredAttributes={'tissue_class': 'white',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
@@ -239,7 +241,7 @@ signature = Signature(
                                          ("non-linear only", 'non_linear'),
                                          section=white_output),
     "white_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                           ["NIFTI-1 image"],
+                                           ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                            requiredAttributes={'tissue_class': 'white',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
@@ -250,7 +252,7 @@ signature = Signature(
     "white_dartel_export", Choice("no", "rigid", "affine", "both",
                                   section=white_output),
     "white_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                               ["NIFTI-1 image"],
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                requiredAttributes={'tissue_class': 'white',
                                                                    'transformation': 'rigid',
                                                                    'modulation': 'none',
@@ -259,7 +261,7 @@ signature = Signature(
                                                                    'analysis': 'default'},
                                                section=white_output),
     "white_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                ["NIFTI-1 image"],
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                 requiredAttributes={'tissue_class': 'white',
                                                                     'transformation': 'affine',
                                                                     'modulation': 'none',
@@ -270,7 +272,7 @@ signature = Signature(
     
     "csf_native_space", Boolean(section=csf_output),
     "csf_native", WriteDiskItem('T1 MRI tissue probability map',
-                                ["NIFTI-1 image"],
+                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                 requiredAttributes={'tissue_class': 'csf',
                                                     'transformation': 'none',
                                                     'modulation': 'none',
@@ -280,7 +282,7 @@ signature = Signature(
                                   section=csf_output),
     "csf_normalized", Boolean(section=csf_output),
     "csf_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                           ["NIFTI-1 image"],
+                                           ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                            requiredAttributes={'tissue_class': 'csf',
                                                                'transformation': 'none',
                                                                'modulation': 'none',
@@ -293,7 +295,7 @@ signature = Signature(
                                        ("non-linear only", 'non_linear'),
                                        section=csf_output),
     "csf_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                         ["NIFTI-1 image"],
+                                         ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                          requiredAttributes={'tissue_class': 'csf',
                                                              'transformation': 'none',
                                                              'modulation': 'affine and non-linear',
@@ -304,7 +306,7 @@ signature = Signature(
     "csf_dartel_export", Choice("no", "rigid", "affine", "both",
                                 section=csf_output),
     "csf_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                             ["NIFTI-1 image"],
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                              requiredAttributes={'tissue_class': 'csf',
                                                                  'transformation': 'rigid',
                                                                  'modulation': 'none',
@@ -313,7 +315,7 @@ signature = Signature(
                                                                  'analysis': 'default'},
                                              section=csf_output),
     "csf_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                              ["NIFTI-1 image"],
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                               requiredAttributes={'tissue_class': 'csf',
                                                                   'transformation': 'affine',
                                                                   'modulation': 'none',
@@ -338,7 +340,7 @@ signature = Signature(
     
     "other_tissue_proba_map_native_space", Boolean(section=other_tissue_output),
     "skull_native", WriteDiskItem('T1 MRI tissue probability map',
-                                  ["NIFTI-1 image"],
+                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                   requiredAttributes={'tissue_class': 'skull',
                                                       'transformation': 'none',
                                                       'modulation': 'none',
@@ -347,7 +349,7 @@ signature = Signature(
                                                       'analysis': 'default'},
                                   section=other_tissue_output),
     "scalp_native", WriteDiskItem('T1 MRI tissue probability map',
-                                  ["NIFTI-1 image"],
+                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                   requiredAttributes={'tissue_class': 'scalp',
                                                       'transformation': 'none',
                                                       'modulation': 'none',
@@ -356,7 +358,7 @@ signature = Signature(
                                                       'analysis': 'default'},
                                   section=other_tissue_output),
     "background_native", WriteDiskItem('T1 MRI tissue probability map',
-                                       ["NIFTI-1 image"],
+                                       ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                        requiredAttributes={'tissue_class': 'none',
                                                            'transformation': 'none',
                                                            'modulation': 'none',
@@ -366,7 +368,7 @@ signature = Signature(
                                        section=other_tissue_output),
     "other_tissue_proba_map_normalized", Boolean(section=other_tissue_output),
     "skull_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                             ["NIFTI-1 image"],
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                              requiredAttributes={'tissue_class': 'skull',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
@@ -375,7 +377,7 @@ signature = Signature(
                                                                  'analysis': 'default'},
                                              section=other_tissue_output),
     "scalp_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                             ["NIFTI-1 image"],
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                              requiredAttributes={'tissue_class': 'scalp',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
@@ -384,7 +386,7 @@ signature = Signature(
                                                                  'analysis': 'default'},
                                              section=other_tissue_output),
     "background_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                  ["NIFTI-1 image"],
+                                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                   requiredAttributes={'tissue_class': 'none',
                                                                       'transformation': 'none',
                                                                       'modulation': 'none',
@@ -397,7 +399,7 @@ signature = Signature(
                                                           ("non-linear only", 'non_linear'),
                                                           section=other_tissue_output),
     "skull_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                           ["NIFTI-1 image"],
+                                           ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                            requiredAttributes={'tissue_class': 'skull',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
@@ -406,7 +408,7 @@ signature = Signature(
                                                                'analysis': 'default'},
                                            section=other_tissue_output),
     "scalp_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                           ["NIFTI-1 image"],
+                                           ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                            requiredAttributes={'tissue_class': 'scalp',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
@@ -415,7 +417,7 @@ signature = Signature(
                                                                'analysis': 'default'},
                                            section=other_tissue_output),
     "background_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                ["NIFTI-1 image"],
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                 requiredAttributes={'tissue_class': 'none',
                                                                     'transformation': 'none',
                                                                     'modulation': 'affine and non-linear',
@@ -426,7 +428,7 @@ signature = Signature(
     "other_tissue_proba_map_dartel_export", Choice("no", "rigid", "affine", "both",
                                                    section=other_tissue_output),
     "skull_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                               ["NIFTI-1 image"],
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                requiredAttributes={'tissue_class': 'skull',
                                                                    'transformation': 'rigid',
                                                                    'modulation': 'none',
@@ -435,7 +437,7 @@ signature = Signature(
                                                                    'analysis': 'default'},
                                                section=other_tissue_output),
     "skull_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                ["NIFTI-1 image"],
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                 requiredAttributes={'tissue_class': 'skull',
                                                                     'transformation': 'affine',
                                                                     'modulation': 'none',
@@ -444,7 +446,7 @@ signature = Signature(
                                                                     'analysis': 'default'},
                                                 section=other_tissue_output),
     "scalp_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                               ["NIFTI-1 image"],
+                                               ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                requiredAttributes={'tissue_class': 'scalp',
                                                                    'transformation': 'rigid',
                                                                    'modulation': 'none',
@@ -453,7 +455,7 @@ signature = Signature(
                                                                    'analysis': 'default'},
                                                section=other_tissue_output),
     "scalp_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                ["NIFTI-1 image"],
+                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                 requiredAttributes={'tissue_class': 'scalp',
                                                                     'transformation': 'affine',
                                                                     'modulation': 'none',
@@ -462,7 +464,7 @@ signature = Signature(
                                                                     'analysis': 'default'},
                                                 section=other_tissue_output),
     "background_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                    ["NIFTI-1 image"],
+                                                    ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                     requiredAttributes={'tissue_class': 'none',
                                                                         'transformation': 'rigid',
                                                                         'modulation': 'none',
@@ -471,7 +473,7 @@ signature = Signature(
                                                                         'analysis': 'default'},
                                                     section=other_tissue_output),
     "background_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
-                                                     ["NIFTI-1 image"],
+                                                     ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                      requiredAttributes={'tissue_class': 'none',
                                                                          'transformation': 'affine',
                                                                          'modulation': 'none',
@@ -500,7 +502,7 @@ signature = Signature(
     
     "jacobian_determinant", Boolean(section=other_output),
     "jacobian_determinant_output", WriteDiskItem('Jacobian determinant',
-                                                 ["NIFTI-1 image"],
+                                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                  requiredAttributes={'space': 't1mri',
                                                                      'processing': 'cat12Segment',
                                                                      'analysis': 'default'},
@@ -508,14 +510,14 @@ signature = Signature(
     'deformation_field_type', Choice("Neither", 'Inverse', 'Forward', 'Inverse + Forward',
                                      section=other_output),
     "forward_field", WriteDiskItem('SPM deformation field',
-                                   ["NIFTI-1 image"],
+                                   ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                    requiredAttributes={'direction': 'forward',
                                                        'warping_method': 'none',
                                                        'processing': 'cat12Segment',
                                                        'analysis': 'default'},
                                    section=other_output),
     "inverse_field", WriteDiskItem('SPM deformation field',
-                                   ["NIFTI-1 image"],
+                                   ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                    requiredAttributes={'direction': 'inverse',
                                                        'warping_method': 'none',
                                                        'processing': 'cat12Segment',
@@ -573,12 +575,13 @@ def initialization(self):
     self.local_adaptative_segmentation = 'medium'
     self.skull_stripping = 'aprg'
     self.clean_up = 'medium'
-    self.wm_hyperintensities_correction = 'temporary'
+    # self.wm_hyperintensities_correction = 'temporary'
     self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
     self.optimal_resolution = 'optimal'
     self.optimal_resolution_value = [1, 0.1]
     self.addLink(None, 'spatial_registration_method', self.update_registration_method)
     self.spatial_registration_method = 'shooting'
+    self.spatial_registration_template = self.signature['spatial_registration_template'].findValue({})
     self.shooting_method = 'opt_standard'
     self.voxel_size = 1.5
     
@@ -797,22 +800,23 @@ def update_deformation_field_signature(self, proc):
     
 def execution(self, context):
     t1mri_path = self.t1mri.fullPath()
-    delete_t1 = False
+    tmp_dir = context.temporary('Directory').fullPath()
+    t1mri_subject = self.t1mri.hierarchyAttributes()['subject']
+    
+    t1mri_temp = os.path.join(tmp_dir, '%s.nii' % t1mri_subject)
     if t1mri_path.endswith('.gz'):
-        t1mri_unzip_path = t1mri_path[:-3]
-        if os.path.exists(t1mri_unzip_path):
-            t1mri_unzip_path = t1mri_unzip_path.replace('.nii', '_unziped.nii')
         with gzip.open(t1mri_path, 'rb') as t1mri:
-            with open(t1mri_unzip_path, 'wb') as t1mri_unzip:
+            with open(t1mri_temp, 'wb') as t1mri_unzip:
                 shutil.copyfileobj(t1mri, t1mri_unzip)
-        delete_t1 = True
-        t1mri_path = t1mri_unzip_path
+    else:
+        shutil.copyfile(t1mri_path, t1mri_temp)
+        
     
     output_path = os.path.dirname(os.path.dirname(self.grey_native.fullPath()))
     print('OUTPUT', output_path)
     
     context.runProcess('SPM12CAT12Segment_generic',
-                       t1mri=t1mri_path,
+                       t1mri=t1mri_temp,
                        template=self.template,
                        affine_regularisation=self.affine_regularisation,
                        inhomogeneity_correction=self.inhomogeneity_correction,
@@ -822,7 +826,7 @@ def execution(self, context):
                        local_adaptative_segmentation=self.local_adaptative_segmentation,
                        skull_stripping=self.skull_stripping,
                        clean_up=self.clean_up,
-                       wm_hyperintensities_correction=self.wm_hyperintensities_correction,
+                    #    wm_hyperintensities_correction=self.wm_hyperintensities_correction,
                        optimal_resolution=self.optimal_resolution,
                        optimal_resolution_value=self.optimal_resolution_value,
                        spatial_registration_method=self.spatial_registration_method,
@@ -871,5 +875,12 @@ def execution(self, context):
                        output_directory=output_path,
                        batch_location=self.batch_location)
 
-    if delete_t1:
-        os.remove(t1mri_path)
+    shutil.rmtree(tmp_dir)
+    
+    # Check to gzip nifti in output_path
+    if self.t1mri.fullPath().endswith('.gz'):
+        for nifti_path in glob.glob(os.path.join(output_path, '*', '*.nii')):
+            with open(nifti_path, 'rb') as nifti_file:
+                with gzip.open(nifti_path + '.gz', 'wb') as gzip_file:
+                    shutil.copyfileobj(nifti_file, gzip_file)
+            os.remove(nifti_path)
