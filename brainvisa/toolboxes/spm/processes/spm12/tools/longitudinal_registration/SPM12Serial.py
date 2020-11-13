@@ -163,7 +163,9 @@ def update_outputs(self, proc):
         del attr['acquisition']
         attr['analysis'] = attr['modality'] + '_default_analysis'
         attr['acquisition_sequence'] = '_'.join(acquisitions)
+        attr['space'] = 'average'
         self.MPA = self.signature['MPA'].findValue(attr)
+        del attr['modality']
         for param in outputs_params[1:]:
             param_list = []
             for vol in self.volumes:
