@@ -371,49 +371,50 @@ def cat_tissue_outputs(tissue_prefix, tissue_class):
   )
 
 CAT12_directory = (
-  'mri', SetContent(
-    *cat_tissue_outputs('1', 'grey'),
-    *cat_tissue_outputs('2', 'white'),
-    *cat_tissue_outputs('3', 'csf'),
-    *cat_tissue_outputs('4', 'skull'),
-    *cat_tissue_outputs('5', 'scalp'),
-    *cat_tissue_outputs('6', 'none'),
+  cat_tissue_outputs('1', 'grey') +
+  cat_tissue_outputs('2', 'white') +
+  cat_tissue_outputs('3', 'csf') +
+  cat_tissue_outputs('4', 'skull') +
+  cat_tissue_outputs('5', 'scalp') +
+  cat_tissue_outputs('6', 'none') +
+  
+  ('y_<subject>',
+    SetType('SPM deformation field'),
+    SetWeakAttr('direction', 'forward',
+                'warping_method', 'none'),
+  'iy_<subject>',
+    SetType('SPM deformation field'),
+    SetWeakAttr('direction', 'inverse',
+                'warping_method', 'none'),
+  't_<subject>_{transformation}_reorient',
+    SetType('SPM transformation'),
+    SetWeakAttr('direction', 'forward'),
+  'it_<subject>_{transformation}_reorient',
+    SetType('SPM transformation'),
+    SetWeakAttr('direction', 'inverse'),
     
-    'y_<subject>',
-      SetType('SPM deformation field'),
-      SetWeakAttr('direction', 'forward',
-                  'warping_method', 'none'),
-    'iy_<subject>',
-      SetType('SPM deformation field'),
-      SetWeakAttr('direction', 'inverse',
-                  'warping_method', 'none'),
-    't_<subject>_{transformation}_reorient',
-      SetType('SPM transformation'),
-      SetWeakAttr('direction', 'forward'),
-    'it_<subject>_{transformation}_reorient',
-      SetType('SPM transformation'),
-      SetWeakAttr('direction', 'inverse'),
-      
-    'wj_<subject>',
-    SetType('Jacobian determinant'),
-    SetWeakAttr('space', 't1mri'),
-    
-    'm<subject>',
-    SetType('T1 MRI Bias corrected'),
-    SetWeakAttr('transformation', 'none',
-                'warping_method', 'none',
-                'space', 't1mri'),
-    'wm<subject>',
-    SetType('T1 MRI Bias corrected'),
-    SetWeakAttr('transformation', 'none',
-                'warping_method', 'high-dimensional',
-                'space', 't1mri'),
-  ),
+  'wj_<subject>',
+  SetType('Jacobian determinant'),
+  SetWeakAttr('space', 't1mri'),
+  
+  'm<subject>',
+  SetType('T1 MRI Bias corrected'),
+  SetWeakAttr('transformation', 'none',
+              'warping_method', 'none',
+              'space', 't1mri'),
+  'wm<subject>',
+  SetType('T1 MRI Bias corrected'),
+  SetWeakAttr('transformation', 'none',
+              'warping_method', 'high-dimensional',
+              'space', 't1mri'),
   # SetWeakAttr('processing', 'cat12Segment'),
+  )
 )
 cat12_analysis_directory = (
   '{analysis}',
-    SetContent(*CAT12_directory),
+  SetContent(
+    'mri', SetContent(*CAT12_directory)
+  )
     # SetDefaultAttributeValue('analysis', 'default'),
 )
 

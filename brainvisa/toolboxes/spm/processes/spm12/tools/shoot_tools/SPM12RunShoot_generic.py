@@ -70,11 +70,8 @@ SIGNATURE_END = [
     "batch_location", WriteDiskItem('Matlab SPM script', 'Matlab script'),
 ]
 
-signature = Signature(
-    *SIGNATURE_BEGIN,
-    "images_1", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
-    *SIGNATURE_END,
-)
+signature_params = SIGNATURE_BEGIN + ["images_1", ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image']))] + SIGNATURE_END
+signature = Signature(*signature_params)
 
 
 def initialization(self):
