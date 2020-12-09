@@ -92,7 +92,7 @@ def update_batch_path(self, proc):
 
 
 def update_nb_images(self, proc):
-    new_signature = [*SIGNATURE_BEGIN]
+    new_signature = list(SIGNATURE_BEGIN)
     for i in range(proc):
         new_signature += ["images_%d" % (i + 1),
                           ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image']))]
