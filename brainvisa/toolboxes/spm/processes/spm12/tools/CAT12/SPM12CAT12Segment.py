@@ -178,7 +178,7 @@ signature = Signature(
                                             requiredAttributes={'tissue_class': 'grey',
                                                                 'transformation': 'none',
                                                                 'modulation': 'none',
-                                                                'warping_method': 'low-dimensional',
+                                                                'warping_method': 'high-dimensional',
                                                                 'processing': 'cat12Segment',
                                                                 'analysis': 'default'},
                                             section=grey_output),
@@ -191,7 +191,7 @@ signature = Signature(
                                           requiredAttributes={'tissue_class': 'grey',
                                                               'transformation': 'none',
                                                               'modulation': 'affine and non-linear',
-                                                              'warping_method': 'low-dimensional',
+                                                              'warping_method': 'high-dimensional',
                                                               'processing': 'cat12Segment',
                                                               'analysis': 'default'},
                                           section=grey_output),
@@ -232,7 +232,7 @@ signature = Signature(
                                              requiredAttributes={'tissue_class': 'white',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
-                                                                 'warping_method': 'low-dimensional',
+                                                                 'warping_method': 'high-dimensional',
                                                                  'processing': 'cat12Segment',
                                                                  'analysis': 'default'},
                                              section=white_output),
@@ -245,7 +245,7 @@ signature = Signature(
                                            requiredAttributes={'tissue_class': 'white',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
-                                                               'warping_method': 'low-dimensional',
+                                                               'warping_method': 'high-dimensional',
                                                                'processing': 'cat12Segment',
                                                                'analysis': 'default'},
                                            section=white_output),
@@ -286,7 +286,7 @@ signature = Signature(
                                            requiredAttributes={'tissue_class': 'csf',
                                                                'transformation': 'none',
                                                                'modulation': 'none',
-                                                               'warping_method': 'low-dimensional',
+                                                               'warping_method': 'high-dimensional',
                                                                'processing': 'cat12Segment',
                                                                'analysis': 'default'},
                                            section=csf_output),
@@ -299,7 +299,7 @@ signature = Signature(
                                          requiredAttributes={'tissue_class': 'csf',
                                                              'transformation': 'none',
                                                              'modulation': 'affine and non-linear',
-                                                             'warping_method': 'low-dimensional',
+                                                             'warping_method': 'high-dimensional',
                                                              'processing': 'cat12Segment',
                                                              'analysis': 'default'},
                                          section=csf_output),
@@ -372,7 +372,7 @@ signature = Signature(
                                              requiredAttributes={'tissue_class': 'skull',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
-                                                                 'warping_method': 'low-dimensional',
+                                                                 'warping_method': 'high-dimensional',
                                                                  'processing': 'cat12Segment',
                                                                  'analysis': 'default'},
                                              section=other_tissue_output),
@@ -381,7 +381,7 @@ signature = Signature(
                                              requiredAttributes={'tissue_class': 'scalp',
                                                                  'transformation': 'none',
                                                                  'modulation': 'none',
-                                                                 'warping_method': 'low-dimensional',
+                                                                 'warping_method': 'high-dimensional',
                                                                  'processing': 'cat12Segment',
                                                                  'analysis': 'default'},
                                              section=other_tissue_output),
@@ -390,7 +390,7 @@ signature = Signature(
                                                   requiredAttributes={'tissue_class': 'none',
                                                                       'transformation': 'none',
                                                                       'modulation': 'none',
-                                                                      'warping_method': 'low-dimensional',
+                                                                      'warping_method': 'high-dimensional',
                                                                       'processing': 'cat12Segment',
                                                                       'analysis': 'default'},
                                                   section=other_tissue_output),
@@ -403,7 +403,7 @@ signature = Signature(
                                            requiredAttributes={'tissue_class': 'skull',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
-                                                               'warping_method': 'low-dimensional',
+                                                               'warping_method': 'high-dimensional',
                                                                'processing': 'cat12Segment',
                                                                'analysis': 'default'},
                                            section=other_tissue_output),
@@ -412,7 +412,7 @@ signature = Signature(
                                            requiredAttributes={'tissue_class': 'scalp',
                                                                'transformation': 'none',
                                                                'modulation': 'affine and non-linear',
-                                                               'warping_method': 'low-dimensional',
+                                                               'warping_method': 'high-dimensional',
                                                                'processing': 'cat12Segment',
                                                                'analysis': 'default'},
                                            section=other_tissue_output),
@@ -421,7 +421,7 @@ signature = Signature(
                                                 requiredAttributes={'tissue_class': 'none',
                                                                     'transformation': 'none',
                                                                     'modulation': 'affine and non-linear',
-                                                                    'warping_method': 'low-dimensional',
+                                                                    'warping_method': 'high-dimensional',
                                                                     'processing': 'cat12Segment',
                                                                     'analysis': 'default'},
                                                 section=other_tissue_output),
@@ -491,6 +491,12 @@ signature = Signature(
                                        section=pve_labels_output),
     
     "bias_native_space", Boolean(section=bias_output),
+    "bias_native", WriteDiskItem('T1 MRI Bias Corrected', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                 requiredAttributes={'transformation': 'none',
+                                                     'warping_method': 'none',
+                                                     'analysis': 'default',
+                                                     'processing': 'cat12Segment'},
+                                 section=bias_output),
     "bias_normalized", Boolean(section=bias_output),
     "bias_dartel_export", Choice("no", "rigid", "affine", "both",
                                  section=bias_output),
@@ -668,6 +674,7 @@ def initialization(self):
                  lambda x: self.update_dartel_export_signature(x,
                                                                ['skull_dartel_rigid_output', 'scalp_dartel_rigid_output', 'background_dartel_rigid_output'],
                                                                ['skull_dartel_affine_output', 'scalp_dartel_affine_output', 'background_dartel_affine_output']))
+    self.addLink(None, 'bias_native_space', lambda x: self.update_bool_output_signature(x, 'bias_native'))
     self.addLink(None, 'jacobian_determinant', lambda x: self.update_bool_output_signature(x, 'jacobian_determinant_output'))
     self.addLink(None, 'deformation_field_type', self.update_deformation_field_signature)
     self.addLink(None, 'registration_matrix',
@@ -676,21 +683,24 @@ def initialization(self):
                                                                  'forward_registration_rigid',
                                                                  'inverse_registration_rigid']))
     
+    self.addLink('grey_native', 't1mri')
     for tissues in ['grey', 'white', 'csf', 'skull', 'scalp', 'background']:
-        self.addLink('%s_native' % tissues, 't1mri')
-        self.addLink('%s_normalized_output' % tissues, 't1mri')
-        self.addLink('%s_mod_norm_output' % tissues, 't1mri')
-        self.addLink('%s_dartel_rigid_output' % tissues, 't1mri')
-        self.addLink('%s_dartel_affine_output' % tissues, 't1mri')
+        if tissues != 'grey':
+            self.addLink('%s_native' % tissues, 'grey_native')
+        self.addLink('%s_normalized_output' % tissues, 'grey_native')
+        self.addLink('%s_mod_norm_output' % tissues, 'grey_native')
+        self.addLink('%s_dartel_rigid_output' % tissues, 'grey_native')
+        self.addLink('%s_dartel_affine_output' % tissues, 'grey_native')
     
-    self.addLink('jacobian_determinant_output', 't1mri')
-    self.addLink('forward_field', 't1mri')
-    self.addLink('inverse_field', 't1mri')
-    self.addLink('forward_registration_affine', 't1mri')
-    self.addLink('inverse_registration_affine', 't1mri')
-    self.addLink('forward_registration_rigid', 't1mri')
-    self.addLink('inverse_registration_rigid', 't1mri')
-
+    self.addLink('bias_native', 'grey_native')
+    self.addLink('jacobian_determinant_output', 'grey_native')
+    self.addLink('forward_field', 'grey_native')
+    self.addLink('inverse_field', 'grey_native')
+    self.addLink('forward_registration_affine', 'grey_native')
+    self.addLink('inverse_registration_affine', 'grey_native')
+    self.addLink('forward_registration_rigid', 'grey_native')
+    self.addLink('inverse_registration_rigid', 'grey_native')
+        
 
 def update_batch_path(self, proc):
     if self.t1mri is not None:
