@@ -56,3 +56,6 @@ FileType('Covariate table for SPM', 'CSV file')
 
 FileType('PET dynamic SPM realign results', 'Text file')
 FileType('T1 MRI intracranial labels', 'Label volume')
+
+FileType('T1 MRI mid-point average', 'Raw T1 MRI')  # SPM12 Pairwise
+FileType('FLAIR MRI mid-point average', '3D Volume')
