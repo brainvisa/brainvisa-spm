@@ -77,7 +77,8 @@ signature = Signature(
                                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                                requiredAttributes={'processing': 'spm12Serial',
                                                                    'orientation': 'acquisition_to_average',
-                                                                   'direction': 'forward'})),
+                                                                   'direction': 'forward',
+                                                                   'warping_method': 'none'})),
     'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', section='default SPM outputs')
 )
 
@@ -161,6 +162,7 @@ def update_outputs(self, proc):
         attr = self.volumes[0].hierarchyAttributes()
         acquisitions = sorted([a.hierarchyAttributes()['acquisition'] for a in self.volumes])
         del attr['acquisition']
+        del attr['normalized']
         attr['analysis'] = attr['modality'] + '_default_analysis'
         attr['acquisition_sequence'] = '_'.join(acquisitions)
         attr['space'] = 'average'
