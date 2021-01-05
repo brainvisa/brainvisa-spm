@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 from soma.spm.spm_main_module import SPM12MainModule
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, moveSPMPath
-from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
 
 class RunShoot(SPM12MainModule):
