@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma import aims
 import numpy as np
@@ -111,8 +112,11 @@ def initialization(self):
     self.tissues_volumes_file = os.path.join(os.getcwd(), 'tissues_volumes_spm.csv')
     self.mode = 'default'
     self.setOptional('white_warped_unmodulated_proba_map')
+    self.setOptional('white_warped_modulated_proba_map')
     self.setOptional('grey_warped_unmodulated_proba_map')
+    self.setOptional('grey_warped_modulated_proba_map')
     self.setOptional('csf_warped_unmodulated_proba_map')
+    self.setOptional('csf_warped_modulated_proba_map')
     self.setOptional('skull_proba_map')
     self.setOptional('scalp_proba_map')
     self.setOptional('tiv_mask')

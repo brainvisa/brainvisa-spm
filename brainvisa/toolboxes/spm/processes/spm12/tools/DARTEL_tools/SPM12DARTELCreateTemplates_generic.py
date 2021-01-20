@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm12.tools.dartel_tools.run_dartel import RunDartel
 from soma.spm.spm12.tools.dartel_tools.run_dartel.outer_iteration import OuterIteration
@@ -37,6 +38,7 @@ from soma.spm.spm12.tools.dartel_tools.run_dartel.optimisation_settings import O
 from soma.spm.spm12.tools.dartel_tools.run_dartel.settings import Settings
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm_batch_maker_utils import copyNifti
+from six.moves import range
 
 #------------------------------------------------------------------------------
 configuration = Application().configuration

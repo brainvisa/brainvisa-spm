@@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numbers 
 
-class EstimationOptions():
+class EstimationOptions(object):
   """
   Various settings for estimating warps.
   """

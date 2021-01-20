@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_main_module import SPM12MainModule
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numbers
@@ -7,6 +8,7 @@ from soma.spm.spm_batch_maker_utils import convertPathListToSPMBatchString,\
   convertlistToSPMString, convertNumpyArrayToSPMString, moveSPMPath,\
   moveFileAndCreateFoldersIfNeeded
 import os
+from six.moves import zip
 
 class PairwiseLongitudinalRegistration(SPM12MainModule):
   def __init__(self):

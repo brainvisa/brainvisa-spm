@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import moveFileAndCreateFoldersIfNeeded
 
 import os
+from six.moves import zip
 
-class CreateWarped():
+class CreateWarped(object):
   """
   This  allows  spatially normalised images to be generated. Note that voxel sizes and bounding boxes can not be adjusted, and that there
   may  be  strange  effects  due to the boundary conditions used by the warping. Also note that the warped images are not in Talairach or

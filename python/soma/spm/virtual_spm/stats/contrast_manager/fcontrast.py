@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 import numpy
 
-class FContrast():
+class FContrast(object):
   """
   * Linear constraining matrices for an SPM{F}
   The  null  hypothesis  c'B=0  can  be thought of as a (linear) constraint on the full
@@ -35,10 +36,10 @@ class FContrast():
     padding   up   to   the  length  of  each  session  and  the  block  effects  is  done
     automatically.
     """
-    if option in self.possible_options.keys():
+    if option in self.possible_options:
       self.replicate_over_sessions = self.possible_options[option]
     else:
-      raise ValueError('Replicate over sessions possibilities are : ' + str(self.possible_options.keys()))
+      raise ValueError('Replicate over sessions possibilities are : ' + str(list(self.possible_options.keys())))
  
   def getStringListForBatch( self ):
     if self.name is not None:
@@ -53,7 +54,7 @@ class FContrast():
 #==============================================================================
 #
 #==============================================================================
-class FContrastVector():
+class FContrastVector(object):
   @checkIfArgumentTypeIsAllowed(numpy.ndarray, 1)
   def setFContrastVector(self, numpy_array):
     self.contrast_vector= numpy_array
@@ -76,7 +77,7 @@ class FContrastVector():
 #==============================================================================
 #
 #==============================================================================
-class FContrastVectorContainer():
+class FContrastVectorContainer(object):
   @checkIfArgumentTypeIsAllowed(FContrastVector, 1)
   def appendFContrastVector(self, f_contrast_vector):
     self.f_contrast_vector_list.append(f_contrast_vector)

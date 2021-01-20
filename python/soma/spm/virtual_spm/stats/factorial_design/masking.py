@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
+import six
 
-class Masking():
+class Masking(object):
   """
   The mask specifies the voxels within the image volume which are to be assessed.
   SPM  supports  three  methods  of  masking  (1)  Threshold,  (2)  Implicit  and  (3)
@@ -41,7 +43,7 @@ class Masking():
     neighbour  interpolation  of a mask image is used if the voxel centers of the input
     images do not coincide with that of the mask image.
     """
-    if isinstance(explicit_mask_path, str) or isinstance(explicit_mask_path, unicode):
+    if isinstance(explicit_mask_path, six.string_types):
       self.explicit_mask_path = explicit_mask_path
     else:
       raise ValueError('Explicit mask value must be a file path not ' + str(type(explicit_mask_path)))
@@ -80,7 +82,7 @@ class Masking():
       batch_list.append("masking.em = {''};")
     return batch_list
 
-class ThresholdMasking():    
+class ThresholdMasking(object):    
   """
   Images  are  thresholded  at  a  given  value  and  only  voxels at which all images
   exceed the threshold are included.

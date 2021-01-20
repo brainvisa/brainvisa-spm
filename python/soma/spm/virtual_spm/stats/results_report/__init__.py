@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class ResultsReport():
+class ResultsReport(object):
   @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
   def setMatlabFilePath(self, matlab_file_path):
     """

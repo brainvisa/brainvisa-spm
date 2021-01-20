@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import abc
 
-class SPMMainModule():
+class SPMMainModule(object):
   def __init__(self):
     raise NotImplementedError()
 

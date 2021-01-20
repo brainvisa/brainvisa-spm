@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class FactorialDesign():
+class FactorialDesign(object):
   """
   This  interface  is used for setting up analyses of PET data. It is also used for '2nd
   level' or 'random effects' analysis which allow one to make a population inference.
@@ -109,7 +110,7 @@ class FactorialDesign():
 # # One Sample T Test
 #==============================================================================
 #==============================================================================
-class OneSampleTTest():
+class OneSampleTTest(object):
   def setScans(self, scans):
     self.design.setScans(scans)
 #==============================================================================
@@ -117,7 +118,7 @@ class OneSampleTTest():
 # # Two Sample T Test
 #==============================================================================
 #==============================================================================
-class TwoSampleTTest():
+class TwoSampleTTest(object):
   def setGroup1Scans(self, scans):
     self.design.setGroup1Scans(scans)
 
@@ -153,7 +154,7 @@ class TwoSampleTTest():
 # # Paired Sample T Test
 #==============================================================================
 #==============================================================================
-class PairedTTest():
+class PairedTTest(object):
   def addScansPair(self, scans_list):
     self.design.addScansPair(scans_list)
 

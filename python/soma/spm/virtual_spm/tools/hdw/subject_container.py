@@ -1,7 +1,8 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class SubjectContainer():
+class SubjectContainer(object):
   """
   Specify pairs of images to match together.
   """   

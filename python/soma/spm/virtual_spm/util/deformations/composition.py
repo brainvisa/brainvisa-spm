@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import convertlistToSPMString, convertNumpyArrayToSPMString
@@ -6,7 +7,7 @@ from soma.spm.spm_batch_maker_utils import convertlistToSPMString, convertNumpyA
 
 import numpy  
 
-class Composition():
+class Composition(object):
   """
   Deformation  fields  can be thought of as mappings. These can be combined by the operation of
   "composition",  which  is  usually  denoted  by a circle "o". Suppose x:A->B and y:B->C are two
@@ -36,7 +37,7 @@ class Composition():
 #===============================================================================
 # 
 #===============================================================================
-class MatFileImported():
+class MatFileImported(object):
   """
   Spatial  normalisation,  and  the unified segmentation model of SPM5 save a parameterisation of
   deformation  fields.  These consist of a combination of an affine transform, and nonlinear warps
@@ -94,7 +95,7 @@ class MatFileImported():
 #===============================================================================
 # 
 #===============================================================================
-class DartelFlow():
+class DartelFlow(object):
   """
   Imported DARTEL flow field.
   """
@@ -223,7 +224,7 @@ class DartelFlow():
 #===============================================================================
 # 
 #===============================================================================
-class DeformationField():
+class DeformationField(object):
   """
   Deformations  can  be  thought  of  as  vector fields. These can be represented by three-volume
   images.
@@ -255,7 +256,7 @@ class DeformationField():
 #===============================================================================
 # 
 #===============================================================================
-class IdentityFromImage():
+class IdentityFromImage(object):
   """
   This  option  generates  an identity transform, but this can be useful for changing
   the  dimensions  of  the resulting deformation (and any images that are generated
@@ -287,7 +288,7 @@ class IdentityFromImage():
 #===============================================================================
 # 
 #===============================================================================
-class Identity():
+class Identity(object):
   """
   This is a utility for working with deformation fields. They can be loaded, inverted,
   combined etc, and the results either saved to disk, or applied to some image.
@@ -323,7 +324,7 @@ class Identity():
 #===============================================================================
 # 
 #===============================================================================
-class Inverse():
+class Inverse(object):
   """
   Creates  the  inverse  of  a  deformation  field.  Deformations  are  assumed to be
   one-to-one,  in  which  case they have a unique inverse.  If y':A->B is the inverse

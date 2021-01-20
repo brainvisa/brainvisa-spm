@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class TissueContainer():
+class TissueContainer(object):
   """
   The data for each subject are classified into a number of different tissue types.  The tissue
   types  are  defined  according to tissue probability maps, which define the prior probability

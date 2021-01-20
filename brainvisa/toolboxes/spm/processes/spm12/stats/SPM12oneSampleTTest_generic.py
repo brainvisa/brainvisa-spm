@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm import csv_converter
 from soma.spm.spm12.stats.factorial_design import OneSampleTTest
@@ -118,7 +119,7 @@ def updateCovariate(self, proc):
     covariate_dict, row_keys_list = csv_converter.reverse(self.covariate_table.fullPath())
     nuisance_covariate_list = []
     for subject_covariate_dict in covariate_dict.values():
-      nuisance_covariate_list = list(set( nuisance_covariate_list + subject_covariate_dict.keys()))
+      nuisance_covariate_list = list(set( nuisance_covariate_list + list(subject_covariate_dict.keys())))
     nuisance_covariate_list.sort()
     self.signature['nuisance_covariate_list'] = ListOf(Choice(*nuisance_covariate_list))
     self.signature['interest_covariate_list'] = ListOf(Choice(*nuisance_covariate_list))

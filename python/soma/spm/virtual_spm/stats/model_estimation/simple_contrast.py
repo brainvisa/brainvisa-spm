@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class SimpleContrast():
+class SimpleContrast(object):
   """
   'Simple'  contrasts refers to a contrast that spans one-dimension ie. to assess an
    effect that is increasing or decreasing.

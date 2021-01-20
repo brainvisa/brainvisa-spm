@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class GlobalCalculation():
+class GlobalCalculation(object):
   """
   This option is only used for PET data.
   There  are  three  methods  for  estimating global effects (1) Omit (assumming no

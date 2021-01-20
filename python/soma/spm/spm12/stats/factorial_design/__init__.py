@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design import FactorialDesign as FactorialDesign_virtual
 from soma.spm.virtual_spm.stats.factorial_design import OneSampleTTest as OneSampleTTest_virtual
 from soma.spm.virtual_spm.stats.factorial_design import TwoSampleTTest as TwoSampleTTest_virtual

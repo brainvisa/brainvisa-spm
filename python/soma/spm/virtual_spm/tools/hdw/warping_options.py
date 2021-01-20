@@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 import numbers
 
-class WarpingOptions():
+class WarpingOptions(object):
   """
   There are a couple of user-customisable warping options.
   """

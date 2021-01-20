@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design.covariate import Covariate as Covariate_virtual
 
 class Covariate(Covariate_virtual):

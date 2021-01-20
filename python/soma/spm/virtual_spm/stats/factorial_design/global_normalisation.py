@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class GlobalNormalisation():
+class GlobalNormalisation(object):
   """
   This option is only used for PET data.
   Global  nuisance effects are usually accounted for either by scaling the images so
@@ -71,7 +72,7 @@ class GlobalNormalisation():
     return batch_list
 
 
-class OverallGrandMeanScaling():
+class OverallGrandMeanScaling(object):
   def enable(self):
     self.is_activate = True
 

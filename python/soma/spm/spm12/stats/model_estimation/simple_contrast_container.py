@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.model_estimation.simple_contrast_container import SimpleContrastContainer as SimpleContrastContainer_virtual
 from soma.spm.spm12.stats.model_estimation.simple_contrast import SimpleContrast
 

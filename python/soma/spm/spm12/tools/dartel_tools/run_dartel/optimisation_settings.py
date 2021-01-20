@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel.optimisation_settings import OptimisationSettings as OptimisationSettings_virtual
 
 class OptimisationSettings(OptimisationSettings_virtual):

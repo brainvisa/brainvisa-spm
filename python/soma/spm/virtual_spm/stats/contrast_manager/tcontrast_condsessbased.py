@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
 import numbers
-class TContrastCondSessBased():
+class TContrastCondSessBased(object):
   """
   Define  a  contrast in terms of conditions or regressors instead of columns of the
   design   matrix.   This  allows  to  create  contrasts  automatically  even  if  some
@@ -20,7 +21,7 @@ class TContrastCondSessBased():
 #==============================================================================
 #
 #==============================================================================
-class TContrastCondSessBasedWithExtraRegressors():
+class TContrastCondSessBasedWithExtraRegressors(object):
   @checkIfArgumentTypeIsAllowed(list, 1)
   def setVector(self, vector):
     self.vector = vector
@@ -43,7 +44,7 @@ class TContrastCondSessBasedWithExtraRegressors():
 #==============================================================================
 #
 #==============================================================================
-class TContrastCondSessBasedWithConditions():
+class TContrastCondSessBasedWithConditions(object):
   def appendContrastEntry(self, contrast_entry):
     self.contrast_entry_container.appendContrastEntry(contrast_entry)
 
@@ -63,7 +64,7 @@ class TContrastCondSessBasedWithConditions():
     batch_list.extend(addBatchKeyWordInEachItem("tconsess", self.contrast_entry_container.getStringListForBatch()))
     return batch_list
 #==============================================================================
-class ContrastEntry():
+class ContrastEntry(object):
   @checkIfArgumentTypeIsAllowed(numbers.Real, 1)
   def setContrastWeight(self, contrast_weight):
     self.contrast_weight = contrast_weight
@@ -100,7 +101,7 @@ class ContrastEntry():
     else:
       raise ValueError('Unvalid contrast Entry, one or more argument not found')
 #==============================================================================
-class ContrastEntryContainer():
+class ContrastEntryContainer(object):
   @checkIfArgumentTypeIsAllowed(ContrastEntry, 1)
   def appendContrastEntry(self, contrast_entry):
     self.contrast_entry_list.append(contrast_entry)

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, moveSPMPath, convertlistToSPMString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
-class MatterWritingOptions():
+class MatterWritingOptions(object):
   """
   This routine produces spatial normalisation parameters (*_seg8.mat files) by default.
   In  addition,  it  also produces files that can be used for doing inverse normalisation. If you
@@ -258,7 +259,7 @@ class CSFMatterWritingOptions(MatterWritingOptions):
     #===========================================================================
     #
     #===========================================================================
-class BiasCorrectedWritingOptions():
+class BiasCorrectedWritingOptions(object):
   """
   This  is  the  option  to save a bias corrected version of your image. MR images are usually
   corrupted  by a smooth, spatially varying artifact that modulates the intensity of the image
@@ -346,7 +347,7 @@ class BiasCorrectedWritingOptions():
     #===========================================================================
     #
     #===========================================================================
-class PVELabelWritingOptions():
+class PVELabelWritingOptions(object):
   """
   This  is  the  option  to  save  a labeled version of your segmentations. Labels are saved as
   Partial Volume Estimation (PVE) values with different mix classes for GM-WM and GM-CSF.
@@ -436,7 +437,7 @@ class PVELabelWritingOptions():
     #===========================================================================
     #
     #===========================================================================
-class WritingOptions():
+class WritingOptions(object):
   def __init__(self, dartel_normalization):
     self.dartel_normalization = dartel_normalization
     self.grey_matter_options = GreyMatterWritingOptions(dartel_normalization)

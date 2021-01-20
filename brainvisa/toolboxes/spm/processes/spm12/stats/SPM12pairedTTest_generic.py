@@ -30,11 +30,13 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm import csv_converter
 from soma.spm.spm12.stats.factorial_design import PairedTTest
 from soma.spm.spm12.stats.factorial_design.covariate import Covariate
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
+from six.moves import zip
 
 #------------------------------------------------------------------------------
 configuration = Application().configuration
@@ -124,7 +126,7 @@ def updateCovariate(self, proc):
     covariate_dict, row_keys_list = csv_converter.reverse(self.covariate_table.fullPath())
     covariate_list = []
     for subject_covariate_dict in covariate_dict.values():
-      covariate_list = list(set( covariate_list + subject_covariate_dict.keys()))
+      covariate_list = list(set( covariate_list + list(subject_covariate_dict.keys())))
     covariate_list.sort()
     self.signature['covariate_list'] = ListOf(Choice(*covariate_list))
     self.changeSignature(self.signature)
@@ -310,7 +312,7 @@ def checkImagesPairs(self, context):
 def removeUselessAttributeForComparison(pydict):
   useless_attribute_list = ['reconstruction']
   for useless_attribute in useless_attribute_list:
-    if useless_attribute in pydict.keys():
+    if useless_attribute in pydict:
       del pydict[useless_attribute]
     else:
       pass
@@ -319,7 +321,7 @@ def removeUselessAttributeForComparison(pydict):
 def checkIfAttributesUsedForComparaisontAreDifferent(first_attribute_dict, second_attribute_dict):
   attribute_used_list = ['acquisition']
   for attribute_used in attribute_used_list:
-    if attribute_used in first_attribute_dict.keys() and attribute_used in second_attribute_dict.keys():
+    if attribute_used in first_attribute_dict and attribute_used in second_attribute_dict:
       if first_attribute_dict[attribute_used] != second_attribute_dict[attribute_used]:
         del first_attribute_dict[attribute_used]
         del second_attribute_dict[attribute_used]

@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm12.spatial.coregister.reslice_options import ResliceOptions
 from soma.spm.spm12.spatial.coregister.estimation_options import EstimationOptions
@@ -157,8 +158,8 @@ def updateBatchPath(self, proc):
 
 
 def execution(self, context):
-    source_diskitem = self.resetIfNecessary(context, self.source)
-    reference_diskitem = self.resetIfNecessary(context, self.reference)
+    source_diskitem = self.source
+    reference_diskitem = self.reference
 
     if self.others and self.custom_outputs:
         if len(self.others) != len(self.others_warped):
@@ -260,17 +261,3 @@ def extractCoregisterMatrix(self, source_path, reference_path, output_path):
     reference_trm = reference_scanner_trm.inverse()
 
     aims.write(reference_trm * source_aligned_trm, output_path)
-
-
-def resetIfNecessary(self, context, diskitem):
-    vol = aims.read(diskitem.fullPath())
-    ref = vol.header()['referentials']
-    transfo = vol.header()['transformations']
-    if ref[0] != 'Scanner-based anatomical coordinates' or len(ref) >1 or len(transfo) > 1:
-        tmp_diskitem = context.temporary(diskitem.format)
-        context.runProcess('resetInternalImageTransformation',
-                           input_image = diskitem,
-                           output_image = tmp_diskitem)
-        return tmp_diskitem
-    else:
-        return diskitem

@@ -191,8 +191,8 @@ HDW_directory = (
 #{center}/{subject}/{processing}/{acquisition}/{analysis}_HDW_to_{template} ==> warping_method : high-dimensional
 def createHierarchyTreeDependingOnNormalization(warping_method):
   return (
-#Warped on template, LDW(ex: TPM)/or/HDW(ex : DARTEL) depending on warping_method (low-dimensional/or/high-dimensional)
-  #-T1 MRI probability map warped on LDW/or/HDW template with non-linear only modulation->
+  #Warped on template, LDW(ex: TPM)/or/HDW(ex : DARTEL) depending on warping_method (low-dimensional/or/high-dimensional)
+    #-T1 MRI probability map warped on LDW/or/HDW template with non-linear only modulation->
   '<subject>_grey_proba_warped_with_non_linear_modulation',
 	SetType('T1 MRI tissue probability map'),
 	SetWeakAttr('tissue_class', 'grey',
@@ -318,16 +318,125 @@ def createHierarchyTreeDependingOnNormalization(warping_method):
   'y_<subject>_forward_deformation_field',
   SetType('SPM deformation field'),
   SetWeakAttr('direction', 'forward',
-              'warping_method', warping_method),
+              'warping_method', warping_method,
+              'orientation', 'acquisition_to_mni'),
   'iy_<subject>_inverse_deformation_field',
   SetType('SPM deformation field'),
   SetWeakAttr('direction', 'inverse',
-              'warping_method', warping_method),
+              'warping_method', warping_method,
+              'orientation', 'acquisition_to_mni'),
   )
 
 HDW_DARTEL = (
   '<subject>_HDW_DARTEL_flow_field', SetType('HDW DARTEL flow field'),
 )
+
+def cat_tissue_outputs(tissue_prefix, tissue_class):
+  return (
+    'p%s<subject>' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'wp%s<subject>' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'high-dimensional',
+                  'modulation', 'none',
+                  'transformation', 'none'),
+    'mwp%s<subject>' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'high-dimensional',
+                  'modulation', 'affine and non-linear',
+                  'transformation', 'none'),
+    'm0wp%s<subject>' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'high-dimensional',
+                  'modulation', 'non-linear only',
+                  'transformation', 'none'),
+    
+    'rp%s<subject>_rigid' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'rigid'),
+    'rp%s<subject>_affine' % tissue_prefix,
+      SetType('T1 MRI tissue probability map'),
+      SetWeakAttr('tissue_class', tissue_class,
+                  'warping_method', 'none',
+                  'modulation', 'none',
+                  'transformation', 'affine'),
+  )
+
+CAT12_directory = (
+  cat_tissue_outputs('1', 'grey') +
+  cat_tissue_outputs('2', 'white') +
+  cat_tissue_outputs('3', 'csf') +
+  cat_tissue_outputs('4', 'skull') +
+  cat_tissue_outputs('5', 'scalp') +
+  cat_tissue_outputs('6', 'none') +
+  
+  ('y_<subject>',
+    SetType('SPM deformation field'),
+    SetWeakAttr('direction', 'forward',
+                'warping_method', 'none',
+                'orientation', 'acquisition_to_mni'),
+  'iy_<subject>',
+    SetType('SPM deformation field'),
+    SetWeakAttr('direction', 'inverse',
+                'warping_method', 'none',
+                'orientation', 'acquisition_to_mni'),
+  't_<subject>_{transformation}_reorient',
+    SetType('SPM transformation'),
+    SetWeakAttr('direction', 'forward'),
+  'it_<subject>_{transformation}_reorient',
+    SetType('SPM transformation'),
+    SetWeakAttr('direction', 'inverse'),
+    
+  'wj_<subject>',
+  SetType('Jacobian determinant'),
+  SetWeakAttr('space', 't1mri'),
+  
+  'm<subject>',
+  SetType('T1 MRI Bias corrected'),
+  SetWeakAttr('transformation', 'none',
+              'warping_method', 'none',
+              'space', 't1mri'),
+  'wm<subject>',
+  SetType('T1 MRI Bias corrected'),
+  SetWeakAttr('transformation', 'none',
+              'warping_method', 'high-dimensional',
+              'space', 't1mri'),
+  # SetWeakAttr('processing', 'cat12Segment'),
+  )
+)
+cat12_analysis_directory = (
+  '{analysis}',
+  SetContent(
+    'mri', SetContent(*CAT12_directory)
+  )
+    # SetDefaultAttributeValue('analysis', 'default'),
+)
+
+shoot_analysis_directory = (
+  '{analysis}', SetContent(
+    # 'v_<subject>_<acquisition>_{from}_Template',
+    # SetType(),
+    
+    'y_<subject>_<acquisition>_{from}_Template',  # FIXME keep rp<subject> ? But specific to diamond or is it generic ?
+    SetType('SPM deformation field'),
+    SetWeakAttr('direction', 'forward',
+                'warping_method', 'none'),
+    
+    'j_<subject>_<acquisition>_{from}_Template',
+    SetType('Jacobian determinant'),
+  )
+)
+
 #{center}/{subject}/{processing}/{acquisition}
 analysis_directory = (
   '{analysis}_LDW_from_t1mri_to_{template}', SetContent(*(LDW_directory +
@@ -335,6 +444,136 @@ analysis_directory = (
   '{analysis}_HDW_from_t1mri_to_{template}', SetContent(*(HDW_directory +
                                                    createHierarchyTreeDependingOnNormalization(warping_method='high-dimensional'))),
   '{analysis}_HDW_DARTEL_from_t1mri_to_{template}', SetContent(*HDW_DARTEL),
+  # '{analysis}_from_t1mri_to_TPM',
+  #   SetContent(*CAT12_directory),
+  #   SetDefaultAttributeValue('analysis', 'default'),
+  #   SetWeakAttr('template', 'TPM',
+  #               'spm_hierarchy', 'yes'),
 )
 
-insert( '{center}/{subject}/spm/{processing}', '{acquisition}', SetContent(*analysis_directory))
+long_spm_registration = (
+  '{analysis}',
+          SetDefaultAttributeValue('analysis', 'default_analysis'),
+          SetContent(
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_bias_corrected',
+                SetType('T1 MRI Bias corrected'),
+                SetWeakAttr('space', 'average',
+                            'transformation', 'none',
+                            'warping_method', 'none'),
+            'iy_<subject>_{acquisition}_to_avg_<acquisition_sequence>_inverse_deformation_field',
+                SetType('SPM deformation field'),
+                SetWeakAttr('orientation', 'acquisition_to_average',
+                            'direction', 'inverse'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_white_proba',
+                SetType('T1 MRI tissue probability map'),
+                SetWeakAttr('tissue_class', 'white',
+                            'space', 'average',
+                            'transformation', 'none',
+                            'modulation', 'none',
+                            'warping_method', 'none'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_proba',
+                SetType('T1 MRI tissue probability map'),
+                SetWeakAttr('tissue_class', 'grey',
+                            'space', 'average',
+                            'transformation', 'none',
+                            'modulation', 'none',
+                            'warping_method', 'none'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_csf_proba',
+                SetType('T1 MRI tissue probability map'),
+                SetWeakAttr('tissue_class', 'csf',
+                            'space', 'average',
+                            'transformation', 'none',
+                            'modulation', 'none',
+                            'warping_method', 'none'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_brain_mask',
+                SetType('T1 Brain Mask'),
+                SetWeakAttr('space', 'average',
+                            ),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_mask',
+                SetType('T1 MRI tissue probability mask'),
+                SetWeakAttr('space', 'average',
+                            'tissue_class', 'grey'),
+                
+            # SPM12 pairwise/serial
+            'y_<subject>_{acquisition}_to_avg_<acquisition_sequence>_deformation_field',
+              SetType('SPM deformation field'),
+              SetWeakAttr('orientation', 'acquisition_to_average',
+                          'direction', 'forward',
+                          'warping_method', 'none'),
+              
+            '<subject>_avg_<acquisition_sequence>_t1mri',
+              SetType('T1 MRI mid-point average'),
+              SetWeakAttr('space', 'average',
+                          'modality', 't1mri'),
+            '<subject>_avg_<acquisition_sequence>_flairmri',
+              SetType('FLAIR MRI mid-point average'),
+              SetWeakAttr('space', 'average',
+                          'modality', 'flairmri'),
+              
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_jacobian_determinant',
+              SetType('Jacobian determinant'),
+              SetWeakAttr('space', 'average'),
+              
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_divergence_map',
+              SetType('Divergence map'),
+              SetWeakAttr('space', 'average'),
+
+            # Native space
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_proba',
+            SetType('T1 MRI tissue probability map'),
+            SetWeakAttr('tissue_class', 'grey',
+                        'space', 'halfway',
+                        'transformation', 'none',
+                        'modulation', 'none',
+                        'warping_method', 'none',
+                        'acquisition', 'average'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_white_proba',
+            SetType('T1 MRI tissue probability map'),
+            SetWeakAttr('tissue_class', 'white',
+                        'space', 'halfway',
+                        'transformation', 'none',
+                        'modulation', 'none',
+                        'warping_method', 'none',
+                        'acquisition', 'average'),
+            # DARTEL imported
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_proba_rigid_registered',
+            SetType('T1 MRI tissue probability map'),
+            SetWeakAttr('tissue_class', 'grey',
+                        'transformation', 'rigid',
+                        'modulation', 'none',
+                        'warping_method', 'none',
+                        'acquisition', 'average'),
+            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_white_proba_rigid_registered',
+            SetType('T1 MRI tissue probability map'),
+            SetWeakAttr('tissue_class', 'white',
+                        'transformation', 'rigid',
+                        'modulation', 'none',
+                        'warping_method', 'none',
+                        'acquisition', 'average'),
+    )
+)
+
+insert('{center}/{subject}/longitudinal_preprocessings/spm12Serial', 'avg_{acquisition_sequence}', SetContent(*long_spm_registration),
+       SetWeakAttr('processing', 'spm12Serial'))
+insert('{center}/{subject}/longitudinal_preprocessings/spm12Pairwise', 'avg_{acquisition_sequence}', SetContent(*long_spm_registration),
+       SetWeakAttr('processing', 'spm12Pairwise'))
+insert('{center}/{subject}/spm/cat12Segment', '{acquisition}', SetContent(*cat12_analysis_directory),
+       SetWeakAttr('processing', 'cat12Segment'))
+insert('{center}/{subject}/spm/spm12Segment', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm12Segment'))
+insert('{center}/{subject}/spm/spm8VBMSegmentation', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm8VBMSegmentation'))
+insert('{center}/{subject}/spm/spm8NewSegment', '{acquisition}', SetContent(*analysis_directory),
+       SetWeakAttr('processing', 'spm8NewSegment'))
+insert('{center}/{subject}/spm/spm12Shoot', '{acquisition}', SetContent(*shoot_analysis_directory),
+       SetWeakAttr('processing', 'spm12Shoot'))
+
+insert('{center}/{subject}/nuclear_imaging/{processing}', '{acquisition}', 
+       SetContent('t1mri',
+                  SetContent('{analysis}_from_{segmentation_method}',
+                             SetContent("t1mri_space", 
+                                        SetContent('<subject>_intracranial_labels',
+                                                   SetType('T1 MRI intracranial labels'),
+                                                   SetWeakAttr('space', 't1mri'),
+                                                   '<subject>_intracranial_labels', SetType('T1 MRI intracranial labels translation'), SetWeakAttr('space', 't1mri'),
+                                                   )))))

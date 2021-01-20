@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 import numbers
 
-class OptimisationSettings():
+class OptimisationSettings(object):
   """
   Settings  for  the  optimisation.    If  you  are  unsure  about them, then leave them at the default values.  Optimisation is by repeating a
   number  of  Levenberg-Marquardt  iterations,  in  which  the  equations  are  solved  using  a  full  multi-grid  (FMG)  scheme.  FMG and

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design.global_normalisation import GlobalNormalisation as GlobalNormalisation_virtual
 from soma.spm.virtual_spm.stats.factorial_design.global_normalisation import OverallGrandMeanScaling as OverallGrandMeanScaling_virtual
 

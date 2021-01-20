@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm8.stats.contrast_manager.contrast import Contrast
 from soma.spm.virtual_spm.stats.contrast_manager.tcontrast import TContrast as TContrast_virtual
 

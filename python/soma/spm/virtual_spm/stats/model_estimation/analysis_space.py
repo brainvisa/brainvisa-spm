@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class AnalysisSpace():
+class AnalysisSpace(object):
   """
   Because estimation can be time consuming options are provided to analyse selected slices or clusters rather than the whole volume.
   """

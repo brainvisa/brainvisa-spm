@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import json
 import csv
 import copy
+
+import six
+from six.moves import range
+
 
 def convert( const_pydict, output_path, const_key_titles=[""], verbose=False ):
   pydict = copy.deepcopy(const_pydict)
@@ -72,12 +77,12 @@ def createGenericDict (  dictionary_list, subtree={} ):
   children_name_list = []
   #create list with all names available
   for d in dictionary_list:
-    children_name_list = list( set( children_name_list + d.keys() ) )
+    children_name_list = list( set( children_name_list + list(d.keys()) ) )
   #create list of subtree which contains the specific node
   for c in children_name_list:
     branch_list = []
     for d in dictionary_list:
-      if c in d.keys():
+      if c in d:
         if isinstance( d[c], dict ):
           branch_list.append( d[c] )
 
@@ -105,7 +110,7 @@ def howMuchLeaves( dict_node, index=0):
 def createRowHeaderList(  key_titles, generic_dict, rows, index=1, begin_length=0):
   """The purpose of this process is to create the rows of the CSV header,
   one list item corresponding to one cell in csv """
-  if not index in rows.keys():
+  if index not in rows:
     rows[index] = []
     if index == 1:
       rows[index].extend( key_titles )
@@ -129,8 +134,8 @@ def createRowHeaderList(  key_titles, generic_dict, rows, index=1, begin_length=
 
   if index == 1:
     #to verify if the rows have the same length
-    length = len( rows[ rows.keys()[0] ] )
-    for k in rows.keys():
+    length = len( next( iter( six.itervalues( rows ) ) ) )
+    for k in rows:
       if len( rows[k] ) < length:
         for r in range(length-len(rows[k])):
           rows[k].append('  --  ')
@@ -170,7 +175,7 @@ def preventAutomaticNumberConversionInCSVReader(subject_id_item):
 def IterationOnEachSubject( generic_dict, subject_dict, subject_rows, exam_name):
   """The purpose of this process is to complete the Subject list so that it meets the header fields"""
   for k in sorted( generic_dict.keys() ):
-    if k in subject_dict.keys():
+    if k in subject_dict:
       if isinstance(subject_dict[k], dict):
         IterationOnEachSubject(generic_dict[k], subject_dict[k], subject_rows, exam_name)
       else:
@@ -308,15 +313,15 @@ def mergeDict( d1, d2, d2_erase_d1=False ):
   without erase the deep keys, contrary to classical "update" method"""
   dict_merged = {}
   key_list = []
-  key_list.extend( d1.keys() )
-  key_list.extend( d2.keys() )
+  key_list.extend( list(d1.keys()) )
+  key_list.extend( list(d2.keys()) )
   key_list = list( set( key_list ) )
   for key in key_list:
     if isinstance( key, str ):
       new_key = key.replace( '\n', '' )
     else:
       new_key = key
-    if key in d1.keys() and key in d2.keys():
+    if key in d1 and key in d2:
       if isinstance( d1[key], dict ) and isinstance( d2[key], dict ):
         dict_merged[new_key] = mergeDict( d1[key], d2[key], d2_erase_d1 )
       else:
@@ -325,9 +330,9 @@ def mergeDict( d1, d2, d2_erase_d1=False ):
           dict_merged[new_key] = d2[key]
         else:
           dict_merged[new_key] = '** data merged **'
-    elif key in d1.keys() and not key in d2.keys():
+    elif key in d1 and key not in d2:
       dict_merged[new_key] = d1[key]
-    elif not key in d1.keys() and key in d2.keys():
+    elif key not in d1 and key in d2:
       dict_merged[new_key] = d2[key]
   return dict_merged
 

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.spm_batch_maker_utils import moveSPMPath, convertlistToSPMString
+from six.moves import range
+from six.moves import zip
 
-class Tissue():
+class Tissue(object):
   """
   A  number  of  options are available for each of the tissues.  You may wish to save images
   of  some tissues, but not others. If planning to use DARTEL, then make sure you generate

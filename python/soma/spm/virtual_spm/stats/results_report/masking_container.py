@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.results_report.masking import Masking
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class MaskingContainer():
+class MaskingContainer(object):
   @checkIfArgumentTypeIsAllowed(Masking, 1)
   def setMasking(self, masking):
     self.masking = masking

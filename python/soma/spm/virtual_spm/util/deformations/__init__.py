@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, convertPathListToSPMBatchString, moveFileAndCreateFoldersIfNeeded
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import os
+from six.moves import zip
 
-class Deformations():
+class Deformations(object):
   """
   This is a utility for working with deformation fields. They can be loaded, inverted, combined etc, and
   the results either saved to disk, or applied to some image.

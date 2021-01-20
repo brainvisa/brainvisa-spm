@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class ContrastQuery():
+class ContrastQuery(object):
   @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
   def setTitle(self, title):
     """

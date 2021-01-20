@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class Covariate():
+class Covariate(object):
   """
   This  option  allows  for  the  specification  of  covariates  and nuisance variables.
   Unlike  SPM94/5/6,  where  the design was partitioned into effects of interest and
@@ -35,10 +36,10 @@ class Covariate():
     additional  regressor  that  is  the  interaction between the covariate and a chosen
     experimental factor.
     """
-    if interaction in self.possible_interaction_dict.keys():
+    if interaction in self.possible_interaction_dict:
       self.interactions = interaction
     else:
-      raise ValueError('Covariates interactions possibilities are : ' + str(self.possible_interaction_dict.keys()))
+      raise ValueError('Covariates interactions possibilities are : ' + str(list(self.possible_interaction_dict.keys())))
 
   def setCentering(self, centering):
     """
@@ -47,10 +48,10 @@ class Covariate():
     affected  by the covariate. You are advised to choose this option, unless you have
     other modelling considerations.
     """
-    if centering in self.possible_centering_dict.keys():
+    if centering in self.possible_centering_dict:
       self.centering = centering
     else:
-      raise ValueError('Covariates centering possibilities are : ' + str(self.possible_centering_dict.keys()))
+      raise ValueError('Covariates centering possibilities are : ' + str(list(self.possible_centering_dict.keys())))
  
   def getStringListForBatch(self):
     if not None in [self.vector, self.name]:

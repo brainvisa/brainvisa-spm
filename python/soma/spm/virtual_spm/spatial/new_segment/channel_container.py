@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class ChannelContainer():
+class ChannelContainer(object):
   """
   Specify  the number of different channels (for multi-spectral classification). If you
   have  scans  of  different contrasts for each of the subjects, then it is possible to

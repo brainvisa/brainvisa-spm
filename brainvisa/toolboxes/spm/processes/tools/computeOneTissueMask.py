@@ -40,8 +40,11 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from brainvisa.processes import *
 import numpy as np
+from six.moves import zip
 
 name = 'compute one tissue mask'
 userLevel = 1
@@ -79,8 +82,7 @@ def execution(self, context):
         # comp_prob_map_arr = np.array(aims.read(other_prob_map.fullPath()), copy=False)
         comp_prob_map_max.append(np.array(aims.read(other_prob_map.fullPath()), copy=False))
         # self.compare_probability_map(prob_map_arr, comp_prob_map_arr)
-    comp_prob_map_arr = np.max(comp_prob_map_max, axis=0)
-    self.compare_probability_map(prob_map_arr, comp_prob_map_arr)
+    self.compare_probability_map(prob_map_arr, comp_prob_map_max)
 
     prob_map_arr[prob_map_arr > 10e-5] = 1
     aims.write(prob_map_vol, self.native_mask.fullPath(), format='S16')
@@ -91,7 +93,7 @@ def compare_probability_map(self, prob_map, comp_prob_map):
     if self.resolve_equal_probability:
         self._resolve_equal_probability(prob_map, comp_prob_map)
         
-    prob_map[prob_map < comp_prob_map] = 0
+    prob_map[prob_map < np.max(comp_prob_map, axis=0)] = 0
 
 
 def _resolve_equal_probability(self, prob_map, comp_prob_map):
@@ -101,16 +103,21 @@ def _resolve_equal_probability(self, prob_map, comp_prob_map):
     and keep the mask for the higher mean.
     """
 
-    if len(prob_map.shape) == 4 and len(comp_prob_map.shape) == 4:
-        equal_arr = prob_map == comp_prob_map
+    if len(prob_map.shape) == 4 and len(comp_prob_map[0].shape) == 4:
+        proba_map_cpy = prob_map.copy()
+        equal_arr = prob_map == np.max(comp_prob_map, axis=0)
         empty_arr = np.zeros(prob_map.shape)
         non_zero_array = prob_map != empty_arr  # Replace by np.where != 0 ?
         equal_coord = np.where(equal_arr * non_zero_array)
         for x, y, z, t in zip(equal_coord[0], equal_coord[1], equal_coord[2], equal_coord[3]):
             if 0 <= x < prob_map.shape[0] and 0 <= y < prob_map.shape[1] and 0 <= z < prob_map.shape[2] and 0 <= t < prob_map.shape[3]:
-                neighbors_arr_mean = _computeNeighborsMean(prob_map, x, y, z, t)
-                neighbors_comp_arr_mean = _computeNeighborsMean(comp_prob_map, x, y, z, t)
-                if neighbors_arr_mean < neighbors_comp_arr_mean:
+                neighbors_comp_arr_mean = []
+                for comp_prob_map_tissue in comp_prob_map:
+                    if comp_prob_map_tissue[x][y][z][t] == proba_map_cpy[x][y][z][t]:
+                        neighbors_comp_arr_mean.append(_computeNeighborsMean(comp_prob_map_tissue, x, y, z, t))
+                neighbors_arr_mean = _computeNeighborsMean(proba_map_cpy, x, y, z, t)
+                # neighbors_comp_arr_mean = _computeNeighborsMean(comp_prob_map, x, y, z, t)
+                if neighbors_arr_mean <= max(neighbors_comp_arr_mean):
                     prob_map[x][y][z][t] = 0
                 else:
                     prob_map[x][y][z][t] = 1
@@ -123,31 +130,34 @@ def _resolve_equal_probability(self, prob_map, comp_prob_map):
 
 def _computeNeighborsMean(arr, x, y, z, t):
     """Compute the mean value of the 18 neighbors"""
-
-    neighbors_6 = [
-        [x - 1, y, z, t],
-        [x, y - 1, z, t],
-        [x, y, z - 1, t],
-        [x + 1, y, z, t],
-        [x, y + 1, z, t],
-        [x, y, z + 1, t],
-    ]
-    neighbors_18 = neighbors_6 + [
-        [x - 1, y - 1, z, t],
-        [x, y - 1, z - 1, t],
-        [x - 1, y, z - 1, t],
-        [x + 1, y + 1, z, t],
-        [x, y + 1, z + 1, t],
-        [x + 1, y, z + 1, t],
-        [x - 1, y + 1, z, t],
-        [x, y - 1, z + 1, t],
-        [x - 1, y, z + 1, t],
-        [x + 1, y - 1, z, t],
-        [x, y + 1, z - 1, t],
-        [x + 1, y, z - 1, t]
-    ]
-    
-    neighbors_sum = 0
-    for n in neighbors_18:
-        neighbors_sum += arr[n[0]][n[1]][n[2]][n[3]]
-    return neighbors_sum / len(neighbors_18)
+    try:
+        neighbors_6 = [
+            [x - 1, y, z, t],
+            [x, y - 1, z, t],
+            [x, y, z - 1, t],
+            [x + 1, y, z, t],
+            [x, y + 1, z, t],
+            [x, y, z + 1, t],
+        ]
+        neighbors_18 = neighbors_6 + [
+            [x - 1, y - 1, z, t],
+            [x, y - 1, z - 1, t],
+            [x - 1, y, z - 1, t],
+            [x + 1, y + 1, z, t],
+            [x, y + 1, z + 1, t],
+            [x + 1, y, z + 1, t],
+            [x - 1, y + 1, z, t],
+            [x, y - 1, z + 1, t],
+            [x - 1, y, z + 1, t],
+            [x + 1, y - 1, z, t],
+            [x, y + 1, z - 1, t],
+            [x + 1, y, z - 1, t]
+        ]
+        
+        neighbors_sum = 0
+        for n in neighbors_18:
+            neighbors_sum += arr[n[0]][n[1]][n[2]][n[3]]
+        return neighbors_sum / len(neighbors_18)
+    except IndexError as e:
+        # print('x', x, 'y', y, 'z', z, 't', t)
+        return 0

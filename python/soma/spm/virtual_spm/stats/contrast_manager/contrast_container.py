@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.contrast_manager.contrast import Contrast
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
 
-class ContrastContainer():
+class ContrastContainer(object):
   """
   For  general  linear  model  Y  =  XB  +  E with data Y, desgin matrix X, parameter
   vector  B,  and  (independent)  errors  E,  a contrast is a linear combination of the

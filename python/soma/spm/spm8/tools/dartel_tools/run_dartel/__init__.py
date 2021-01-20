@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel import RunDartel as RunDartel_virtual
 from soma.spm.spm8.tools.dartel_tools.run_dartel.settings import Settings
 from soma.spm.spm_main_module import SPM8MainModule

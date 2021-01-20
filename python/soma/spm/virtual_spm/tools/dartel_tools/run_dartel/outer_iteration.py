@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import convertlistToSPMString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
 
-class OuterIteration():
+class OuterIteration(object):
   """
   Different parameters can be specified for each outer iteration. Each of them warps the images to the template, and then regenerates the
   template  from  the  average  of the warped images. Multiple outer iterations should be used for more accurate results, beginning with a

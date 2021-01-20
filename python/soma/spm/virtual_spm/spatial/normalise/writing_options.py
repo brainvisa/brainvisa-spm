@@ -1,8 +1,9 @@
  # -*- coding: utf-8 -*- 
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import convertNumpyArrayToSPMString, convertlistToSPMString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 
-class WritingOptions():
+class WritingOptions(object):
   """
   Various options for writing normalised images.
   """

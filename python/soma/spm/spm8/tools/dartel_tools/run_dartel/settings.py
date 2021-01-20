@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm8.tools.dartel_tools.run_dartel.outer_iteration_container import OuterIterationContainer
 from soma.spm.spm8.tools.dartel_tools.run_dartel.optimisation_settings import OptimisationSettings
 from soma.spm.virtual_spm.tools.dartel_tools.run_dartel.settings import Settings as Settings_virtual

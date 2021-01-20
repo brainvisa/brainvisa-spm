@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+
+import six
+
+
 def checkIfArgumentTypeIsStrOrUnicode(argument_index):
   def decorator(function):
     def checkArgumentType(*args, **kwargs):
-      assert isinstance(args[argument_index], str) or isinstance(args[argument_index], unicode),\
+      assert isinstance(args[argument_index], six.string_types),\
         "str or unicode allowed but argument %s is %s" % (argument_index, type(args[argument_index]))
       return function(*args, **kwargs)
     return checkArgumentType

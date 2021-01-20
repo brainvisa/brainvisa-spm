@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 
-class PairedTTestDesign():
+class PairedTTestDesign(object):
   def addScansPair(self, scans_list):
     scans_pair = ScansPair()
     scans_pair.setScans( scans_list )
@@ -68,7 +69,7 @@ class PairedTTestDesign():
     else:
       raise ValueError('PairedTTestDesign needs scans pair list')
     
-class ScansPair():    
+class ScansPair(object):    
   def setScans(self, scans_list):
     if len(scans_list) == 2:
       self.scan_1 = scans_list[0]

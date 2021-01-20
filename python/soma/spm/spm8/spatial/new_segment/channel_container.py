@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.spatial.new_segment.channel_container import ChannelContainer as ChannelContainer_virtual
 from soma.spm.spm8.spatial.new_segment.channel import Channel
 from soma.spm.spm_container import SPMContainer

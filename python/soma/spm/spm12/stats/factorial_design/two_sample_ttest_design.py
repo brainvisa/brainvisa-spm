@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.virtual_spm.stats.factorial_design.two_sample_ttest_design import TwoSampleTTestDesign as TwoSampleTTestDesign_virtual
 
 class TwoSampleTTestDesign(TwoSampleTTestDesign_virtual):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 
 from brainvisa.processes import *
 import json
@@ -47,8 +48,8 @@ def execution(self, context):
     
         offset_dict_key = "dynamic offset (mm)"
         spm_version_dict_key = "%s realign" % self.spm_version
-        if offset_dict_key in  data.keys():
-            if spm_version_dict_key in data[offset_dict_key].keys():
+        if offset_dict_key in data:
+            if spm_version_dict_key in data[offset_dict_key]:
                 data[offset_dict_key][spm_version_dict_key][str(self.box_size)] = realign_offset_dict
             else:
                 data[offset_dict_key][spm_version_dict_key] = {str(self.box_size): realign_offset_dict}
@@ -86,7 +87,7 @@ def extractOffsetBetweenTwoTransformations(self, first_transfo, second_transfo):
                   [self.box_size[0], self.box_size[1], 0],
                   [0, self.box_size[1], self.box_size[2]],
                   [self.box_size[0], self.box_size[1], self.box_size[2]],
-                  [self.box_size[0]/2, self.box_size[1]/2, self.box_size[2]/2],
+                  [self.box_size[0]//2, self.box_size[1]//2, self.box_size[2]//2],
                  ]
     norm_sum = 0
     for coord in coord_list:

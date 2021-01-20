@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
+from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm12.tools.longitudinal_registration.serial import SerialLongitudinalRegistration
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
@@ -54,7 +55,7 @@ name = 'spm12 - serial longitudinal registration - generic'
 
 
 signature = Signature(
-  'volumes', ListOf(ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image'])),
+  'volumes', ListOf(ReadDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
   'times', ListOf(Float()),
   'noise_estimate', Choice("NaN", "Scalar", "Matrix"),
   'noise_estimate_value', Matrix(),

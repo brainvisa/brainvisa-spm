@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma.spm.spm_batch_maker_utils import convertPathListToSPMBatchString, moveSPMPath
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed
+from six.moves import zip
 
-class ManySubjects():
+class ManySubjects(object):
   """
   Select  this  option if you have many subjects to spatially normalise, but there are
   a small and fixed number of scans for each subject.
