@@ -62,4 +62,5 @@ FileType('FLAIR MRI mid-point average', '3D Volume')
 
 FileType('Divergence map', '3D Volume')  # SPM12 Pairwise
 FileType('SPM tissue volumes', 'CSV file')
+FileType('T1 MRI intracranial labels translation', 'Text file', 'JSON file')
 
