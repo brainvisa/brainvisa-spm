@@ -162,7 +162,6 @@ def _updateSliceOrder(self, proc):
         return st_utils.get_slice_order(self.number_of_slices,
                                         self.slice_order_type,
                                         self.manufacturer)
-    
     else:
         return ''
     
@@ -216,7 +215,7 @@ def execution(self, context):
     slice_timing.setFilenamePrefix(self.filename_prefix)
     
     if self.custom_outputs:
-        slice_timing.setOutputImagePathList(self.output_image.fullPath())
+        slice_timing.setOuputImagePath(self.output_image.fullPath())
 
     spm = validation()
     spm.addModuleToExecutionQueue(slice_timing)

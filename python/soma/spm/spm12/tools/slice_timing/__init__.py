@@ -21,7 +21,7 @@ class SliceTiming(SPM12MainModule):
         self.reference_slice_index = None
         
         self.filename_prefix = 'a'
-        self.output_path_list = None
+        self.output_path = None
         
     @checkIfArgumentTypeIsAllowed(list, 1)
     def setInputImagesPathList(self, images_path_list):
@@ -53,7 +53,7 @@ class SliceTiming(SPM12MainModule):
         
     @checkIfArgumentTypeIsAllowed(str, 1)
     def setOuputImagePath(self, image_path):
-        self.output_path_list = image_path 
+        self.output_path = image_path 
 
     def getStringListForBatch(self):
         if None in self.input_path_list:
@@ -77,18 +77,13 @@ class SliceTiming(SPM12MainModule):
         batch_list.append('spm.temporal.st.prefix = %s' % self.filename_prefix)
         
         return batch_list
-        
+    
     def _moveSPMDefaultPathsIfNeeded(self):
-        if self.output_path_list is not None:
-            if len(self.input_path_list) == len(self.output_path_list):
-                for input_path, output_path in zip(self.input_path_list,
-                                                   self.output_path_list):
-                    moveSPMPath(input_path,
-                                output_path,
-                                prefix=self.filename_prefix)
-            else:
-                raise ValueError('input_path_list does not have the same \
-                                  length than output_path_list')
+        if self.output_path is not None:
+            moveSPMPath(self.input_path_list[0].split(',')[0],
+                        self.output_path,
+                        prefix=self.filename_prefix)
         else:
             # Default prefix will be used
             pass
+        
