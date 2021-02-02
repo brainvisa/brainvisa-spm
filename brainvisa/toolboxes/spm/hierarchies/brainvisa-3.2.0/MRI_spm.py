@@ -406,11 +406,13 @@ CAT12_directory = (
   SetWeakAttr('transformation', 'none',
               'warping_method', 'none',
               'space', 't1mri'),
+  SetPriorityOffset(-1),
   'wm<subject>',
   SetType('T1 MRI Bias corrected'),
   SetWeakAttr('transformation', 'none',
               'warping_method', 'high-dimensional',
               'space', 't1mri'),
+  SetPriorityOffset(-1),
   # SetWeakAttr('processing', 'cat12Segment'),
   )
 )
