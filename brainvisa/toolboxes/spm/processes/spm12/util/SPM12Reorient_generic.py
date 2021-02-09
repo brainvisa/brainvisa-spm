@@ -57,14 +57,17 @@ name = 'spm12 - Reorient - generic'
 
 signature = Signature(
     "images_to_reorient", ListOf(ReadDiskItem('4D Volume',
-                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
+                                              ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     "reorient_by", Choice(("Reorientation Matrix", 'matrix'),
                           ("Reorientation Parameters", 'parameters'),
                           ("Saved reorientation matrix", 'saved_matrix')),
     "matrix", Matrix(length=4, width=4),
     "parameters", ListOf(Float()),
     "saved_matrix", ReadDiskItem('Matlab SPM script', 'Matlab file'),
+    "custom_outputs", Boolean(),
     "filename_prefix", String(),
+    "images_reoriented", ListOf(WriteDiskItem('4D Volume',
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
     "batch_location", WriteDiskItem('Matlab SPM script', 'Matlab script'),
 )
 
@@ -73,6 +76,11 @@ def initialization(self):
     self.setDisable('parameters', 'saved_matrix')
     self.addLink(None, "reorient_by", self.update_reorient_method)
     self.addLink('batch_location', 'images_to_reorient', self.update_batch_path)
+    
+    self.setOptional('filename_prefix', 'images_reoriented')
+    self.custom_outputs = False
+    self.addLink(None, 'custom_outputs', 
+                 self._updateSignatureAboutCustomOutputs)
 
 
 def update_reorient_method(self, proc):
@@ -92,6 +100,17 @@ def update_batch_path(self, proc):
         return None
 
 
+def _updateSignatureAboutCustomOutputs(self, proc):
+    """Either use filename prefix for outputs or choose custom outputs."""
+    if self.custom_outputs:
+        self.setEnable('images_reoriented')
+        self.setDisable('filename_prefix')
+    else:
+        self.setDisable('images_reoriented')
+        self.setEnable('filename_prefix')
+    self.signatureChangeNotifier.notify(self)
+    
+
 def execution(self, context):
     reorient = Reorient()
     
@@ -107,7 +126,13 @@ def execution(self, context):
         reorient.set_reorient_by_saved_matrix()
         reorient.set_saved_matrix(self.saved_matrix.fullPath())
     
-    reorient.set_prefix(self.filename_prefix)
+    if self.custom_outputs:
+        reorient.set_prefix('o')
+        reorient.set_output_images_path_list(
+            [image.fullPath() for image in self.images_reoriented])
+    else:
+        if self.filename_prefix is not None:
+            reorient.set_prefix(self.filename_prefix)
     
     spm = validation()
     spm.addModuleToExecutionQueue(reorient)

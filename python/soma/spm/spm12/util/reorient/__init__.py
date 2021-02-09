@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 import numpy as np
 from soma.spm.spm_main_module import SPM12MainModule
-from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
+from soma.spm.spm_batch_maker_utils import moveSPMPath
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
-from soma.spm.custom_decorator_pattern import checkIfArgumentIsInAllowedList
 
 
 class Reorient(SPM12MainModule):
@@ -32,6 +31,8 @@ class Reorient(SPM12MainModule):
         self.saved_matrix_path = ''
         
         self.prefix = ''
+        
+        self.output_images_path_list = []
     
     def set_images_path_list(self, path_list):
         if isinstance(path_list, str):
@@ -72,6 +73,14 @@ class Reorient(SPM12MainModule):
     def set_prefix(self, pref):
         self.prefix = pref
     
+    def set_output_images_path_list(self, path_list):
+        if isinstance(path_list, str):
+            self.output_images_path_list = [path_list]
+        elif isinstance(path_list, list):
+            self.output_images_path_list = path_list
+        else:
+            raise ValueError("Images path has to be a list or a string")
+    
     def getStringListForBatch(self):
         batch_list = []
         if self.images_path_list:
@@ -92,3 +101,19 @@ class Reorient(SPM12MainModule):
             return batch_list
         else:
             raise ValueError('At least one image path is required')
+
+    def _moveSPMDefaultPathsIfNeeded(self):
+        if self.output_images_path_list is not None:
+            if len(self.images_path_list) == len(self.output_images_path_list):
+                for input_path, output_path in zip(
+                   self.images_path_list, self.output_images_path_list):
+                    moveSPMPath(input_path,
+                                output_path,
+                                prefix=self.prefix)
+            else:
+                raise ValueError(
+                    'Input and output path_list do not have the same length.')
+        else:
+            # Default prefix used
+            pass
+      
