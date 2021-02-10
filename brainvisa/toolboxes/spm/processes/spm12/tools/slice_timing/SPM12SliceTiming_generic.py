@@ -63,14 +63,9 @@ signature = Signature(
     'input_image', ReadDiskItem('4D Volume', 
                                  ['NIFTI-1 image', 'SPM image', 'MINC image']),
     'acquisition_direction', Choice('Axial', 'Coronal', 'Sagittal'),
-    'number_of_slices', Integer(),
-    'tr', Float(),
-    'ta', Float(),
     'manufacturer', Choice('', 'Siemens', 'Philips'),
     'slice_order_type', Choice(''),
-    'slice_order', String(),
     'reference_slice_type', Choice('', 'First', 'Middle', 'Last'),
-    'reference_slice_index', Integer(),
     'custom_outputs', Boolean(),
     'filename_prefix', String(),
     'output_image', WriteDiskItem('4D Volume', 
@@ -82,20 +77,9 @@ signature = Signature(
 
 def initialization(self):
     self.acquisition_direction = 'Axial'
-    self.addLink('number_of_slices', 'input_image', self._updateNumberOfSlices)    
-    self.addLink('tr', 'input_image', self._updateTr)
-    self.addLink('ta', 'tr', self._updateTa)
     
     self.manufacturer = ''    
     self.addLink(None, 'manufacturer', self._updateSliceOrderChoices)
-
-    self.addLinks('slice_order', 
-                  ['number_of_slices', 'manufacturer', 'slice_order_type'], 
-                 self._updateSliceOrder)
-    
-    self.addLinks('reference_slice_index', 
-                  ['slice_order', 'reference_slice_type'],
-                  self._updateReferenceSliceIndex)
     
     self.setOptional('output_image')
 
@@ -109,38 +93,6 @@ def initialization(self):
     self.addLink('batch_location', 'input_image', self._updateBatchPath)
 
 
-def addLinks(self, parameter, dependencies, updateParameterFunction):
-    for dependencie in dependencies:
-        self.addLink(parameter, dependencie, updateParameterFunction)
-
-
-def _updateNumberOfSlices(self, proc):
-    """Set number of slices from input image and acquisition direction.""" 
-    if (self.input_image is not None) and \
-       (os.path.exists(self.input_image.fullPath())):
-        
-        index = ['Sagittal', 'Coronal', 'Axial'].index(
-            self.acquisition_direction)
-        inputArray = np.array(aims.read(self.input_image.fullPath()), 
-                                        copy=False)
-        return inputArray.shape[index]
-
-    
-def _updateTr(self, proc):
-    """Set TR from input image header."""
-    if (self.input_image is not None) and \
-       (os.path.exists(self.input_image.fullPath())):
-            
-        return st_utils.get_tr(self.input_image.fullPath())
-
-
-def _updateTa(self, proc):
-    """Compute TA from TR and number of slices."""
-    if self.tr is not None and self.number_of_slices is not None:
-        
-        return self.tr - (float(self.tr) / self.number_of_slices)
-
-
 def _updateSliceOrderChoices(self, proc):
     """Set slice order choice list from scanner's manufacturer."""
     choices = ['']
@@ -150,32 +102,6 @@ def _updateSliceOrderChoices(self, proc):
     elif self.manufacturer == 'Philips':
         choices = ['', 'Interleaved Single package?']
     self.signature['slice_order_type'].setChoices(*choices)
-        
-        
-def _updateSliceOrder(self, proc):
-    """
-    Compute slice order from manufacturer, slice order type and 
-    number of slices.
-    """
-    if (self.manufacturer not in [None, '']) and \
-       (self.slice_order_type not in [None, '']) and \
-       (self.number_of_slices not in [None, '']):
-        
-        return st_utils.get_slice_order(self.number_of_slices,
-                                        self.slice_order_type,
-                                        self.manufacturer)
-    else:
-        return ''
-    
-
-def _updateReferenceSliceIndex(self, proc):
-    """Set reference slice index from reference slice type and slice order."""
-    if (self.slice_order not in [None, '']) and \
-       (self.reference_slice_type not in [None, '']):
-        
-        slice_order_list = self.slice_order.strip('[]').split(',')
-        return st_utils.st_get_ref_slice(self.reference_slice_type,
-                                         slice_order_list)
     
     
 def _updateSignatureAboutCustomOutputs(self, proc):
@@ -207,20 +133,51 @@ def _updateBatchPath(self, proc):
 def execution(self, context):
     slice_timing = SliceTiming()
 
+    # Compute relevant parameters from input
+    input_array = np.array(aims.read(self.input_image.fullPath()), copy=False)
+    acq = ['Sagittal', 'Coronal', 'Axial'].index(self.acquisition_direction)
+    number_of_slices = input_array.shape[acq]
+    
+    tr = st_utils.get_tr(self.input_image.fullPath())
+    
+    ta = tr - (float(tr) / number_of_slices)
+    
+    slice_order = st_utils.get_slice_order(number_of_slices,
+                                           self.slice_order_type,
+                                           self.manufacturer)
+    
+    reference_slice_index = st_utils.st_get_ref_slice(
+        self.reference_slice_type, slice_order)
+    
+    # Set parameters in SPM process
     slice_timing.setInputImagesPathList(
         st_utils.getSpmImagesListFrom4DVolume(self.input_image.fullPath()))        
-    slice_timing.setNumberOfSlices(self.number_of_slices)
-    slice_timing.setRepetitionTime(self.tr)
-    slice_timing.setAcquisitionTime(self.ta)
-    slice_timing.setSliceOrder(self.slice_order.strip('[]').split(','))
-    slice_timing.setReferenceSliceIndex(self.reference_slice_index)
+    slice_timing.setNumberOfSlices(number_of_slices)
+    slice_timing.setRepetitionTime(tr)
+    slice_timing.setAcquisitionTime(ta)
+    slice_timing.setSliceOrder(slice_order)
+    slice_timing.setReferenceSliceIndex(reference_slice_index)
     slice_timing.setFilenamePrefix(self.filename_prefix)
     
     if self.custom_outputs:
         slice_timing.setOuputImagePath(self.output_image.fullPath())
 
+    # Run process
     spm = validation()
     spm.addModuleToExecutionQueue(slice_timing)
     spm.setSPMScriptPath(self.batch_location.fullPath())
     output = spm.run()
     context.log(name, html=output)
+    
+    # Update output header
+    if self.custom_outputs:
+        output_path = self.output_image.fullPath()
+    else:
+        output_directory = os.path.dirname(self.input_image.fullPath())
+        output_name = self.filename_prefix + \
+                      os.path.basename(self.input_image.fullPath())
+        output_path = os.path.join(output_directory, output_name)
+    output_volume = aims.read(output_path)
+    output_volume.header().update(
+        aims.read(self.input_image.fullPath()).header())
+    aims.write(output_volume, output_path)
