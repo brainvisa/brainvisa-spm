@@ -172,3 +172,4 @@ def st_get_ref_slice(ref_slice, slice_order):
         raise ValueError("Ref slice must be either First, Middle or Last."
                          " Not : {0}.".format(ref_slice))
     return ref_slice_idx
+    

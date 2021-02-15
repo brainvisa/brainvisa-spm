@@ -168,16 +168,3 @@ def execution(self, context):
     spm.setSPMScriptPath(self.batch_location.fullPath())
     output = spm.run()
     context.log(name, html=output)
-    
-    # Update output header
-    if self.custom_outputs:
-        output_path = self.output_image.fullPath()
-    else:
-        output_directory = os.path.dirname(self.input_image.fullPath())
-        output_name = self.filename_prefix + \
-                      os.path.basename(self.input_image.fullPath())
-        output_path = os.path.join(output_directory, output_name)
-    output_volume = aims.read(output_path)
-    output_volume.header().update(
-        aims.read(self.input_image.fullPath()).header())
-    aims.write(output_volume, output_path)
