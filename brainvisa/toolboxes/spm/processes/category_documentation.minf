@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<minf version="1.0">
+
+<xhtml name="en">
+  <h1>SPM toolbox</h1>
+
+  <p>This toolbox is an interface to the <a href="https://www.fil.ion.ucl.ac.uk/spm/">SPM software</a>. In order to work,
+
+  <ul>
+    <li>SPM needs to be installed first: SPM is not part of the BrainVISA distribution and has to be installed independently.</li>
+    <li>BrainVISA has to be configured to point to SPM paths: open the <em>BrainVISA / Preferences</em> menu, then select the <em>SPM</em> tab, and fill in the required locations.
+    </li>
+  </ul>
+  </p>
+
+  <p>The toolbox may use SPM12 or SPM8, and can use either the Matlab versions of SPM, or the standalone variants (compiled, Matlab not required).
+  </p>
+
+</xhtml>
+</minf>
+
+
