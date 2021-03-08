@@ -74,7 +74,7 @@ class SliceTiming(SPM12MainModule):
         batch_list.append('spm.temporal.st.so = %s;' % self.slice_order)
         batch_list.append(
             'spm.temporal.st.refslice = %i;' % self.reference_slice_index)
-        batch_list.append('spm.temporal.st.prefix = %s' % self.filename_prefix)
+        batch_list.append("spm.temporal.st.prefix = '%s'" % self.filename_prefix)
         
         return batch_list
     
