@@ -32,8 +32,11 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
 from __future__ import absolute_import
+
 import os
 import numpy as np
+import shutil
+from tempfile import mkdtemp
 
 from brainvisa.processes import *
 
@@ -61,7 +64,7 @@ name = 'SPM12 - Slice Timing - generic'
 
 signature = Signature(
     'input_image', ReadDiskItem('4D Volume', 
-                                 ['NIFTI-1 image', 'SPM image', 'MINC image']),
+                                 ['NIFTI-1 image', 'gz compressed NIFTI-1 image']),
     'acquisition_direction', Choice('Axial', 'Coronal', 'Sagittal'),
     'manufacturer', Choice('', 'Siemens', 'Philips'),
     'slice_order_type', Choice(''),
@@ -149,22 +152,37 @@ def execution(self, context):
     reference_slice_index = st_utils.st_get_ref_slice(
         self.reference_slice_type, slice_order)
     
-    # Set parameters in SPM process
-    slice_timing.setInputImagesPathList(
-        st_utils.getSpmImagesListFrom4DVolume(self.input_image.fullPath()))        
-    slice_timing.setNumberOfSlices(number_of_slices)
-    slice_timing.setRepetitionTime(tr)
-    slice_timing.setAcquisitionTime(ta)
-    slice_timing.setSliceOrder(slice_order)
-    slice_timing.setReferenceSliceIndex(reference_slice_index)
-    slice_timing.setFilenamePrefix(self.filename_prefix)
+    temp_directory = mkdtemp()    
+    try:
+        # gunzip input file if it is in .nii.gz
+        input_image_ext = '.'.join(
+            os.path.basename(self.input_image.fullPath()).split('.')[-2:])
+        if input_image_ext == 'nii.gz':
+            input_image_gz = shutil.copy(self.input_image.fullPath(), 
+                                         temp_directory)
+            context.system('gunzip', input_image_gz)
+            input_image = '.'.join(input_image_gz.split('.')[:-1])
+        else:
+            input_image = self.input_image.fullPath()
+        
+        # Set parameters in SPM process
+        slice_timing.setInputImagesPathList(
+            st_utils.getSpmImagesListFrom4DVolume(input_image))
+        slice_timing.setNumberOfSlices(number_of_slices)
+        slice_timing.setRepetitionTime(tr)
+        slice_timing.setAcquisitionTime(ta)
+        slice_timing.setSliceOrder(slice_order)
+        slice_timing.setReferenceSliceIndex(reference_slice_index)
+        slice_timing.setFilenamePrefix(self.filename_prefix)
+        
+        if self.custom_outputs:
+            slice_timing.setOuputImagePath(self.output_image.fullPath())
     
-    if self.custom_outputs:
-        slice_timing.setOuputImagePath(self.output_image.fullPath())
-
-    # Run process
-    spm = validation()
-    spm.addModuleToExecutionQueue(slice_timing)
-    spm.setSPMScriptPath(self.batch_location.fullPath())
-    output = spm.run()
-    context.log(name, html=output)
+        # Run process
+        spm = validation()
+        spm.addModuleToExecutionQueue(slice_timing)
+        spm.setSPMScriptPath(self.batch_location.fullPath())
+        output = spm.run()
+        context.log(name, html=output)
+    finally:
+            shutil.rmtree(temp_directory)
