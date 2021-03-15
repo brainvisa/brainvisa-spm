@@ -103,7 +103,7 @@ class Reorient(SPM12MainModule):
             raise ValueError('At least one image path is required')
 
     def _moveSPMDefaultPathsIfNeeded(self):
-        if self.output_images_path_list is not None:
+        if len(self.output_images_path_list) != 0:
             if len(self.images_path_list) == len(self.output_images_path_list):
                 for input_path, output_path in zip(
                    self.images_path_list, self.output_images_path_list):
