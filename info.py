@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 version_major = 5
-version_minor = 0
+version_minor = 1
 version_micro = 0
 version_extra = ''
 
