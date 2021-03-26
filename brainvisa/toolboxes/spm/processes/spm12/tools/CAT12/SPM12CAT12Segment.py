@@ -78,6 +78,7 @@ other_output = "Other outputs"
 signature = Signature(
     "t1mri", ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image', 'gz compressed NIFTI-1 image'],
                           section=input_section),
+    "subject", String(section=input_section),
     
     # --- Options ---
     "template", ReadDiskItem('TPM template', ['NIFTI-1 image', 'SPM image', 'MINC image'],
@@ -569,6 +570,7 @@ signature = Signature(
 def initialization(self):
     self.setOptional('template', 'voxel_size', 'spatial_registration_template')
     self.setUserLevel(2, 'create_report', 'lazy_processing', 'error_handling', 'verbose')
+    self.setUserLevel(100, 'subject')
     
     self.addLink('batch_location', 't1mri', self.update_batch_path)
     self.addLink(None, 'surface_thickness_estimation', self.update_surface_selection)
@@ -646,6 +648,7 @@ def initialization(self):
     self.deformation_field_type = 'Neither'
     self.registration_matrix = False
     
+    self.linkParameters('subject', 't1mri', self.link_subject)
     self.addLink(None, 'output_options', self.update_output_dir)    
         
     self.addLink(None, 'grey_native_space', lambda x: self.update_bool_output_signature(x, 'grey_native'))
@@ -700,7 +703,12 @@ def initialization(self):
     self.addLink('inverse_registration_affine', 'grey_native')
     self.addLink('forward_registration_rigid', 'grey_native')
     self.addLink('inverse_registration_rigid', 'grey_native')
-        
+
+
+def link_subject(self, proc, dummy):
+    if self.t1mri:
+        return self.t1mri.get('subject')
+
 
 def update_batch_path(self, proc):
     if self.t1mri is not None:
@@ -811,9 +819,8 @@ def update_deformation_field_signature(self, proc):
 def execution(self, context):
     t1mri_path = self.t1mri.fullPath()
     tmp_dir = context.temporary('Directory').fullPath()
-    t1mri_subject = self.t1mri.hierarchyAttributes()['subject']
     
-    t1mri_temp = os.path.join(tmp_dir, '%s.nii' % t1mri_subject)
+    t1mri_temp = os.path.join(tmp_dir, '%s.nii' % self.subject)
     if t1mri_path.endswith('.gz'):
         with gzip.open(t1mri_path, 'rb') as t1mri:
             with open(t1mri_temp, 'wb') as t1mri_unzip:
