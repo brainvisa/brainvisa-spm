@@ -94,8 +94,14 @@ def initialization(self):
     self.addLink(None, "customs_outputs", self.updateSignatureAboutDivergenceRate)
     self.addLink(None, "save_deformation_fields", self.updateSignatureAboutDeformationField)
     self.addLink(None, "customs_outputs", self.updateSignatureAboutDeformationField)
-    self.addLink(None, "volumes", self.update_outputs)
-    self.addLink("batch_location", "volumes", self.updateBatchPath)
+    self.addLink('MPA', 'volumes', self.update_MPA)
+    self.addLink('jacobian_rate', 'volumes',
+                 lambda x: self.update_outputs(x, 'jacobian_rate'))
+    self.addLink('divergence_rate', 'volumes',
+                 lambda x: self.update_outputs(x, 'divergence_rate'))
+    self.addLink('deformation_fields', 'volumes',
+                 lambda x: self.update_outputs(x, 'deformation_fields'))
+    self.addLink('batch_location', 'volumes', self.updateBatchPath)
 
     # SPM default initialisation
     self.warping_regularisation = [0, 0, 100, 25, 100]
@@ -156,27 +162,32 @@ def updateSignatureAboutDeformationField(self, proc):
     self.changeSignature(self.signature)
 
 
-def update_outputs(self, proc):
-    outputs_params = ['MPA', 'jacobian_rate', 'divergence_rate', 'deformation_fields']
+def update_MPA(self, proc):
     if self.volumes:
         attr = self.volumes[0].hierarchyAttributes()
-        acquisitions = sorted([a.hierarchyAttributes()['acquisition'] for a in self.volumes])
+        acquisitions = sorted([a.get('acquisition') for a in self.volumes])
         del attr['acquisition']
         del attr['normalized']
         attr['analysis'] = attr['modality'] + '_default_analysis'
         attr['acquisition_sequence'] = '_'.join(acquisitions)
         attr['space'] = 'average'
-        self.MPA = self.signature['MPA'].findValue(attr)
+        return self.signature['MPA'].findValue(attr)
+
+
+def update_outputs(self, proc, param):
+    if self.volumes:
+        attr = self.volumes[0].hierarchyAttributes()
+        acquisitions = sorted([a.get('acquisition') for a in self.volumes])
+        del attr['normalized']
+        attr['analysis'] = attr['modality'] + '_default_analysis'
         del attr['modality']
-        for param in outputs_params[1:]:
-            param_list = []
-            for vol in self.volumes:
-                attr['acquisition'] = vol.hierarchyAttributes()['acquisition']
-                param_list.append(self.signature[param].contentType.findValue(attr))
-            setattr(self, param, param_list)
-    else:
-        for param in outputs_params:
-            setattr(self, param, None)
+        attr['acquisition_sequence'] = '_'.join(acquisitions)
+        attr['space'] = 'average'
+        param_list = []
+        for vol in self.volumes:
+            attr['acquisition'] = vol.get('acquisition')
+            param_list.append(self.signature[param].contentType.findValue(attr))
+        return param_list
 
 
 def updateBatchPath(self, proc):
