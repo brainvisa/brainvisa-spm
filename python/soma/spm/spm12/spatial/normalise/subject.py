@@ -47,6 +47,7 @@ class SubjectToEstimateAndWrite(SubjectToEstimate):
     def setImageListToWrite(self, image_path_list):
         if len(image_path_list) == 1:
             #TODO: handle case where multiple 4D files are provided
+            #      and case where both 4D files and 3D files are provided 
             image_volume = aims.read(image_path_list[0])
             if len(image_volume.shape) == 4 and image_volume.shape[-1] != 1:
                 self.is4d = True
@@ -119,6 +120,7 @@ class SubjectToWrite(Subject):
     def setImageListToWrite(self, image_path_list):
         if len(image_path_list) == 1:
             #TODO: handle case where multiple 4D files are provided
+            #      and case where both 4D files and 3D files are provided 
             image_volume = aims.read(image_path_list[0])
             if len(image_volume.shape) == 4 and image_volume.shape[-1] != 1:
                 self.is4d = True
