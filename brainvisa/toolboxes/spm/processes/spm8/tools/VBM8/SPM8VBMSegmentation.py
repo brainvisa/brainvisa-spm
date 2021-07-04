@@ -38,9 +38,15 @@ from soma.spm.spm_launcher import SPM8, SPM8Standalone
 configuration = Application().configuration
 #------------------------------------------------------------------------------
 def validation():
-  spm = SPM8(configuration.SPM.spm8_path,
-             configuration.matlab.executable,
-             configuration.matlab.options)
+  try:
+    spm = SPM8Standalone(configuration.SPM.spm8_standalone_command,
+                         configuration.SPM.spm8_standalone_mcr_path,
+                         configuration.SPM.spm8_standalone_path)
+  except:
+    spm = SPM8(configuration.SPM.spm8_path,
+               configuration.matlab.executable,
+               configuration.matlab.options)
+  return spm
 #------------------------------------------------------------------------------
 
 userLevel = 0
