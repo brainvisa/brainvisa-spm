@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 2.6 )
 
 # Keep the list of REQUIRED packages synchronized with
-# cmake/brainvisa_spm-config.cmake.in
+# cmake/brainvisa-spm-config.cmake.in
 find_package( python REQUIRED )
 find_package( Sphinx )
 find_package( brainvisa-cmake REQUIRED )
