@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<minf expander="minf_2.0">
+<d>
+  <d name="en">
+    <xhtml name="short">
+      <p>This process help to apply consecutive deformations which are different types (deformation field, deformation matrix) on an image.
+      <br/>It uses SPM12 Deformation and Reorient processes.</p>
+    </xhtml>
+    <xhtml name="long"/>
+    <d name="parameters">
+    </d>
+  </d>
+</d>
+</minf>
