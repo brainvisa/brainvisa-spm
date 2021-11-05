@@ -17,8 +17,8 @@ class Estimate(Estimate_virtual, SPM12MainModule):
 
   def getStringListForBatch(self):
     batch_list = []
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.oldnorm.est", self.subject_container.getStringListForBatch()))
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.oldnorm.est", self.estimation_options.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.est", self.subject_container.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.est", self.estimation_options.getStringListForBatch()))
     return batch_list
 #===============================================================================
 #
@@ -30,8 +30,8 @@ class Write(Write_virtual, SPM12MainModule):
 
   def getStringListForBatch(self):
     batch_list = []
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.oldnorm.write", self.subject_container.getStringListForBatch()))
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.oldnorm.write", self.writing_options.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.write", self.subject_container.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.write", self.writing_options.getStringListForBatch()))
     return batch_list
 #===============================================================================
 #
@@ -44,7 +44,7 @@ class EstimateAndWrite(EstimateAndWrite_virtual, SPM12MainModule):
 
   def getStringListForBatch(self):
     batch_list = []
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.normalise.estwrite", self.subject_container.getStringListForBatch()))
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.normalise.estwrite", self.estimation_options.getStringListForBatch()))
-    batch_list.extend(addBatchKeyWordInEachItem("spm.spatial.normalise.estwrite", self.writing_options.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.estwrite", self.subject_container.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.estwrite", self.estimation_options.getStringListForBatch()))
+    batch_list.extend(addBatchKeyWordInEachItem("spm.tools.oldnorm.estwrite", self.writing_options.getStringListForBatch()))
     return batch_list
