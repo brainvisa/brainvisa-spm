@@ -106,8 +106,7 @@ def _resolve_equal_probability(self, prob_map, comp_prob_map):
     if len(prob_map.shape) == 4 and len(comp_prob_map[0].shape) == 4:
         proba_map_cpy = prob_map.copy()
         equal_arr = prob_map == np.max(comp_prob_map, axis=0)
-        empty_arr = np.zeros(prob_map.shape)
-        non_zero_array = prob_map != empty_arr  # Replace by np.where != 0 ?
+        non_zero_array = prob_map > 10e-5
         equal_coord = np.where(equal_arr * non_zero_array)
         for x, y, z, t in zip(equal_coord[0], equal_coord[1], equal_coord[2], equal_coord[3]):
             if 0 <= x < prob_map.shape[0] and 0 <= y < prob_map.shape[1] and 0 <= z < prob_map.shape[2] and 0 <= t < prob_map.shape[3]:
