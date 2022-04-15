@@ -33,11 +33,10 @@
 from __future__ import absolute_import
 from brainvisa.tools import spm_utils
 from brainvisa.processes import *
-import os
-import shutil
-from distutils.dir_util import copy_tree
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.tools.cat12 import EstimateAndWrite
+import shutil
+from distutils.dir_util import copy_tree
 
 
 configuration = Application().configuration
@@ -75,7 +74,8 @@ bias_output = 'Bias corrections'
 other_output = "Other outputs"
 
 signature = Signature(
-    "t1mri", ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'],
+    "t1mri", ReadDiskItem('4D Volume',
+                          ['NIFTI-1 image', 'SPM image', 'MINC image', 'gz compressed NIFTI-1 image'],
                           section=input_section),
     
     # --- Options ---
@@ -93,12 +93,22 @@ signature = Signature(
     
     # --- Extended options ---
     # - Segmentation options -
+    "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
+                                 ('Native resolution', 'native'),
+                                 ('Best native resolution', 'best'),
+                                 ('Fixed resolution', 'fixed'),
+                                 section=seg_options_section),
+    "optimal_resolution_value", ListOf(Float(),
+                                       section=seg_options_section),
+    "COM_to_set_origin", Boolean(section=seg_options_section), #new in CAT12.8 ? more possiblity in CAT than just yes or no
     "affine_preprocessing", Choice('none', 'light', 'full', 'default', 'rough',
                                    section=seg_options_section),
     "noise_correction", Choice('none', 'classic', 'light', 'medium',
                                section=seg_options_section),  # , 'strong'),
     # "initial_segmentation", Choice('SPM unified Segmentation', 'k-means AMAP'),
-    "local_adaptative_segmentation", Choice('none', 'ultralight', 'light', 'medium', 'strong', 'heavy',
+    "local_adaptative_segmentation", Choice('none', 'ultralight',
+                                            'light', 'medium',
+                                            'strong', 'heavy',
                                             section=seg_options_section),
     "skull_stripping", Choice(('none', 'none'),
                               ('SPM approach', 'spm'),
@@ -110,18 +120,12 @@ signature = Signature(
                               section=seg_options_section),
     "clean_up", Choice('none', 'light', 'medium', 'strong', 'heavy',
                        section=seg_options_section),
-    # "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
-    #                                          ("set WMH temporary as WM", "temporary"),
-    #                                          #  ("set WMH as WM", "save"),
-    #                                          section=seg_options_section),
+    "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
+                                             ("set WMH temporary as WM", "temporary"),
+                                             ("set WMH as WM", "save_as_wm"),
+                                             ("set WMH as separate class", "as_separate_class"),
+                                             section=seg_options_section),
     # "stroke_lesion_correction", Choice(),
-    "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
-                                 ('Native resolution', 'native'),
-                                 ('Best native resolution', 'best'),
-                                 ('Fixed resolution', 'fixed'),
-                                 section=seg_options_section),
-    "optimal_resolution_value", ListOf(Float(),
-                                       section=seg_options_section),
     
     # - Spatial registration -
     "spatial_registration_method", Choice('shooting', 'dartel',
@@ -139,21 +143,22 @@ signature = Signature(
                               section=spatial_options_section),
     
     "voxel_size", Float(section=extended_section),
+    #"bounding_box", Float(section=extended_section),
     
     # - Surface otions - ?
     "surface_thickness_estimation", Boolean(section=surface_options),
     "voxel_size_thickness_est", Float(section=surface_options),
-    "cortical_myelination_corr", Boolean(section=surface_options),
+    #"cortical_myelination_corr", Boolean(section=surface_options),
     "cortical_surf_creation", Float(section=surface_options),
     "parahipp_surf_creation", Float(section=surface_options),
     "closing_parahipp", Boolean(section=surface_options),
     
     # - Admin options -
-    "create_report", Boolean(section=admin_options),
     "lazy_processing", Boolean(section=admin_options),
     "error_handling", Boolean(section=admin_options),
     "verbose", Choice('none', 'default', 'details',
                       section=admin_options),
+    "create_report", Boolean(section=admin_options),
     
     # --- Writing options ---
     # ROI process
@@ -188,14 +193,14 @@ signature = Signature(
     "csf_dartel_export", Choice("no", "rigid", "affine", "both",
                                 section=csf_output),
     
-    # "wmh_native_space", Boolean(section=wmh_output),
-    # "wmh_normalized", Boolean(section=wmh_output),
-    # "wmh_modulated_normalized", Choice(("no", 'no'),
-    #                                    ("affine + non-linear", 'affine_non_linear'),
-    #                                    ("non-linear only", 'non_linear'),
-    #                                    section=wmh_output),
-    # "wmh_dartel_export", Choice("no", "rigid", "affine", "both",
-    #                             section=wmh_output),
+    "wmh_native_space", Boolean(section=wmh_output),
+    "wmh_normalized", Boolean(section=wmh_output),
+    "wmh_modulated_normalized", Choice(("no", 'no'),
+                                       ("affine + non-linear", 'affine_non_linear'),
+                                       ("non-linear only", 'non_linear'),
+                                       section=wmh_output),
+    "wmh_dartel_export", Choice("no", "rigid", "affine", "both",
+                                section=wmh_output),
     
     # "sls_native_space", Boolean(),
     # "sls_normalized", Boolean(),
@@ -253,22 +258,24 @@ def initialization(self):
     self.inhomogeneity_correction = 'medium'
     self.processing_accuracy = 'average'
     
+    self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
+    self.optimal_resolution = 'optimal'
+    self.optimal_resolution_value = [1, 0.3] #[1, 0.1] CAT12.7
+    self.COM_to_set_origin = True
     self.affine_preprocessing = 'default'
     self.noise_correction = 'medium'
     self.local_adaptative_segmentation = 'medium'
     self.skull_stripping = 'aprg'
     self.clean_up = 'medium'
-    # self.wm_hyperintensities_correction = 'temporary'
-    self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
-    self.optimal_resolution = 'optimal'
-    self.optimal_resolution_value = [1, 0.1]
+    self.wm_hyperintensities_correction = 'save_as_wm'
     self.addLink(None, 'spatial_registration_method', self.update_registration_method)
     self.spatial_registration_method = 'shooting'
     self.shooting_method = 'opt_standard'
     self.voxel_size = 1.5
+    #self.bounding_box = 12
     
     self.voxel_size_thickness_est = 0.5
-    self.cortical_myelination_corr = False
+    #self.cortical_myelination_corr = False
     self.cortical_surf_creation = 0.7
     self.parahipp_surf_creation = 0.1
     self.closing_parahipp = False
@@ -295,10 +302,10 @@ def initialization(self):
     self.csf_modulated_normalized = 'no'
     self.csf_dartel_export = 'no'
 
-    # self.wmh_native_space = False
-    # self.wmh_normalized = False
-    # self.wmh_modulated_normalized = 'no'
-    # self.wmh_dartel_export = 'no'
+    self.wmh_native_space = False
+    self.wmh_normalized = False
+    self.wmh_modulated_normalized = 'no'
+    self.wmh_dartel_export = 'no'
 
     self.other_tissue_proba_map_native_space = False
     self.other_tissue_proba_map_normalized = False
@@ -332,11 +339,11 @@ def update_batch_path(self, proc):
 
 def update_surface_selection(self, proc):
     if self.surface_thickness_estimation:
-        self.setEnable("voxel_size_thickness_est", "cortical_myelination_corr",
+        self.setEnable("voxel_size_thickness_est", #"cortical_myelination_corr",
                        "cortical_surf_creation", "parahipp_surf_creation",
                        "closing_parahipp",)
     else:
-        self.setDisable("voxel_size_thickness_est", "cortical_myelination_corr",
+        self.setDisable("voxel_size_thickness_est", #"cortical_myelination_corr",
                         "cortical_surf_creation", "parahipp_surf_creation",
                         "closing_parahipp",)
     self.changeSignature(self.signature)
@@ -388,6 +395,10 @@ def execution(self, context):
             'set_processing_%s' % self.processing_accuracy)()
     
     # Extended options
+    if self.COM_to_set_origin:
+        estimate_and_write.extended_options.set_COM_default()
+    else:
+        estimate_and_write.extended_options.unset_COM()
     getattr(estimate_and_write.extended_options,
             'set_APP_%s' % self.affine_preprocessing)()
     getattr(estimate_and_write.extended_options,
@@ -398,8 +409,8 @@ def execution(self, context):
             'set_skull_stripping_%s' % self.skull_stripping)()
     getattr(estimate_and_write.extended_options,
             'set_clean_up_%s' % self.clean_up)()
-    # getattr(estimate_and_write.extended_options,
-    #         'set_wmh_correction_%s' % self.wm_hyperintensities_correction)()
+    getattr(estimate_and_write.extended_options,
+            'set_wmh_correction_%s' % self.wm_hyperintensities_correction)()
     if self.optimal_resolution == 'native':
         estimate_and_write.extended_options.set_resampling_preproc_native()
     else:
@@ -425,7 +436,7 @@ def execution(self, context):
     # Surface options
     surf_options = estimate_and_write.extended_options.surface_options
     surf_options.set_voxel_size(self.voxel_size_thickness_est)
-    surf_options.set_corr_myelination_choice(self.cortical_myelination_corr)
+    #surf_options.set_corr_myelination_choice(self.cortical_myelination_corr)
     surf_options.set_cortical_surf(self.cortical_surf_creation)
     surf_options.set_parahipp_surf(self.parahipp_surf_creation)
     surf_options.set_closing_parahipp_choice(self.closing_parahipp)
@@ -443,14 +454,13 @@ def execution(self, context):
     # no ROI process by default
     estimate_and_write.writing_options.output_atlases.set_process_ROI_choice(False)
     
-    for tissue in ['grey', 'white', 'csf']:  # , 'wmh']:
+    for tissue in ['grey', 'white', 'csf', 'wmh']:
         getattr(estimate_and_write.writing_options,
                 '%s' % tissue).set_native_choice(str(int(getattr(self, '%s_native_space' % tissue))))
         getattr(estimate_and_write.writing_options,
                 '%s' % tissue).set_warped_choice(str(int(getattr(self, '%s_normalized' % tissue))))
         
-        mod = getattr(estimate_and_write.writing_options,
-                      '%s' % tissue)
+        mod = getattr(estimate_and_write.writing_options, '%s' % tissue)
         getattr(mod, 'set_modulated_%s' % getattr(self, '%s_modulated_normalized' % tissue))()
         
         dartel = getattr(estimate_and_write.writing_options,
