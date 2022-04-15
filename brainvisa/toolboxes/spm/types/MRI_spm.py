@@ -40,6 +40,7 @@ FileType('DARTEL analysis directory', 'Directory')
 FileType('SPM field', '3D Volume')
 FileType('HDW DARTEL flow field', 'SPM field')
 FileType('SPM deformation field', 'SPM field')
+FileType('Velocity field', 'SPM field')
 FileType('T1 MRI Bias field', 'SPM field')#Voir avec Morpho
 
 FileType('TPM HDW DARTEL created template', 'TPM HDW DARTEL template')
@@ -51,16 +52,14 @@ FileType('T1 MRI partial volume estimation', '3D Volume')
 FileType('T1 MRI tissue probability map', '3D Volume')
 FileType('T1 MRI tissue probability mask', 'Label volume')
 
+FileType('T1 MRI mid-point average', 'Raw T1 MRI')  # SPM12 Long
+FileType('FLAIR MRI mid-point average', '3D Volume')
+FileType('Divergence map', '3D Volume')  # SPM12 Long
+
+FileType('T1 MRI intracranial labels', 'Label volume')
+FileType('T1 MRI intracranial labels translation', 'Text file', 'JSON file')
+FileType('SPM tissue volumes', 'CSV file')
+FileType('PET dynamic SPM realign results', 'Text file')
+
 FileType('Subject Group', 'Any Type', 'JSON file')
 FileType('Covariate table for SPM', 'CSV file')
-
-FileType('PET dynamic SPM realign results', 'Text file')
-FileType('T1 MRI intracranial labels', 'Label volume')
-
-FileType('T1 MRI mid-point average', 'Raw T1 MRI')  # SPM12 Pairwise
-FileType('FLAIR MRI mid-point average', '3D Volume')
-
-FileType('Divergence map', '3D Volume')  # SPM12 Pairwise
-FileType('SPM tissue volumes', 'CSV file')
-FileType('T1 MRI intracranial labels translation', 'Text file', 'JSON file')
-

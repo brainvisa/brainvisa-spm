@@ -136,7 +136,7 @@ def checkIfNotEmpty(self, proc):
 def updateBatchPath(self, proc):
   if self.source is not None:
     directory_path = os.path.dirname(self.source.fullPath())
-    return os.path.join(directory_path, 'spm8_normalise_EW_job.m')
+    return os.path.join(directory_path, 'spm12_oldnormalise_EW_job.m')
 
 def execution( self, context ):
   estimate_and_write = EstimateAndWrite()
