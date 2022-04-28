@@ -18,7 +18,7 @@ deformations = 'Deformations parameters {}'
 output = 'Output'
 
 OUTPUT_SECTION = {
-    'output_deformation': WriteDiskItem('Any Type', getAllFormats(),
+    'output_deformation': WriteDiskItem('4D Volume', getAllFormats(),
                                         section=output),
     'batch_location': WriteDiskItem('Matlab SPM script', 'Matlab script',
                                     section=output),
@@ -63,27 +63,27 @@ def deformation_file_diskitem(num):
 
 def dartel_params(num):
     return {
-        f'flow_field_{num}': ReadDiskItem('Any Type', getAllFormats(),
+        f'flow_field_{num}': ReadDiskItem('4D Volume', getAllFormats(),
                                           section=deformations.format(num)),
         f'direction_{num}': Choice(('Forward', [0, 1]), ('Backward', [1, 0]),
                                    section=deformations.format(num)),
         f'time_step_{num}': Choice(*[(2**i, i) for i in range(10)],
                                    section=deformations.format(num)),
-        f'dartel_template_{num}': ReadDiskItem('Any Type', getAllFormats(),
+        f'dartel_template_{num}': ReadDiskItem('4D Volume', getAllFormats(),
                                                section=deformations.format(num))
     }
 
 
 def deformation_params(num):
     return {
-        f'deformation_field_{num}': ReadDiskItem('Any Type', getAllFormats(),
+        f'deformation_field_{num}': ReadDiskItem('4D Volume', getAllFormats(),
                                                  section=deformations.format(num))
     }
 
 
 def identity_image_params(num):
     return {
-        f'base_image_{num}': ReadDiskItem('Any Type', getAllFormats(),
+        f'base_image_{num}': ReadDiskItem('4D Volume', getAllFormats(),
                                           section=deformations.format(num))
     }
 
