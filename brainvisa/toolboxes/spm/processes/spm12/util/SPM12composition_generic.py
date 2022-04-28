@@ -56,11 +56,6 @@ def deformation_type_choice(num):
     )
 
 
-def deformation_file_diskitem(num):
-    return ReadDiskItem('Any Type', ['NIFTI-1 image'],
-                        section=deformations.format(num))
-
-
 def dartel_params(num):
     return {
         f'flow_field_{num}': ReadDiskItem('4D Volume', getAllFormats(),
