@@ -24,8 +24,8 @@ serial.setBiasRegularisation(1000000)
 serial.saveMidPointAverage()
 #By default spm prefix used, but setting custom outputs is possible
 serial.setOutputMidPointAverage('/tmp/mid_point_average.nii')
-serial.discardJacobianRate()
-serial.discardDivergenceRate()
+serial.discardJacobians()
+serial.discardDivergences()
 serial.saveDeformationFields()
 #By default spm prefix used, but setting custom outputs is possible
 serial.setOutputVolumeDeformationField(['/tmp/volume_1_deformation_field.nii', '/tmp/volume_2_deformation_field.nii'])

@@ -64,10 +64,10 @@ signature = Signature(
   'customs_outputs', Boolean(),
   'save_MPA', Boolean(),
   'MPA', WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"]),
-  'save_jacobian_rate', Boolean(),
-  'jacobian_rate',ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
-  'save_divergence_rate', Boolean(),
-  'divergence_rate',ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
+  'save_jacobians', Boolean(),
+  'jacobians',ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
+  'save_divergences', Boolean(),
+  'divergences',ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
   'save_deformation_fields', Boolean(),
   'deformation_fields', ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
   'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', section='default SPM outputs')
@@ -77,10 +77,10 @@ def initialization(self):
   self.addLink(None, "noise_estimate", self.updateSignatureAboutNoise)
   self.addLink(None, "save_MPA", self.updateSignatureAboutMPA)
   self.addLink(None, "customs_outputs", self.updateSignatureAboutMPA)
-  self.addLink(None, "save_jacobian_rate", self.updateSignatureAboutJacobianRate)
-  self.addLink(None, "customs_outputs", self.updateSignatureAboutJacobianRate)
-  self.addLink(None, "save_divergence_rate", self.updateSignatureAboutDivergenceRate)
-  self.addLink(None, "customs_outputs", self.updateSignatureAboutDivergenceRate)
+  self.addLink(None, "save_jacobians", self.updateSignatureAboutJacobians)
+  self.addLink(None, "customs_outputs", self.updateSignatureAboutJacobians)
+  self.addLink(None, "save_divergences", self.updateSignatureAboutDivergences)
+  self.addLink(None, "customs_outputs", self.updateSignatureAboutDivergences)
   self.addLink(None, "save_deformation_fields", self.updateSignatureAboutDeformationField)
   self.addLink(None, "customs_outputs", self.updateSignatureAboutDeformationField)
   self.addLink("batch_location", "volumes", self.updateBatchPath)
@@ -91,8 +91,8 @@ def initialization(self):
   self.warping_regularisation = [0, 0, 100, 25, 100]
   self.bias_regularisation = 1000000
   self.save_MPA = True
-  self.save_jacobian_rate = False
-  self.save_divergence_rate = True
+  self.save_jacobians = False
+  self.save_divergences = True
   self.save_deformation_fields = False
 
 def updateSignatureAboutNoise(self, proc):
@@ -111,18 +111,18 @@ def updateSignatureAboutMPA(self, proc):
     self.setDisable("MPA")
   self.changeSignature(self.signature)
 
-def updateSignatureAboutJacobianRate(self, proc):
-  if self.save_jacobian_rate and self.customs_outputs:
-    self.setEnable("jacobian_rate")
+def updateSignatureAboutJacobians(self, proc):
+  if self.save_jacobians and self.customs_outputs:
+    self.setEnable("jacobians")
   else:
-    self.setDisable("jacobian_rate")
+    self.setDisable("jacobians")
   self.changeSignature(self.signature)
 
-def updateSignatureAboutDivergenceRate(self, proc):
-  if self.save_divergence_rate and self.customs_outputs:
-    self.setEnable("divergence_rate")
+def updateSignatureAboutDivergences(self, proc):
+  if self.save_divergences and self.customs_outputs:
+    self.setEnable("divergences")
   else:
-    self.setDisable("divergence_rate")
+    self.setDisable("divergences")
   self.changeSignature(self.signature)
 
 def updateSignatureAboutDeformationField(self, proc):
@@ -157,18 +157,18 @@ def execution( self, context ):
       serial.setOutputMidPointAverage(self.MPA.fullPath())
   else:
     serial.discardMidPointAverage()
-  if self.save_jacobian_rate:
-    serial.saveJacobianRate()
+  if self.save_jacobians:
+    serial.saveJacobians()
     if self.customs_outputs:
-      serial.setOutputJacobianRate([diskitem.fullPath() for diskitem in self.jacobian_rate])
+      serial.setOutputJacobians([diskitem.fullPath() for diskitem in self.jacobians])
   else:
-    serial.discardJacobianRate()
-  if self.divergence_rate:
-    serial.saveDivergenceRate()
+    serial.discardJacobians()
+  if self.divergences:
+    serial.saveDivergences()
     if self.customs_outputs:
-      serial.setOutputDivergeRate([diskitem.fullPath() for diskitem in self.divergence_rate])
+      serial.setOutputDivergences([diskitem.fullPath() for diskitem in self.divergences])
   else:
-    serial.discardDivergenceRate()
+    serial.discardDivergences()
   if self.save_deformation_fields:
     serial.saveDeformationFields()
     if self.customs_outputs:
