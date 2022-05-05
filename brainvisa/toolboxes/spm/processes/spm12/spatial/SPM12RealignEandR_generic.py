@@ -70,19 +70,19 @@ output_section = 'Outputs'
 
 
 signature = Signature(
-    'session_paths_0', ListOf(ReadDiskItem('4D Volume', 
-                                           ['NIFTI-1 image', 'SPM image', 
-                                            'MINC image']), 
+    'session_paths_0', ListOf(ReadDiskItem('4D Volume',
+                                           ['NIFTI-1 image', 'SPM image',
+                                            'MINC image']),
                                            section=input_section),
-    'session_paths_1', ListOf(ReadDiskItem('4D Volume', 
-                                           ['NIFTI-1 image', 'SPM image', 
-                                            'MINC image']), 
+    'session_paths_1', ListOf(ReadDiskItem('4D Volume',
+                                           ['NIFTI-1 image', 'SPM image',
+                                            'MINC image']),
                                            section=input_section),
 
     'quality', Float(section=estimation_section),
     'separation', Float(section=estimation_section),
     'smoothing', Float(section=estimation_section),
-    'num_passes', Choice('Register to first', 'Register to mean', 
+    'num_passes', Choice('Register to first', 'Register to mean',
                          section=estimation_section),
     'interpolation', Choice('Nearest neighbour',
                             'Trilinear',
@@ -102,8 +102,8 @@ signature = Signature(
                        ('Wrap Y & Z', [False, True, True]),
                        ('Wrap X, Y & Z', [True, True, True]),
                        section=estimation_section),
-    'weighting', ReadDiskItem('4D Volume', 
-                              ['NIFTI-1 image', 'SPM image', 'MINC image'], 
+    'weighting', ReadDiskItem('4D Volume',
+                              ['NIFTI-1 image', 'SPM image', 'MINC image'],
                               section=estimation_section),
 
     'resliced_images', Choice('All Images (1..n)',
@@ -133,22 +133,22 @@ signature = Signature(
     'masking', Boolean(section=reslice_section),
     'filename_prefix', String(section=reslice_section),
 
-    'realign_paths_0', ListOf(WriteDiskItem('4D Volume', 
-                                            ['gz compressed NIFTI-1 image', 
-                                             'NIFTI-1 image']), 
+    'realign_paths_0', ListOf(WriteDiskItem('4D Volume',
+                                            ['gz compressed NIFTI-1 image',
+                                             'NIFTI-1 image']),
                                             section=output_section),
-    'realign_paths_1', ListOf(WriteDiskItem('4D Volume', 
-                                            ['gz compressed NIFTI-1 image', 
-                                             'NIFTI-1 image']), 
+    'realign_paths_1', ListOf(WriteDiskItem('4D Volume',
+                                            ['gz compressed NIFTI-1 image',
+                                             'NIFTI-1 image']),
                                             section=output_section),
-    'ouput_mean', WriteDiskItem('4D Volume', 
-                                ['gz compressed NIFTI-1 image', 
-                                 'NIFTI-1 image'], 
+    'ouput_mean', WriteDiskItem('4D Volume',
+                                ['gz compressed NIFTI-1 image',
+                                 'NIFTI-1 image'],
                                 section=output_section),
-    'realign_parameters', ListOf(WriteDiskItem('Text file', 'Text file'), 
+    'realign_parameters', ListOf(WriteDiskItem('Text file', 'Text file'),
                                  section=output_section),
 
-    'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', 
+    'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script',
                                     section='default SPM outputs' ),
 )
 
@@ -160,8 +160,9 @@ def initialization(self):
     self.addLink(None, 'filename_prefix', self.checkIfNotEmpty)
 
     self.addLink('batch_location', 'session_paths_0', self.updateBatchPath)
+    self.addLink(None, 'session_paths_0', self.updateOutputs)
 
-    #SPM default initialisation
+    # SPM default initialisation
     self.quality = 0.9
     self.separation = 4
     self.smoothing = 5
@@ -187,7 +188,26 @@ def updateBatchPath(self, proc):
         return os.path.join(directory_path, 'spm12_realign_ER_job.m')
 
 
-def execution( self, context ):
+def updateOutputs(self, proc):
+    if self.session_paths_0:
+        directory_path = os.path.dirname(self.session_paths_0[0].fullPath())
+        self.realign_paths_0 = \
+            [os.path.join(directory_path,
+                          'r' + os.path.basename(session_path.fullPath()))
+             for session_path in self.session_paths_0]
+        base_name = os.path.basename(self.session_paths_0[0].fullPath())
+        self.ouput_mean = os.path.join(directory_path, 'mean' + base_name)
+        self.realign_parameters = os.path.join(
+            directory_path, 'rp_' + base_name.split('.')[0] + '.txt')
+    if self.session_paths_1:
+        directory_path = os.path.dirname(self.session_paths_1[0].fullPath())
+        self.realign_paths_1 = \
+            [os.path.join(directory_path,
+                          'r' + os.path.basename(session_path.fullPath()))
+             for session_path in self.session_paths_1]
+
+
+def execution(self, context):
     # Set estimation options
     estimation_options = EstimationOptions()
     estimation_options.setQuality(self.quality)
@@ -220,8 +240,8 @@ def execution( self, context ):
     else:
         raise ValueError('Unvalid interpolation')
 
-    estimation_options.setWrapping(self.wrapping[0], 
-                                   self.wrapping[1], 
+    estimation_options.setWrapping(self.wrapping[0],
+                                   self.wrapping[1],
                                    self.wrapping[2])
     if self.weighting is not None:
         estimation_options.setWeighting(self.weighting.fullPath())
@@ -267,7 +287,7 @@ def execution( self, context ):
     else:
         reslice_options.unsetMasking()
 
-    reslice_options.setFilenamePrefix(self.filename_prefix)  
+    reslice_options.setFilenamePrefix(self.filename_prefix)
 
     # Set input/outputs
     estimate_and_reslice = EstimateAndReslice()
@@ -302,4 +322,3 @@ def execution( self, context ):
     spm.setSPMScriptPath(self.batch_location.fullPath())
     output = spm.run()
     context.log(name, html=output)
-
