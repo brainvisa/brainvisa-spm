@@ -66,11 +66,11 @@ signature = Signature(
     'save_MPA', Boolean(),
     'MPA', WriteDiskItem('T1 MRI mid-point average', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                          requiredAttributes={'processing': 'spm12Serial'}),
-    'save_jacobian_rate', Boolean(),
-    'jacobian_rate', ListOf(WriteDiskItem('Jacobian determinant', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+    'save_jacobians', Boolean(),
+    'jacobians', ListOf(WriteDiskItem('Jacobian determinant', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                           requiredAttributes={'processing': 'spm12Serial'})),
-    'save_divergence_rate', Boolean(),
-    'divergence_rate', ListOf(WriteDiskItem('Divergence map', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+    'save_divergences', Boolean(),
+    'divergences', ListOf(WriteDiskItem('Divergence map', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                             requiredAttributes={'processing': 'spm12Serial'})),
     'save_deformation_fields', Boolean(),
     'deformation_fields', ListOf(WriteDiskItem('SPM deformation field',
@@ -88,17 +88,17 @@ def initialization(self):
     self.addLink(None, "noise_estimate", self.updateSignatureAboutNoise)
     self.addLink(None, "save_MPA", self.updateSignatureAboutMPA)
     self.addLink(None, "customs_outputs", self.updateSignatureAboutMPA)
-    self.addLink(None, "save_jacobian_rate", self.updateSignatureAboutJacobianRate)
-    self.addLink(None, "customs_outputs", self.updateSignatureAboutJacobianRate)
-    self.addLink(None, "save_divergence_rate", self.updateSignatureAboutDivergenceRate)
-    self.addLink(None, "customs_outputs", self.updateSignatureAboutDivergenceRate)
+    self.addLink(None, "save_jacobians", self.updateSignatureAboutJacobians)
+    self.addLink(None, "customs_outputs", self.updateSignatureAboutJacobians)
+    self.addLink(None, "save_divergences", self.updateSignatureAboutDivergences)
+    self.addLink(None, "customs_outputs", self.updateSignatureAboutDivergences)
     self.addLink(None, "save_deformation_fields", self.updateSignatureAboutDeformationField)
     self.addLink(None, "customs_outputs", self.updateSignatureAboutDeformationField)
     self.addLink('MPA', 'volumes', self.update_MPA)
-    self.addLink('jacobian_rate', 'volumes',
-                 lambda x: self.update_outputs(x, 'jacobian_rate'))
-    self.addLink('divergence_rate', 'volumes',
-                 lambda x: self.update_outputs(x, 'divergence_rate'))
+    self.addLink('jacobians', 'volumes',
+                 lambda x: self.update_outputs(x, 'jacobians'))
+    self.addLink('divergences', 'volumes',
+                 lambda x: self.update_outputs(x, 'divergences'))
     self.addLink('deformation_fields', 'volumes',
                  lambda x: self.update_outputs(x, 'deformation_fields'))
     self.addLink('batch_location', 'volumes', self.updateBatchPath)
@@ -107,8 +107,8 @@ def initialization(self):
     self.warping_regularisation = [0, 0, 100, 25, 100]
     self.bias_regularisation = 1000000
     self.save_MPA = True
-    self.save_jacobian_rate = False
-    self.save_divergence_rate = True
+    self.save_jacobians = False
+    self.save_divergences = True
     self.save_deformation_fields = False
 
 
@@ -138,19 +138,19 @@ def updateSignatureAboutMPA(self, proc):
     self.changeSignature(self.signature)
 
 
-def updateSignatureAboutJacobianRate(self, proc):
-    if self.save_jacobian_rate and self.customs_outputs:
-        self.setEnable("jacobian_rate")
+def updateSignatureAboutJacobians(self, proc):
+    if self.save_jacobians and self.customs_outputs:
+        self.setEnable("jacobians")
     else:
-        self.setDisable("jacobian_rate")
+        self.setDisable("jacobians")
     self.changeSignature(self.signature)
 
 
-def updateSignatureAboutDivergenceRate(self, proc):
-    if self.save_divergence_rate and self.customs_outputs:
-        self.setEnable("divergence_rate")
+def updateSignatureAboutDivergences(self, proc):
+    if self.save_divergences and self.customs_outputs:
+        self.setEnable("divergences")
     else:
-        self.setDisable("divergence_rate")
+        self.setDisable("divergences")
     self.changeSignature(self.signature)
 
 
@@ -207,10 +207,10 @@ def execution(self, context):
                        customs_outputs=self.customs_outputs,
                        save_MPA=self.save_MPA,
                        MPA=self.MPA,
-                       save_jacobian_rate=self.save_jacobian_rate,
-                       jacobian_rate=self.jacobian_rate,
-                       save_divergence_rate=self.save_divergence_rate,
-                       divergence_rate=self.divergence_rate,
+                       save_jacobians=self.save_jacobians,
+                       jacobians=self.jacobians,
+                       save_divergences=self.save_divergences,
+                       divergences=self.divergences,
                        save_deformation_fields=self.save_deformation_fields,
                        deformation_fields=self.deformation_fields,
                        batch_location=self.batch_location)

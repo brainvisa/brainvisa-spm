@@ -54,7 +54,7 @@ class SaveDeformation(Output):
             ouput_directory)
 
     def getStringListForBatch(self):
-        if self.current_directory or self.ouput_directory is not None:
+        if self.output_destination.current_directory or self.output_destination.ouput_directory is not None:
             batch_list = []
             batch_list.append("savedef.ofname = '%s';" % self.deformation_name)
             batch_list.extend(addBatchKeyWordInEachItem(
@@ -65,7 +65,7 @@ class SaveDeformation(Output):
                 "ouput directory path is required if output destination is not current directory")
 
     @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
-    def setOuputDeformationPath(self, deformation_saved_path):
+    def setOutputDeformationPath(self, deformation_saved_path):
         self.deformation_saved_path = deformation_saved_path
 
     def _moveSPMDefaultPathsIfNeeded(self):

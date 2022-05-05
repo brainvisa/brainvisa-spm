@@ -32,10 +32,8 @@
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 from __future__ import absolute_import
 from brainvisa.processes import *
-import os
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 import gzip
-import os
 import shutil
 import glob
 from distutils.dir_util import copy_tree
@@ -76,7 +74,8 @@ bias_output = 'Bias corrections'
 other_output = "Other outputs"
 
 signature = Signature(
-    "t1mri", ReadDiskItem('Raw T1 MRI', ['NIFTI-1 image', 'SPM image', 'MINC image', 'gz compressed NIFTI-1 image'],
+    "t1mri", ReadDiskItem('Raw T1 MRI',
+                          ['NIFTI-1 image', 'SPM image', 'MINC image', 'gz compressed NIFTI-1 image'],
                           section=input_section),
     "subject", String(section=input_section),
     
@@ -95,12 +94,22 @@ signature = Signature(
     
     # --- Extended options ---
     # - Segmentation options -
+    "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
+                                 ('Native resolution', 'native'),
+                                 ('Best native resolution', 'best'),
+                                 ('Fixed resolution', 'fixed'),
+                                 section=seg_options_section),
+    "optimal_resolution_value", ListOf(Float(),
+                                       section=seg_options_section),
+    "COM_to_set_origin", Boolean(section=seg_options_section), #new in CAT12.8 ? more possiblity in CAT than just yes or no
     "affine_preprocessing", Choice('none', 'light', 'full', 'default', 'rough',
                                    section=seg_options_section),
     "noise_correction", Choice('none', 'classic', 'light', 'medium',
                                section=seg_options_section),  # , 'strong'),
     # "initial_segmentation", Choice('SPM unified Segmentation', 'k-means AMAP'),
-    "local_adaptative_segmentation", Choice('none', 'ultralight', 'light', 'medium', 'strong', 'heavy',
+    "local_adaptative_segmentation", Choice('none', 'ultralight',
+                                            'light', 'medium',
+                                            'strong', 'heavy',
                                             section=seg_options_section),
     "skull_stripping", Choice(('none', 'none'),
                               ('SPM approach', 'spm'),
@@ -112,18 +121,12 @@ signature = Signature(
                               section=seg_options_section),
     "clean_up", Choice('none', 'light', 'medium', 'strong', 'heavy',
                        section=seg_options_section),
-    # "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
-    #                                          ("set WMH temporary as WM", "temporary"),
-    #                                          #  ("set WMH as WM", "save"),
-    #                                          section=seg_options_section),
+    "wm_hyperintensities_correction", Choice(("no WMH correction", "no"),
+                                             ("set WMH temporary as WM", "temporary"),
+                                             ("set WMH as WM", "save_as_wm"),
+                                             ("set WMH as separate class", "as_separate_class"),
+                                             section=seg_options_section),
     # "stroke_lesion_correction", Choice(),
-    "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
-                                 ('Native resolution', 'native'),
-                                 ('Best native resolution', 'best'),
-                                 ('Fixed resolution', 'fixed'),
-                                 section=seg_options_section),
-    "optimal_resolution_value", ListOf(Float(),
-                                       section=seg_options_section),
     
     # - Spatial registration -
     "spatial_registration_method", Choice('shooting', 'dartel',
@@ -141,21 +144,22 @@ signature = Signature(
                               section=spatial_options_section),
     
     "voxel_size", Float(section=extended_section),
+    #"bounding_box", Float(section=extended_section),
     
     # - Surface otions - ?
     "surface_thickness_estimation", Boolean(section=surface_options),
     "voxel_size_thickness_est", Float(section=surface_options),
-    "cortical_myelination_corr", Boolean(section=surface_options),
+    #"cortical_myelination_corr", Boolean(section=surface_options),
     "cortical_surf_creation", Float(section=surface_options),
     "parahipp_surf_creation", Float(section=surface_options),
     "closing_parahipp", Boolean(section=surface_options),
     
     # - Admin options -
-    "create_report", Boolean(section=admin_options),
     "lazy_processing", Boolean(section=admin_options),
     "error_handling", Boolean(section=admin_options),
     "verbose", Choice('none', 'default', 'details',
                       section=admin_options),
+    "create_report", Boolean(section=admin_options),
     
     # --- Writing options ---
     # ROI process
@@ -325,14 +329,59 @@ signature = Signature(
                                                                   'analysis': 'default'},
                                               section=csf_output),
     
-    # "wmh_native_space", Boolean(section=wmh_output),
-    # "wmh_normalized", Boolean(section=wmh_output),
-    # "wmh_modulated_normalized", Choice(("no", 'no'),
-    #                                    ("affine + non-linear", 'affine_non_linear'),
-    #                                    ("non-linear only", 'non_linear'),
-    #                                    section=wmh_output),
-    # "wmh_dartel_export", Choice("no", "rigid", "affine", "both",
-    #                             section=wmh_output),
+    "wmh_native_space", Boolean(section=wmh_output),
+    "wmh_native", WriteDiskItem('T1 MRI tissue probability map',
+                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                  requiredAttributes={'tissue_class': 'wmh',
+                                                      'transformation': 'none',
+                                                      'modulation': 'none',
+                                                      'warping_method': 'none',
+                                                      'processing': 'cat12Segment',
+                                                      'analysis': 'default'},
+                                  section=wmh_output),
+    "wmh_normalized", Boolean(section=wmh_output),
+    "wmh_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
+                                           ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                           requiredAttributes={'tissue_class': 'wmh',
+                                                               'transformation': 'none',
+                                                               'modulation': 'none',
+                                                               'warping_method': 'high-dimensional',
+                                                               'processing': 'cat12Segment',
+                                                               'analysis': 'default'},
+                                           section=wmh_output),
+    "wmh_modulated_normalized", Choice(("no", 'no'),
+                                       ("affine + non-linear", 'affine_non_linear'),
+                                       ("non-linear only", 'non_linear'),
+                                       section=wmh_output),
+    "wmh_mod_norm_output", WriteDiskItem('T1 MRI tissue probability map',
+                                         ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                         requiredAttributes={'tissue_class': 'wmh',
+                                                             'transformation': 'none',
+                                                             'modulation': 'affine and non-linear',
+                                                             'warping_method': 'high-dimensional',
+                                                             'processing': 'cat12Segment',
+                                                             'analysis': 'default'},
+                                         section=wmh_output),
+    "wmh_dartel_export", Choice("no", "rigid", "affine", "both",
+                                section=wmh_output),
+    "wmh_dartel_rigid_output", WriteDiskItem('T1 MRI tissue probability map',
+                                             ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                             requiredAttributes={'tissue_class': 'wmh',
+                                                                 'transformation': 'rigid',
+                                                                 'modulation': 'none',
+                                                                 'warping_method': 'none',
+                                                                 'processing': 'cat12Segment',
+                                                                 'analysis': 'default'},
+                                             section=wmh_output),
+    "wmh_dartel_affine_output", WriteDiskItem('T1 MRI tissue probability map',
+                                              ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                              requiredAttributes={'tissue_class': 'wmh',
+                                                                  'transformation': 'affine',
+                                                                  'modulation': 'none',
+                                                                  'warping_method': 'none',
+                                                                  'processing': 'cat12Segment',
+                                                                  'analysis': 'default'},
+                                              section=wmh_output),
     
     # "sls_native_space", Boolean(),
     # "sls_normalized", Boolean(),
@@ -562,8 +611,7 @@ signature = Signature(
     # "output_directory", WriteDiskItem('Directory', 'Directory',
     #                                   section=other_output),
     "batch_location", WriteDiskItem('Matlab SPM script', 'Matlab script',
-                                    section=other_output),
-    
+                                    section=other_output)
 )
 
 
@@ -578,24 +626,26 @@ def initialization(self):
     self.inhomogeneity_correction = 'medium'
     self.processing_accuracy = 'average'
     
+    self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
+    self.optimal_resolution = 'optimal'
+    self.optimal_resolution_value = [1, 0.3] #[1, 0.1] CAT12.7
+    self.COM_to_set_origin = True
     self.affine_preprocessing = 'default'
     self.noise_correction = 'medium'
     self.local_adaptative_segmentation = 'medium'
     self.skull_stripping = 'aprg'
     self.clean_up = 'medium'
-    # self.wm_hyperintensities_correction = 'temporary'
-    self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
-    self.optimal_resolution = 'optimal'
-    self.optimal_resolution_value = [1, 0.1]
+    self.wm_hyperintensities_correction = 'save_as_wm'
     self.addLink(None, 'spatial_registration_method', self.update_registration_method)
     self.spatial_registration_method = 'shooting'
     self.spatial_registration_template = self.signature['spatial_registration_template'].findValue({})
     self.shooting_method = 'opt_standard'
     self.voxel_size = 1.5
+    #self.bounding_box = 12
     
     self.surface_thickness_estimation = False
     self.voxel_size_thickness_est = 0.5
-    self.cortical_myelination_corr = False
+    #self.cortical_myelination_corr = False
     self.cortical_surf_creation = 0.7
     self.parahipp_surf_creation = 0.1
     self.closing_parahipp = False
@@ -622,10 +672,10 @@ def initialization(self):
     self.csf_modulated_normalized = 'no'
     self.csf_dartel_export = 'no'
 
-    # self.wmh_native_space = False
-    # self.wmh_normalized = False
-    # self.wmh_modulated_normalized = 'no'
-    # self.wmh_dartel_export = 'no'
+    self.wmh_native_space = False
+    self.wmh_normalized = False
+    self.wmh_modulated_normalized = 'no'
+    self.wmh_dartel_export = 'no'
 
     self.other_tissue_proba_map_native_space = False
     self.other_tissue_proba_map_normalized = False
@@ -663,6 +713,10 @@ def initialization(self):
     self.addLink(None, 'csf_normalized', lambda x: self.update_bool_output_signature(x, 'csf_normalized_output'))
     self.addLink(None, 'csf_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'csf_mod_norm_output'))
     self.addLink(None, 'csf_dartel_export', lambda x: self.update_dartel_export_signature(x, 'csf_dartel_rigid_output', 'csf_dartel_affine_output'))
+    self.addLink(None, 'wmh_native_space', lambda x: self.update_bool_output_signature(x, 'wmh_native'))
+    self.addLink(None, 'wmh_normalized', lambda x: self.update_bool_output_signature(x, 'wmh_normalized_output'))
+    self.addLink(None, 'wmh_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'wmh_mod_norm_output'))
+    self.addLink(None, 'wmh_dartel_export', lambda x: self.update_dartel_export_signature(x, 'wmh_dartel_rigid_output', 'wmh_dartel_affine_output'))
     self.addLink(None, 'other_tissue_proba_map_native_space',
                  lambda x: self.update_bool_output_signature(x, ['skull_native', 'scalp_native', 'background_native']))
     self.addLink(None, 'other_tissue_proba_map_normalized',
@@ -686,8 +740,8 @@ def initialization(self):
                                                                  'forward_registration_rigid',
                                                                  'inverse_registration_rigid']))
     
-    self.addLink('grey_native', 't1mri')
-    for tissues in ['grey', 'white', 'csf', 'skull', 'scalp', 'background']:
+    self.addLink('grey_native', 't1mri', self.update_grey)
+    for tissues in ['grey', 'white', 'csf', 'wmh', 'skull', 'scalp', 'background']:
         if tissues != 'grey':
             self.addLink('%s_native' % tissues, 'grey_native')
         self.addLink('%s_normalized_output' % tissues, 'grey_native')
@@ -704,6 +758,22 @@ def initialization(self):
     self.addLink('forward_registration_rigid', 'grey_native')
     self.addLink('inverse_registration_rigid', 'grey_native')
 
+def update_grey(self, proc):
+    if self.t1mri:
+        attr = self.t1mri.hierarchyAttributes()
+        if 'acquisition' in attr.keys():
+            acq = attr['acquisition']
+        elif 'acquisition_sequence' in attr.keys():
+            acq = 'avg_' + attr['acquisition_sequence']
+        else:
+            acq = None
+        d = {'acquisition': acq,
+             'center': attr['center'],
+             'subject': attr['subject'],
+             '_database': attr['_database'],
+             }
+        return self.signature['grey_native'].findValue(d)
+
 
 def link_subject(self, proc, dummy):
     if self.t1mri:
@@ -718,11 +788,11 @@ def update_batch_path(self, proc):
 
 def update_surface_selection(self, proc):
     if self.surface_thickness_estimation:
-        self.setEnable("voxel_size_thickness_est", "cortical_myelination_corr",
+        self.setEnable("voxel_size_thickness_est", #"cortical_myelination_corr",
                        "cortical_surf_creation", "parahipp_surf_creation",
                        "closing_parahipp",)
     else:
-        self.setDisable("voxel_size_thickness_est", "cortical_myelination_corr",
+        self.setDisable("voxel_size_thickness_est", #"cortical_myelination_corr",
                         "cortical_surf_creation", "parahipp_surf_creation",
                         "closing_parahipp",)
     self.changeSignature(self.signature)
@@ -838,28 +908,30 @@ def execution(self, context):
                        affine_regularisation=self.affine_regularisation,
                        inhomogeneity_correction=self.inhomogeneity_correction,
                        processing_accuracy=self.processing_accuracy,
+                       optimal_resolution=self.optimal_resolution,
+                       optimal_resolution_value=self.optimal_resolution_value,
+                       COM_to_set_origin = self.COM_to_set_origin,
                        affine_preprocessing=self.affine_preprocessing,
                        noise_correction=self.noise_correction,
                        local_adaptative_segmentation=self.local_adaptative_segmentation,
                        skull_stripping=self.skull_stripping,
                        clean_up=self.clean_up,
-                    #    wm_hyperintensities_correction=self.wm_hyperintensities_correction,
-                       optimal_resolution=self.optimal_resolution,
-                       optimal_resolution_value=self.optimal_resolution_value,
+                       wm_hyperintensities_correction=self.wm_hyperintensities_correction,
                        spatial_registration_method=self.spatial_registration_method,
                        spatial_registration_template=self.spatial_registration_template,
                        shooting_method=self.shooting_method,
                        voxel_size=self.voxel_size,
+                       #bounding_box=self.bounding_box,
                        surface_thickness_estimation=self.surface_thickness_estimation,
                        voxel_size_thickness_est=self.voxel_size_thickness_est,
-                       cortical_myelination_corr=self.cortical_myelination_corr,
+                       #cortical_myelination_corr=self.cortical_myelination_corr,
                        cortical_surf_creation=self.cortical_surf_creation,
                        parahipp_surf_creation=self.parahipp_surf_creation,
                        closing_parahipp=self.closing_parahipp,
-                       create_report=self.create_report,
                        lazy_processing=self.lazy_processing,
                        error_handling=self.error_handling,
                        verbose=self.verbose,
+                       create_report=self.create_report,
                        grey_native_space=self.grey_native_space,
                        grey_normalized=self.grey_normalized,
                        grey_modulated_normalized=self.grey_modulated_normalized,
@@ -872,6 +944,10 @@ def execution(self, context):
                        csf_normalized=self.csf_normalized,
                        csf_modulated_normalized=self.csf_modulated_normalized,
                        csf_dartel_export=self.csf_dartel_export,
+                       wmh_native_space=self.wmh_native_space,
+                       wmh_normalized=self.wmh_normalized,
+                       wmh_modulated_normalized=self.wmh_modulated_normalized,
+                       wmh_dartel_export=self.wmh_dartel_export,
                        other_tissue_proba_map_native_space=self.other_tissue_proba_map_native_space,
                        other_tissue_proba_map_normalized=self.other_tissue_proba_map_normalized,
                        other_tissue_proba_map_modulated_normalized=self.other_tissue_proba_map_modulated_normalized,

@@ -31,13 +31,13 @@ class SerialLongitudinalRegistration(SPM12MainModule):
     self.warping_regularisation_list = [0, 0, 100, 25, 100]
     self.bias_regularisation = 1000000
     self.save_mid_point_average = 1
-    self.save_jacobian_rate = 0
-    self.save_divergence_rate = 1
+    self.save_jacobians = 0
+    self.save_divergences = 1
     self.save_deformation_fields = 0
 
     self.ouput_mid_point_average_path = None
-    self.ouput_jacobian_rate_path_list = None
-    self.ouput_divergence_rate_path_list = None
+    self.ouput_jacobians_path_list = None
+    self.ouput_divergences_path_list = None
     self.ouput_volume_deformation_field_path_list = None
 
   @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
@@ -161,67 +161,63 @@ class SerialLongitudinalRegistration(SPM12MainModule):
     """
     self.save_mid_point_average = False
 
-  def saveJacobianRate(self):
+  def saveJacobians(self):
     """
-    Do  you  want  to  save  a  map  of  the differences between the Jacobian determinants,
-    divided  by  the time interval?  Some consider these useful for morphometrics (although
-    Jacobian determinants is computed and this is divided by the time interval. One original
-    Jacobian  map is for the deformation from the mid point to the first scan, and the other
-    is  for  the  deformation from the mid point to the second scan.  Each of these encodes
-    the  relative  volume  (at  each  spatial  location)  between  the  scan and the mid-point
-    average.  Values  less  than  0  indicate  contraction (over time), whereas values greater
-    than  zero indicate expansion.  These files are prefixed by ``jd_'' and written out in the
+    Do you want to save a map of the Jacobian determinants?
+    Some consider these useful for morphometrics (although
+    the divergences of the initial velocities may be preferable).
+    Each map of Jacobians encodes the relative volume (at each  spatial location) between
+    the scan and the median point average. Values less than one indicate contraction (over time), whereas values greater
+    than one indicate expansion. These files are prefixed by ``j_'' and written out in the
     same directory of the first time point data.
     """
-    self.save_jacobian_rate = 1
+    self.save_jacobians = 1
 
-  def discardJacobianRate(self):
+  def discardJacobians(self):
     """
-    Do  you  want  to  save  a  map  of  the differences between the Jacobian determinants,
-    divided  by  the time interval?  Some consider these useful for morphometrics (although
-    Jacobian determinants is computed and this is divided by the time interval. One original
-    Jacobian  map is for the deformation from the mid point to the first scan, and the other
-    is  for  the  deformation from the mid point to the second scan.  Each of these encodes
-    the  relative  volume  (at  each  spatial  location)  between  the  scan and the mid-point
-    average.  Values  less  than  0  indicate  contraction (over time), whereas values greater
-    than  zero indicate expansion.  These files are prefixed by ``jd_'' and written out in the
+    Do you want to save a map of the Jacobian determinants?
+    Some consider these useful for morphometrics (although
+    the divergences of the initial velocities may be preferable).
+    Each map of Jacobians encodes the relative volume (at each  spatial location) between
+    the scan and the median point average. Values less than one indicate contraction (over time), whereas values greater
+    than one indicate expansion. These files are prefixed by ``j_'' and written out in the
     same directory of the first time point data.
     """
-    self.save_jacobian_rate = 0
+    self.save_jacobians = 0
 
-  def saveDivergenceRate(self):
+  def saveDivergences(self):
     """
-    Do  you  want  to  save  a  map  of  divergence  of  the velocity field?  This is useful for
-    morphometrics,  and  may be considered as the rate of volumetric expansion.  Negative
-    values  indicate  contraction.  These  files  are prefixed by ``dv_'' and written out in the
-    same  directory  of the first time point data. Note that the divergences written out have
-    been divided by the time interval between scans
+    Do you want to save a map of divergence of the velocity field?
+    This is useful for morphometrics, and may be considered as the rate of volumetric expansion.
+    Negative values indicate contraction.
+    These files are prefixed by ``dv_'' and written out in the
+    same  directory  of the first time point data.
     """
-    self.save_divergence_rate = 1
+    self.save_divergences = 1
 
-  def discardDivergenceRate(self):
+  def discardDivergences(self):
     """
-    Do  you  want  to  save  a  map  of  divergence  of  the velocity field?  This is useful for
-    morphometrics,  and  may be considered as the rate of volumetric expansion.  Negative
-    values  indicate  contraction.  These  files  are prefixed by ``dv_'' and written out in the
-    same  directory  of the first time point data. Note that the divergences written out have
-    been divided by the time interval between scans
+    Do you want to save a map of divergence of the velocity field?
+    This is useful for morphometrics, and may be considered as the rate of volumetric expansion.
+    Negative values indicate contraction.
+    These files are prefixed by ``dv_'' and written out in the
+    same  directory  of the first time point data.
     """
-    self.save_divergence_rate = 0
+    self.save_divergences = 0
 
   def saveDeformationFields(self):
     """
-    Deformation   fields  can  be  saved  to  disk,  and  used  by  the  Deformations  Utility.
-    Deformations  are saved as y_*.nii files, which contain three volumes to encode the x, y
-    and z coordinates.  They are written in the same directory as the corresponding image.
+    Deformation fields can be saved to disk, and used by the Deformations Utility.
+    Deformations are saved as y_*.nii files, which contain three volumes to encode the x, y and z coordinates.
+    They are written in the same directory as the corresponding image.
     """
     self.save_deformation_fields = 1
 
   def discardDeformationFields(self):
     """
-    Deformation   fields  can  be  saved  to  disk,  and  used  by  the  Deformations  Utility.
-    Deformations  are saved as y_*.nii files, which contain three volumes to encode the x, y
-    and z coordinates.  They are written in the same directory as the corresponding image.
+    Deformation fields can be saved to disk, and used by the Deformations Utility.
+    Deformations are saved as y_*.nii files, which contain three volumes to encode the x, y and z coordinates.
+    They are written in the same directory as the corresponding image.
     """
     self.save_deformation_fields = 0
 
@@ -235,8 +231,8 @@ class SerialLongitudinalRegistration(SPM12MainModule):
         batch_list.append("spm.tools.longit{1}.series.wparam = %s;" % convertlistToSPMString(self.warping_regularisation_list))
         batch_list.append("spm.tools.longit{1}.series.bparam = %g;" % self.bias_regularisation)
         batch_list.append("spm.tools.longit{1}.series.write_avg = %i;" % self.save_mid_point_average)
-        batch_list.append("spm.tools.longit{1}.series.write_jac = %i;" % self.save_jacobian_rate)
-        batch_list.append("spm.tools.longit{1}.series.write_div = %i;" % self.save_divergence_rate)
+        batch_list.append("spm.tools.longit{1}.series.write_jac = %i;" % self.save_jacobians)
+        batch_list.append("spm.tools.longit{1}.series.write_div = %i;" % self.save_divergences)
         batch_list.append("spm.tools.longit{1}.series.write_def = %i;" % self.save_deformation_fields)
         return batch_list
       else:
@@ -249,12 +245,12 @@ class SerialLongitudinalRegistration(SPM12MainModule):
     self.ouput_mid_point_average_path = output_path
 
   @checkIfArgumentTypeIsAllowed(list, 1)
-  def setOutputJacobianRate(self, output_path_list):
-    self.ouput_jacobian_rate_path_list = output_path_list
+  def setOutputJacobians(self, output_path_list):
+    self.ouput_jacobians_path_list = output_path_list
 
   @checkIfArgumentTypeIsAllowed(list, 1)
-  def setOutputDivergeRate(self, output_path_list):
-    self.ouput_divergence_rate_path_list = output_path_list
+  def setOutputDivergences(self, output_path_list):
+    self.ouput_divergences_path_list = output_path_list
 
   @checkIfArgumentTypeIsAllowed(list, 1)
   def setOutputVolumeDeformationField(self, output_path_list):
@@ -279,25 +275,25 @@ class SerialLongitudinalRegistration(SPM12MainModule):
     else:
       pass
 
-    if self.ouput_jacobian_rate_path_list is not None and self.save_jacobian_rate:
-      if len(self.ouput_jacobian_rate_path_list) == len(self.volume_path_list):
-        for reference_path, output_path in zip(self.volume_path_list, self.ouput_jacobian_rate_path_list):
+    if self.ouput_jacobians_path_list is not None and self.save_jacobians:
+      if len(self.ouput_jacobians_path_list) == len(self.volume_path_list):
+        for reference_path, output_path in zip(self.volume_path_list, self.ouput_jacobians_path_list):
           moveSPMPath(reference_path,
                       output_path,
                       prefix='j_')
       else:
-        raise ValueError("Unvalid ouput_jacobian_rate_path_list")
+        raise ValueError("Unvalid ouput_jacobians_path_list")
     else:
       pass
 
-    if self.ouput_divergence_rate_path_list is not None and self.save_divergence_rate:
-      if len(self.ouput_divergence_rate_path_list) == len(self.volume_path_list):
-        for reference_path, output_path in zip(self.volume_path_list, self.ouput_divergence_rate_path_list):
+    if self.ouput_divergences_path_list is not None and self.save_divergences:
+      if len(self.ouput_divergences_path_list) == len(self.volume_path_list):
+        for reference_path, output_path in zip(self.volume_path_list, self.ouput_divergences_path_list):
           moveSPMPath(reference_path,
                       output_path,
                       prefix='dv_')
       else:
-        raise ValueError("Unvalid ouput_divergence_rate_path_list")
+        raise ValueError("Unvalid ouput_divergences_path_list")
     else:
       pass
 

@@ -379,6 +379,7 @@ CAT12_directory = (
   cat_tissue_outputs('4', 'skull') +
   cat_tissue_outputs('5', 'scalp') +
   cat_tissue_outputs('6', 'none') +
+  cat_tissue_outputs('7', 'wmh') +
   
   ('y_<subject>',
     SetType('SPM deformation field'),
@@ -425,16 +426,15 @@ cat12_analysis_directory = (
 )
 
 shoot_analysis_directory = (
-  '{analysis}', SetContent(
-    # 'v_<subject>_<acquisition>_{from}_Template',
-    # SetType(),
+  '{analysis}_using_{template}', SetContent(
+    'v_{prefix}<subject>_Template',
+    SetType('Velocity field'),
     
-    'y_<subject>_<acquisition>_{from}_Template',  # FIXME keep rp<subject> ? But specific to diamond or is it generic ?
+    'y_{prefix}<subject>_Template',
     SetType('SPM deformation field'),
-    SetWeakAttr('direction', 'forward',
-                'warping_method', 'none'),
+    SetWeakAttr('direction', 'forward'),
     
-    'j_<subject>_<acquisition>_{from}_Template',
+    'j_{prefix}<subject>_Template',
     SetType('Jacobian determinant'),
   )
 )

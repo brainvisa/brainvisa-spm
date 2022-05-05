@@ -74,15 +74,15 @@ signature = Signature(
   "affine_regularisation", Choice("ICBM space template",
                                   "Average sized template",
                                   "No regularisation", section=estimation_section),
-  "frequency_cutoff", Float(section=estimation_section),
-  "iterations", Integer(section=estimation_section),
-  "regularisation", Float(section=estimation_section),
+  "nonlinear_frequency_cutoff", Float(section=estimation_section),
+  "nonlinear_iterations", Integer(section=estimation_section),
+  "nonlinear_regularisation", Float(section=estimation_section),
 
   "preserve", Choice("Preserve Concentrations",
                      "Preserve Amount",
                      section=writing_section),
   "bounding_box", Matrix(length=2, width=3, section=writing_section),
-  "voxel_size", ListOf(Float(),section=writing_section),
+  "voxel_sizes", ListOf(Float(),section=writing_section),
   "interpolation", Choice("Nearest neighbour",
                           "Trilinear",
                           "2nd Degree B-Spline",
@@ -104,7 +104,7 @@ signature = Signature(
 
   "filename_prefix", String(section="outputs"),
   "images_written", ListOf(WriteDiskItem("4D Volume", ["gz compressed NIFTI-1 image", "NIFTI-1 image"]), section="outputs"),
-  "sn_mat", WriteDiskItem("Matlab SPM script", "Matlab file", section="SPM outputs"),
+  "sn_mat", WriteDiskItem("SPM transformation", "Matlab file", section="SPM outputs"),
   'batch_location', WriteDiskItem("Matlab SPM script", "Matlab script", section="default SPM outputs"),
 )
 def initialization(self):
@@ -117,12 +117,12 @@ def initialization(self):
   self.source_smoothing = 8
   self.template_smoothing = 0
   self.affine_regularisation = "ICBM space template"
-  self.frequency_cutoff = 25
-  self.iterations = 16
-  self.regularisation = 1
+  self.nonlinear_frequency_cutoff = 25
+  self.nonlinear_iterations = 16
+  self.nonlinear_regularisation = 1
   self.preserve = "Preserve Concentrations"
   self.bounding_box = [[-78, -112, -70],[78, 76, 85]]
-  self.voxel_size = [2, 2, 2]
+  self.voxel_sizes = [2, 2, 2]
   self.interpolation = "Trilinear"
   self.wrappping = "No wrap"
   self.filename_prefix = 'w'
@@ -136,7 +136,7 @@ def checkIfNotEmpty(self, proc):
 def updateBatchPath(self, proc):
   if self.source is not None:
     directory_path = os.path.dirname(self.source.fullPath())
-    return os.path.join(directory_path, 'spm8_normalise_EW_job.m')
+    return os.path.join(directory_path, 'spm12_oldnormalise_EW_job.m')
 
 def execution( self, context ):
   estimate_and_write = EstimateAndWrite()
@@ -175,9 +175,9 @@ def execution( self, context ):
   else:
     raise ValueError("Invalid choice for affine_regularisation")
 
-  estimate.setNonLinearFrequencyCutOff(self.frequency_cutoff)
-  estimate.setNonLinearIterations(self.iterations)
-  estimate.setNonLinearRegularisation(self.regularisation)
+  estimate.setNonLinearFrequencyCutOff(self.nonlinear_frequency_cutoff)
+  estimate.setNonLinearIterations(self.nonlinear_iterations)
+  estimate.setNonLinearRegularisation(self.nonlinear_regularisation)
 
   estimate_and_write.replaceEstimateOptions(estimate)
 
@@ -190,7 +190,7 @@ def execution( self, context ):
     raise ValueError("Invalid choice for preserve")
 
   writing.setBoundingBox(numpy.array(self.bounding_box))
-  writing.setVoxelSize(self.voxel_size)
+  writing.setVoxelSize(self.voxel_sizes)
 
   if self.interpolation == "Nearest neighbour":
     writing.setInterpolationToNearestNeighbour()

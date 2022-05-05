@@ -18,6 +18,7 @@ class WritingVolumeAtlases(object):
         self.lpba40 = "0"
         self.cobra = "1"
         self.hammers = "0"
+        self.thalamus = "0"
         self.ibsr = "0"
         self.aal3 = "0"
         self.mori = "0"
@@ -61,10 +62,11 @@ class WritingVolumeAtlases(object):
             batch_list.append("lpba40 = %s;" % self.lpba40)
             batch_list.append("cobra = %s;" % self.cobra)
             batch_list.append("hammers = %s;" % self.hammers)
+            batch_list.append("thalamus = %s;" % self.thalamus)
             batch_list.append("ibsr = %s;" % self.ibsr)
             batch_list.append("aal3 = %s;" % self.aal3)
             batch_list.append("mori = %s;" % self.mori)
-            batch_list.append("anatomy = %s;" % self.anatomy)
+            batch_list.append("anatomy3 = %s;" % self.anatomy)
             batch_list.append("julichbrain = %s;" % self.julichbrain)
             batch_list.append("Schaefer2018_100Parcels_17Networks_order = %s;" % self.schaefer_100_parsels)
             batch_list.append("Schaefer2018_200Parcels_17Networks_order = %s;" % self.schaefer_200_parsels)
@@ -150,15 +152,15 @@ class WritingOptions(object):
         self.grey = WritingOutputs("GM", ["0", "0", "1", "0"])
         self.white = WritingOutputs("WM", ["0", "0", "1", "0"])
         self.csf = WritingOutputs("CSF")
-        # self.wmh = WritingOutputs("WMH")
+        self.percent_position = WritingOutputs("pp", ["0", "0", None, "0"])
+        self.wmh = WritingOutputs("WMH")
         self.sl = WritingOutputs("SL")
         self.tpmc = WritingOutputs("TPMC")
-        self.atlas = WritingOutputs("atlas", ["0", "0", None, "0"])
+        self.atlas = WritingOutputs("atlas", ["0", None, None, None])
         self.label = WritingOutputs("label", ["1", "0", None, "0"])
         self.bias = WritingOutputs("bias", ["0", "1", None, "0"])
         self.las = WritingOutputs("las", ["0", "0", None, "0"])
         
-        self.percent_position = WritingOutputs("pp", ["0", "0", None, "0"])
     
     def set_surface_no(self):
         self.surface_thickness = "0"
@@ -188,11 +190,14 @@ class WritingOptions(object):
     def getStringListForBatch(self):
         if self._batch_prefix is not None:
             batch_list = []
+            batch_list.append('BIDS.BIDSno = 1;')
+            batch_list.append('surface = %s;' % self.surface_thickness)
+            batch_list.append('surf_measures = 1;')
             batch_list.extend(self.output_atlases.getStringListForBatch())
             batch_list.extend(self.grey.getStringListForBatch())
             batch_list.extend(self.white.getStringListForBatch())
             batch_list.extend(self.csf.getStringListForBatch())
-            # batch_list.extend(self.wmh.getStringListForBatch())
+            batch_list.extend(self.wmh.getStringListForBatch())
             batch_list.extend(self.sl.getStringListForBatch())
             batch_list.extend(self.tpmc.getStringListForBatch())
             batch_list.extend(self.atlas.getStringListForBatch())
@@ -200,8 +205,6 @@ class WritingOptions(object):
             batch_list.extend(self.bias.getStringListForBatch())
             batch_list.extend(self.las.getStringListForBatch())
             batch_list.extend(self.percent_position.getStringListForBatch())
-            batch_list.append('surface = %s;' % self.surface_thickness)
-            batch_list.append('surf_measures = 1;')
             batch_list.append('jacobianwarped = %s;' % self.jacobian_warped)
             batch_list.append('warps = [%s];' % ' '.join(self.deformation_fields))
             batch_list.append('rmat = %s;' % self.registration_matrix)

@@ -61,14 +61,14 @@ subject_section = "subject options"
 writing_section = "writing options"
 
 signature = Signature(
-  "sn_mat", ReadDiskItem("Matlab SPM script", "Matlab file", section="SPM outputs"),
+  "sn_mat", ReadDiskItem("SPM transformation", "Matlab file", section="SPM outputs"),
   "images_to_write", ListOf(ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image']), section=subject_section),
 
   "preserve", Choice("Preserve Concentrations",
                      "Preserve Amount",
                      section=writing_section),
   "bounding_box", Matrix(length=2, width=3, section=writing_section),
-  "voxel_size", ListOf(Float(),section=writing_section),
+  "voxel_sizes", ListOf(Float(),section=writing_section),
   "interpolation", Choice("Nearest neighbour",
                           "Trilinear",
                           "2nd Degree B-Spline",
@@ -101,7 +101,7 @@ def initialization(self):
   #SPM default initialisation
   self.preserve = "Preserve Concentrations"
   self.bounding_box = [[-78, -112, -70],[78, 76, 85]]
-  self.voxel_size = [2, 2, 2]
+  self.voxel_sizes = [2, 2, 2]
   self.interpolation = "Trilinear"
   self.wrappping = "No wrap"
   self.filename_prefix = 'w'
@@ -115,7 +115,7 @@ def checkIfNotEmpty(self, proc):
 def updateBatchPath(self, proc):
   if self.sn_mat is not None:
     directory_path = os.path.dirname(self.sn_mat.fullPath())
-    return os.path.join(directory_path, 'spm8_normalise_EW_job.m')
+    return os.path.join(directory_path, 'spm12_oldnormalise_write_job.m')
 
 def execution( self, context ):
   write = Write()
@@ -143,7 +143,7 @@ def execution( self, context ):
     raise ValueError("Unvalid choice for preserve")
 
   writing_options.setBoundingBox(numpy.array(self.bounding_box))
-  writing_options.setVoxelSize(self.voxel_size)
+  writing_options.setVoxelSize(self.voxel_sizes)
 
   if self.interpolation == "Nearest neighbour":
     writing_options.setInterpolationToNearestNeighbour()

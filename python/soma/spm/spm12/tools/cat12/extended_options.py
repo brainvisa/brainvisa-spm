@@ -63,7 +63,7 @@ class RegistrationOptions(object):
 class SurfaceOptions(object):
     def __init__(self):
         self.voxel_size = 0.5
-        self.corr_myelination = '0'
+        #self.corr_myelination = '0'
         self.cortical_surf = 0.7
         self.parahipp_surf = 0.1
         self.initial_closing_parahipp = '0'
@@ -72,8 +72,8 @@ class SurfaceOptions(object):
     def set_voxel_size(self, size):
         self.voxel_size = size
     
-    def set_corr_myelination_choice(self, choice):
-        self.corr_myelination = str(int(choice))
+    #def set_corr_myelination_choice(self, choice):
+        #self.corr_myelination = str(int(choice))
     
     @checkIfArgumentTypeIsAllowed(float, 1)
     def set_cortical_surf(self, value):
@@ -89,41 +89,57 @@ class SurfaceOptions(object):
     def getStringListForBatch(self):
         batch_list = []
         batch_list.append('pbtres = %s;' % str(self.voxel_size))
-        batch_list.append('pbtlas = %s;' % self.corr_myelination)
+        batch_list.append("pbtmethod = 'pbt2x';")
+        batch_list.append('SRP = 22;')
+        batch_list.append('reduce_mesh = 1;')
+        batch_list.append('vdist = 2;')
         batch_list.append('scale_cortex = %s;' % str(self.cortical_surf))
         batch_list.append('add_parahipp = %s;' % str(self.parahipp_surf))
         batch_list.append('close_parahipp = %s;' % self.initial_closing_parahipp)
+        #batch_list.append('pbtlas = %s;' % self.corr_myelination)
         return addBatchKeyWordInEachItem("surface", batch_list)
 
 
 class ExtendedOptions(object):
     def __init__(self):
         # Segmentation options
+        self.resampling_preproc_type = 'optimal'
+        self.resampling_preproc_values = [1, 0.3] #[1, 0.1]CAT12.7
+        self.COM_to_set_origin = "1"
         self.affine_preprocessing = "1070"
         self.noise_correction = "-Inf"
         self.initial_segmentation = "0"
         self.local_adaptative_seg = "0.5"
         self.skull_stripping = "2"
         self.clean_up = "0.5"
-        self.wmh_correction = "1"
+        self.wmh_correction = "2"
         # self.stroke_lesion_correction = "0"
-        self.resampling_preproc_type = 'optimal'
-        self.resampling_preproc_values = [1, 0.1]
         
         # Registration
         self.spatial_registration = RegistrationOptions()
         
         # Voxel size
         self.voxel_size = 1.5
+        self.bounding_box = 12
         
         # Surface
         self.surface_options = SurfaceOptions()
         
         # Admin
-        self.create_report = "2"
         self.lazy_process = "0"
         self.error_handling = "1"
         self.verbose = "2"
+        self.create_report = "2"
+    
+    # Use center-of-mass to set origin
+    def unset_COM(self):
+        self.center_to_set_origin = "0"
+    
+    def set_COM_default(self):
+        self.center_to_set_origin = "1"
+    
+    def set_COM_noTPM(self):
+        self.center_to_set_origin = "2"
     
     # Affine preprocessing
     def set_APP_default(self):
@@ -231,11 +247,11 @@ class ExtendedOptions(object):
     def set_wmh_correction_temporary(self):
         self.wmh_correction = "1"
     
-    def set_wmh_correction_save(self):
+    def set_wmh_correction_save_as_wm(self):
         self.wmh_correction = "2"
     
-    # def set_wmh_correction_as_separate_class(self):
-    #     self.wmh_correction = "3"
+    def set_wmh_correction_as_separate_class(self):
+        self.wmh_correction = "3"
     
     @checkIfArgumentTypeIsAllowed(list, 1)
     def set_resampling_preproc_optimal(self, values):
@@ -270,10 +286,13 @@ class ExtendedOptions(object):
     
     # Spatial registration
     
-    
     @checkIfArgumentTypeIsAllowed(float, 1)
     def set_voxel_size(self, size):
         self.voxel_size = size
+       
+    @checkIfArgumentTypeIsAllowed(float, 1)
+    def set_bounding_box(self, size):
+        self.bounding_box = size
     
     # Report
     def unset_report(self):
@@ -302,22 +321,29 @@ class ExtendedOptions(object):
     
     def getStringListForBatch(self):
         batch_list = []
+        batch_list.append("segmentation.restypes.%s = %s;" % (self.resampling_preproc_type,
+                                                              self.resampling_preproc_values))
+        batch_list.append("segmentation.setCOM = %s;" % self.COM_to_set_origin)
         batch_list.append("segmentation.APP = %s;" % self.affine_preprocessing)
+        batch_list.append("segmentation.affmod = 0;")
         batch_list.append("segmentation.NCstr = %s;" % self.noise_correction)
         batch_list.append("segmentation.spm_kamap = %s;" % self.initial_segmentation)
         batch_list.append("segmentation.LASstr = %s;" % self.local_adaptative_seg)
+        batch_list.append("segmentation.LASmyostr = 0;")
         batch_list.append("segmentation.gcutstr = %s;" % self.skull_stripping)
         batch_list.append("segmentation.cleanupstr = %s;" % self.clean_up)
+        batch_list.append("segmentation.BVCstr = 0.5;")
         batch_list.append("segmentation.WMHC = %s;" % self.wmh_correction)
         batch_list.append("segmentation.SLC = 0;")
-        batch_list.append("segmentation.restypes.%s = %s;" % (self.resampling_preproc_type,
-                                                              self.resampling_preproc_values))
+        batch_list.append("segmentation.mrf = 1;")
         batch_list.extend(self.spatial_registration.getStringListForBatch())
-        batch_list.extend(self.surface_options.getStringListForBatch())
         batch_list.append("vox = %s;" % str(self.voxel_size))
-        
-        batch_list.append("admin.print = %s;" % str(self.create_report))
+        batch_list.append("bb = %s;" % str(self.bounding_box))
+        batch_list.extend(self.surface_options.getStringListForBatch())
+        batch_list.append("admin.experimental = 0;")
+        batch_list.append("admin.new_release = 0;")
         batch_list.append("admin.lazy = %s;" % str(self.lazy_process))
         batch_list.append("admin.ignoreErrors = %s;" % str(self.error_handling))
         batch_list.append("admin.verb = %s;" % str(self.verbose))
+        batch_list.append("admin.print = %s;" % str(self.create_report))
         return addBatchKeyWordInEachItem("extopts", batch_list)

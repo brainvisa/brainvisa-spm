@@ -69,12 +69,12 @@ signature = Signature(
   "affine_regularisation", Choice("ICBM space template",
                                   "Average sized template",
                                   "No regularisation", section=estimation_section),
-  "frequency_cutoff", Float(section=estimation_section),
-  "iterations", Integer(section=estimation_section),
-  "regularisation", Float(section=estimation_section),
+  "nonlinear_frequency_cutoff", Float(section=estimation_section),
+  "nonlinear_iterations", Integer(section=estimation_section),
+  "nonlinear_regularisation", Float(section=estimation_section),
 
-  "sn_mat", WriteDiskItem( 'Matlab SPM script', 'Matlab file', section='SPM outputs' ),
-  'batch_location', WriteDiskItem( 'Matlab SPM script', 'Matlab script', section='default outputs' ),
+  "sn_mat", WriteDiskItem('SPM transformation', 'Matlab file', section='SPM outputs'),
+  'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', section='default outputs'),
 )
 def initialization(self):
   self.setOptional("source_weighting", "template_weighting", "sn_mat")
@@ -85,9 +85,9 @@ def initialization(self):
   self.source_smoothing = 8
   self.template_smoothing = 0
   self.affine_regularisation = "ICBM space template"
-  self.frequency_cutoff = 25
-  self.iterations = 16
-  self.regularisation = 1
+  self.nonlinear_frequency_cutoff = 25
+  self.nonlinear_iterations = 16
+  self.nonlinear_regularisation = 1
 
 def checkIfNotEmpty(self, proc):
   if self.filename_prefix in [None, '']:
@@ -98,7 +98,7 @@ def checkIfNotEmpty(self, proc):
 def updateBatchPath(self, proc):
   if self.source is not None:
     directory_path = os.path.dirname(self.source.fullPath())
-    return os.path.join(directory_path, 'spm8_normalise_estimate_job.m')
+    return os.path.join(directory_path, 'spm12_oldnormalise_estimate_job.m')
 
 def execution( self, context ):
   estimate = Estimate()
@@ -131,9 +131,9 @@ def execution( self, context ):
   else:
     raise ValueError("Unvalid choice for affine_regularisation")
 
-  estimation_options.setNonLinearFrequencyCutOff(self.frequency_cutoff)
-  estimation_options.setNonLinearIterations(self.iterations)
-  estimation_options.setNonLinearRegularisation(self.regularisation)
+  estimation_options.setNonLinearFrequencyCutOff(self.nonlinear_frequency_cutoff)
+  estimation_options.setNonLinearIterations(self.nonlinear_iterations)
+  estimation_options.setNonLinearRegularisation(self.nonlinear_regularisation)
 
   estimate.replaceEstimateOptions(estimation_options)
 
