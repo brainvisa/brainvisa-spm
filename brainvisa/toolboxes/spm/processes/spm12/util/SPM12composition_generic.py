@@ -1,4 +1,4 @@
-import os
+import os, numpy
 
 from brainvisa.processes import Application, Signature
 from brainvisa.processes import ReadDiskItem, WriteDiskItem, Choice, Integer
@@ -205,7 +205,7 @@ def execution(self, context):
                 deformation_element.voxel_size = voxel_size
             bounding_box = getattr(self, f'bounding_box_{i}')
             if bounding_box:
-                deformation_element.bounding_box = bounding_box
+                deformation_element.bounding_box = numpy.array(bounding_box)
         elif deformation_type == 'imported_mat':
             deformation_element = composition.MatFileImported()
             deformation_element.parameter_file_path = getattr(self, f'param_file_{i}').fullPath()
@@ -214,7 +214,7 @@ def execution(self, context):
                 deformation_element.voxel_size = voxel_size
             bounding_box = getattr(self, f'bounding_box_{i}')
             if bounding_box:
-                deformation_element.bounding_box = bounding_box
+                deformation_element.bounding_box = numpy.array(bounding_box)
         
         deformations.appendDeformation(deformation_element)
     
