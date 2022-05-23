@@ -268,7 +268,7 @@ class PullBack(Output):
     # ===========================================================================
 
 
-class PushFoward(Output):
+class PushForward(Output):
     """
     This is the old way of warping images, which involves resampling images based on a mapping from the new (warped)
     image  space  back  to  the  original image.  The deformation should be the inverse of the deformation that would be
@@ -281,7 +281,7 @@ class PushFoward(Output):
         self.output_destination = OutputDestinationWithSources()
         self.image_defined_path = None
         self.user_defined_bouding_box = None
-        self.user_defined_voxel_size = None
+        self.user_defined_voxel_sizes = None
         self.preserve = 0
         self.gaussian_fwhm = [0, 0, 0]
 
@@ -319,11 +319,11 @@ class PushFoward(Output):
         """
         self.image_defined_path = image_defined_path
         self.user_defined_bouding_box = None
-        self.user_defined_voxel_size = None
+        self.user_defined_voxel_sizes = None
 
     @checkIfArgumentTypeIsAllowed(numpy.ndarray, 1)
     @checkIfArgumentTypeIsAllowed(list, 2)
-    def setFieldOfViewToUserDefined(self, bounding_box, voxel_size_list):
+    def setFieldOfViewToUserDefined(self, bounding_box, voxel_sizes_list):
         """
         The  part  of the deformation to use is specified by defining the bounding box and voxel sizes
         that  you  would  like to have. This is probably stating the obvious to many but smaller voxels
@@ -333,8 +333,8 @@ class PushFoward(Output):
             self.user_defined_bouding_box = bounding_box
         else:
             raise ValueError("An 2-by-3 array must be entered")
-        if len(voxel_size_list) == 3:
-            self.user_defined_voxel_size = voxel_size_list
+        if len(voxel_sizes_list) == 3:
+            self.user_defined_voxel_sizes = voxel_sizes_list
         else:
             raise ValueError("3 values are required for voxel size")
 
@@ -379,11 +379,11 @@ class PushFoward(Output):
             if self.image_defined_path is not None:
                 batch_list.append(
                     "push.fov.file = {'%s'};" % self.image_defined_path)
-            elif not None in [self.user_defined_bouding_box, self.user_defined_voxel_size]:
+            elif not numpy.any([i is None for i in [self.user_defined_bouding_box, self.user_defined_voxel_sizes]]):
                 batch_list.append("push.fov.bbvox.bb = %s;" %
-                                  convertNumpyArrayToSPMString(self.image_defined_path))
+                                  convertNumpyArrayToSPMString(self.user_defined_bouding_box))
                 batch_list.append("push.fov.bbvox.vox = %s;" %
-                                  convertlistToSPMString(self.image_defined_path))
+                                  convertlistToSPMString(self.user_defined_voxel_sizes))
             else:
                 raise ValueError("Unvalid Field of View configuration")
             batch_list.append("push.preserve = %i;" % self.preserve)
