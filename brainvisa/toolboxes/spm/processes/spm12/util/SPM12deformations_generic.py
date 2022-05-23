@@ -41,7 +41,7 @@ from soma.spm.spm12.util.deformations.composition import DeformationField
 # from soma.spm.spm12.util.deformations.composition import IdentityFromImage
 # from soma.spm.spm12.util.deformations.composition import Identity
 from soma.spm.spm12.util.deformations.composition import Inverse
-from soma.spm.spm12.util.deformations.output import PullBack, PushFoward
+from soma.spm.spm12.util.deformations.output import PullBack, PushForward
 from soma.spm.spm_batch_maker_utils import copyNifti
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 
@@ -51,51 +51,101 @@ configuration = Application().configuration
 def validation():
     try:
         spm = SPM12Standalone(configuration.SPM.spm12_standalone_command,
-                                                    configuration.SPM.spm12_standalone_mcr_path,
-                                                    configuration.SPM.spm12_standalone_path)
+                              configuration.SPM.spm12_standalone_mcr_path,
+                              configuration.SPM.spm12_standalone_path)
     except:
         spm = SPM12(configuration.SPM.spm12_path,
-                                configuration.matlab.executable,
-                                configuration.matlab.options)
+                    configuration.matlab.executable,
+                    configuration.matlab.options)
     return spm
 #------------------------------------------------------------------------------
 
+inputs = 'Inputs'
+options = 'Options'
+pull_options = 'Pullback options'
+push_options = 'Pushforward options'
+outputs = 'Outputs'
 userLevel = 1
-name = 'spm12 - Deformations : apply deformation field- generic'
-#TODO : Add all available compositions but BV interface is not very efficient to do this
+name = 'spm12 - Deformations : apply one deformation - generic'
+
 signature = Signature(
-    'input_images', ListOf(ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image'])),#TODO : modify because 4D is unvailable from SPM
-    'deformation_type', Choice(('Deformation field', 'deformation_field'),
-                             ('Spatial normalisation (_sn.mat)', 'spatial_normalisation_param')),
-    'deformation_field', ReadDiskItem('4D Volume', ["gz compressed NIFTI-1 image", 'NIFTI-1 image', 'SPM image', 'MINC image']),
-    'spatial_normalisation_param', ReadDiskItem('SPM transformation', ['Matlab file']),
-    'voxel_sizes', ListOf(Float()),
-    'bounding_box', Matrix(length=2, width=3),
-    'apply_inverse', Boolean(),
-    'reference_volume', ReadDiskItem('4D Volume', ['NIFTI-1 image', 'SPM image', 'MINC image']),
-    'interpolation', Choice("Nearest neighbour",
-                                                    "Trilinear",
-                                                    "2nd Degree B-Spline",
-                                                    "3rd Degree B-Spline",
-                                                    "4th Degree B-Spline",
-                                                    "5th Degree B-Spline",
-                                                    "6th Degree B-Spline",
-                                                    "7th Degree B-Spline"),
-    'masking', Boolean(),
-    'gaussian_fwhm', ListOf(Float()),
+    'input_images', ListOf(ReadDiskItem(
+        '4D Volume', #TODO : modify because 4D is unvailable from SPM
+        ['NIFTI-1 image', 'SPM image', 'MINC image']),
+        section=inputs),
+    'deformation_type', Choice(
+        ('Deformation field', 'deformation_field'),
+        ('Spatial normalisation (_sn.mat)', 'spatial_normalisation_param'),
+        section=inputs),
+    'deformation_field', ReadDiskItem(
+        '4D Volume',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image', 'SPM image', 'MINC image'],
+        section=inputs),
+    'spatial_normalisation_param', ReadDiskItem(
+        'SPM transformation',
+        ['Matlab file'],
+        section=inputs),
+    'voxel_sizes', ListOf(Float(), section=inputs),
+    'bounding_box', Matrix(length=2, width=3, section=inputs),
+    'apply_inverse', Boolean(section=inputs),
+    'inverse_reference_volume', ReadDiskItem(
+        '4D Volume',
+        ['NIFTI-1 image', 'SPM image', 'MINC image'],
+        section=inputs),
+    'outputs_method', Choice('Pullback',
+                             'Pushforward',
+                             section=inputs),
+    #pull options
+    'interpolation', Choice('Nearest neighbour',
+                            'Trilinear',
+                            '2nd Degree B-Spline',
+                            '3rd Degree B-Spline',
+                            '4th Degree B-Spline',
+                            '5th Degree B-Spline',
+                            '6th Degree B-Spline',
+                            '7th Degree B-Spline',
+                            section=pull_options),
+    'masking', Boolean(section=pull_options),
+    #push options
+    'weight_image', ReadDiskItem(
+        '4D Volume',
+        ['NIFTI-1 image', 'SPM image', 'MINC image'],
+        section=push_options),
+    'fov_ref_image', ReadDiskItem(
+        '4D Volume',
+        ['NIFTI-1 image', 'SPM image', 'MINC image'],
+        section=push_options),
+    'fov_voxel_sizes', ListOf(Float(), section=push_options),
+    'fov_bounding_box', Matrix(length=2, width=3, section=push_options),
+    'preserve', Choice(('Preserve Concentrations (no modulation)', 'no_mod'),
+                       ('Preserve Amount (modulation)', 'mod'),
+                       #('Preserve labels (categorical data)', 'labels'),
+                       section=push_options),
+    'gaussian_fwhm', ListOf(Float(), section=options),
     'output_destination', Choice('Current directory',
-                               'Source directories',
-                               'Output directory'),
-    'ouput_directory', WriteDiskItem('Directory', 'Directory'),
-    'custom_outputs', Boolean(),
-    'images_deformed', ListOf(WriteDiskItem('4D Volume', ["gz compressed NIFTI-1 image", "NIFTI-1 image"])),
+                                 'Source directories',
+                                 'Output directory',
+                                 section=outputs),
+    'ouput_directory', WriteDiskItem(
+        'Directory',
+        'Directory',
+        section=outputs),
+    'custom_outputs', Boolean(section=outputs),
+    'images_deformed', ListOf(WriteDiskItem(
+        '4D Volume',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image']),
+        section=outputs),
     #Batch
-    'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', section='default SPM outputs' )
+    'batch_location', WriteDiskItem(
+        'Matlab SPM script',
+        'Matlab script',
+        section=outputs)
 )
 
 def initialization(self):
     self.addLink(None, 'deformation_type', self.updateSignatureAboutDeformation)
     self.addLink(None, 'apply_inverse', self.updateSignatureAboutInverse)
+    self.addLink(None, 'outputs_method', self.updateSignatureAboutMethod)
     self.addLink(None, 'custom_outputs', self.updateSignatureAboutOutputs)
     self.addLink(None, 'output_destination', self.updateSignatureAboutOutputDestination)
 
@@ -104,7 +154,9 @@ def initialization(self):
     # self.voxel_sizes = [np.nan, np.nan, np.nan]
     # self.bounding_box = [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]]
     self.apply_inverse = False
-    self.interpolation = "4th Degree B-Spline"
+    self.outputs_method = 'Pullback'
+    self.interpolation = '4th Degree B-Spline'
+    self.preserve = 'no_mod'
     self.gaussian_fwhm = [0, 0, 0]
     self.custom_outputs = False
 
@@ -124,9 +176,24 @@ def updateSignatureAboutDeformation(self, proc):
 
 def updateSignatureAboutInverse(self, proc):
     if self.apply_inverse:
-        self.setEnable('reference_volume')
+        self.setEnable('inverse_reference_volume')
     else:
-        self.setDisable('reference_volume')
+        self.setDisable('inverse_reference_volume')
+    self.changeSignature(self.signature)
+
+def updateSignatureAboutMethod(self, proc):
+    if self.outputs_method == 'Pullback':
+        self.setEnable('interpolation', 'masking')
+        self.setDisable('weight_image', 'fov_ref_image',
+                        'fov_voxel_sizes', 'fov_bounding_box',
+                        'preserve')
+    else:
+        self.setEnable('weight_image', 'fov_ref_image',
+                       'fov_voxel_sizes', 'fov_bounding_box',
+                       'preserve')
+        self.setOptional('weight_image', 'fov_ref_image',
+                         'fov_voxel_sizes', 'fov_bounding_box')
+        self.setDisable('interpolation', 'masking')
     self.changeSignature(self.signature)
 
 def updateSignatureAboutOutputs(self, proc):
@@ -154,7 +221,7 @@ def execution(self, context):
         matfile_imported = MatFileImported()
         matfile_imported.setParameterFile(self.spatial_normalisation_param.fullPath())
         if self.voxel_sizes:
-            matfile_imported.setVoxelSize(np.array(self.voxel_sizes))
+            matfile_imported.setVoxelSize(self.voxel_sizes)
         if self.bounding_box:
             matfile_imported.setBoundingBox(np.array(self.bounding_box))
         deformation_element = matfile_imported
@@ -176,63 +243,86 @@ def execution(self, context):
         comp.append(deformation_element)
         inverse = Inverse()
         inverse.setDeformationComposition(comp)
-        inverse.setImageToBaseInverseOn(self.reference_volume.fullPath())
+        inverse.setImageToBaseInverseOn(self.inverse_reference_volume.fullPath())
         deformations.appendDeformation(inverse)
     else:
         deformations.appendDeformation(deformation_element)
 
-    pull_back = PullBack()
-    pull_back.setVolumeListToApply([diskitem.fullPath() for diskitem in self.input_images])
+    if self.outputs_method == 'Pullback':
+        pback = PullBack()
+    else:
+        pback = PushForward()
+    
+    pback.setVolumeListToApply([diskitem.fullPath() for diskitem in self.input_images])
 
     if self.custom_outputs:
-        pull_back.setOuputPathList([diskitem.fullPath() for diskitem in self.images_deformed])
+        pback.setOuputPathList([diskitem.fullPath() for diskitem in self.images_deformed])
 
     if self.output_destination == 'Current directory':
         # deformations.setOuputDestinationToCurrentDirectory()#SPM current directory == batch directory
-        pull_back.setOutputDestinationToOutputDirectory(os.path.dirname(self.batch_location.fullPath()))
+        pback.setOutputDestinationToOutputDirectory(os.path.dirname(self.batch_location.fullPath()))
     elif self.output_destination == 'Source directories':
-        pull_back.setOuputDestinationToSourceDirectories()
+        pback.setOuputDestinationToSourceDirectories()
     elif self.output_destination == 'Output directory':
         if not os.path.exists(self.ouput_directory.fullPath()):
             os.makedirs(self.ouput_directory.fullPath())
         else:
             pass#directory already exists
-        pull_back.setOutputDestinationToOutputDirectory(self.ouput_directory.fullPath())
+        pback.setOutputDestinationToOutputDirectory(self.ouput_directory.fullPath())
     else:
         raise ValueError("Unvalid output_destination")
+    
+    if self.outputs_method == 'Pullback':
+        if self.interpolation == "Nearest neighbour":
+            pback.setInterpolationToNearestNeighbour()
+        elif self.interpolation == "Trilinear":
+            pback.setInterpolationToTrilinear()
+        elif self.interpolation == "2nd Degree B-Spline":
+            pback.setInterpolationTo2ndDegreeBSpline()
+        elif self.interpolation == "3rd Degree B-Spline":
+            pback.setInterpolationTo3rdDegreeBSpline()
+        elif self.interpolation == "4th Degree B-Spline":
+            pback.setInterpolationTo4thDegreeBSpline()
+        elif self.interpolation == "5th Degree B-Spline":
+            pback.setInterpolationTo5thDegreeBSpline()
+        elif self.interpolation == "6th Degree B-Spline":
+            pback.setInterpolationTo6thDegreeBSpline()
+        elif self.interpolation == "7th Degree B-Spline":
+            pback.setInterpolationTo7thDegreeBSpline()
+        else:
+            raise ValueError("Unvalid interpolation")
 
-    if self.interpolation == "Nearest neighbour":
-        pull_back.setInterpolationToNearestNeighbour()
-    elif self.interpolation == "Trilinear":
-        pull_back.setInterpolationToTrilinear()
-    elif self.interpolation == "2nd Degree B-Spline":
-        pull_back.setInterpolationTo2ndDegreeBSpline()
-    elif self.interpolation == "3rd Degree B-Spline":
-        pull_back.setInterpolationTo3rdDegreeBSpline()
-    elif self.interpolation == "4th Degree B-Spline":
-        pull_back.setInterpolationTo4thDegreeBSpline()
-    elif self.interpolation == "5th Degree B-Spline":
-        pull_back.setInterpolationTo5thDegreeBSpline()
-    elif self.interpolation == "6th Degree B-Spline":
-        pull_back.setInterpolationTo6thDegreeBSpline()
-    elif self.interpolation == "7th Degree B-Spline":
-        pull_back.setInterpolationTo7thDegreeBSpline()
+        if self.masking:
+            pback.setMasking()
+        else:
+            pback.unsetMasking()
     else:
-        raise ValueError("Unvalid interpolation")
-
-    if self.masking:
-        pull_back.setMasking()
-    else:
-        pull_back.unsetMasking()
+        if self.weight_image:
+            pback.setWeightImagePath(self.weight_image.fullPath())
+        
+        if self.fov_ref_image:
+            pback.setFieldOfViewToImageDefined(self.fov_ref_image.fullPath())
+        elif self.fov_voxel_sizes and self.fov_bounding_box:
+            pback.setFieldOfViewToUserDefined(np.array(self.fov_bounding_box),
+                                              self.fov_voxel_sizes)
+        else:
+            raise ValueError("Unvalid FOV, an image reference or the bounding_box and voxel_sizes of the output must be fill")
+        
+        if self.preserve == 'no_mod':
+            pback.setPreserveToConcentrations()
+        elif self.preserve == 'mod':
+            pback.setPreserveToAmount()
+        else:
+            raise ValueError("Unvalid preserve option")
 
     if len(self.gaussian_fwhm) == 3:
-        pull_back.setFWHM(self.gaussian_fwhm[0],
-                                            self.gaussian_fwhm[1],
-                                            self.gaussian_fwhm[2])
+        pback.setFWHM(self.gaussian_fwhm[0],
+                      self.gaussian_fwhm[1],
+                      self.gaussian_fwhm[2])
     else:
         context.error("gaussian_fwhm requires 3 value")
 
-    deformations.appendOutput(pull_back)
+    deformations.appendOutput(pback)
 
     spm = validation()
     spm.addModuleToExecutionQueue(deformations)
