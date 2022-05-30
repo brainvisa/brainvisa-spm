@@ -145,7 +145,7 @@ signature = Signature(
     'intracranial_labels', Boolean(section=labels),
     'intracranial_native_labels', WriteDiskItem(
         'T1 MRI intracranial labels',
-        'NIFTI-1 image',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
         requiredAttributes={'space': 't1mri'},
         section=labels),
     'intracranial_native_translation', WriteDiskItem(
@@ -159,7 +159,7 @@ signature = Signature(
                                       section=labels),
     'cranial_native_labels', WriteDiskItem(
         'T1 MRI intracranial labels',
-        'NIFTI-1 image',
+        ['gz compressed NIFTI-1 image', 'NIFTI-1 image'],
         requiredAttributes={'space': 't1mri'},
         section=labels),
     'cranial_native_translation', WriteDiskItem(
