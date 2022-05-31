@@ -187,70 +187,66 @@ def update_defo_type(self, num):
 def execution(self, context):
 
     temp_directory = context.temporary('Directory')
-    try:
-        deformations = Deformations()
-        for i in range(1, self.deformation_number + 1):
-            deformation_type = getattr(self, f'deformation_type_{i}')
-            if deformation_type == 'dartel':
-                deformation_element = composition.DartelFlow()
-                deformation_element.flow_field_path = getattr(self, f'flow_field_{i}').fullPath()
-                deformation_element.flow_direction = getattr(self, f'direction_{i}')
-                deformation_element.time_step = getattr(self, f'time_step_{i}')
-                deformation_element.setDartelTemplatePath(getattr(self, f'dartel_template_{i}').fullPath())
+    deformations = Deformations()
+    for i in range(1, self.deformation_number + 1):
+        deformation_type = getattr(self, f'deformation_type_{i}')
+        if deformation_type == 'dartel':
+            deformation_element = composition.DartelFlow()
+            deformation_element.flow_field_path = getattr(self, f'flow_field_{i}').fullPath()
+            deformation_element.flow_direction = getattr(self, f'direction_{i}')
+            deformation_element.time_step = getattr(self, f'time_step_{i}')
+            deformation_element.setDartelTemplatePath(getattr(self, f'dartel_template_{i}').fullPath())
 
-            elif deformation_type == 'deformation':
-                deformation_element = composition.DeformationField()
-                deformation_file = getattr(self, f'deformation_field_{i}').fullPath()
-                if deformation_file.endswith('.gz'):
-                    src_gz = shutil.copy(deformation_file, temp_directory.fullPath())
-                    context.system('gunzip', src_gz)
-                    source = '.'.join(src_gz.split('.')[:-1])
-                else:
-                    source = deformation_file
-                deformation_element.deformation_field_path = source
+        elif deformation_type == 'deformation':
+            deformation_element = composition.DeformationField()
+            deformation_file = getattr(self, f'deformation_field_{i}').fullPath()
+            if deformation_file.endswith('.gz'):
+                src_gz = shutil.copy(deformation_file, temp_directory.fullPath())
+                context.system('gunzip', src_gz)
+                source = '.'.join(src_gz.split('.')[:-1])
+            else:
+                source = deformation_file
+            deformation_element.deformation_field_path = source
                 
-            elif deformation_type == 'identity_image':
-                deformation_element = composition.IdentityFromImage()
-                deformation_element.reference_image_path = getattr(self, f'base_image_{i}').fullPath()
+        elif deformation_type == 'identity_image':
+            deformation_element = composition.IdentityFromImage()
+            deformation_element.reference_image_path = getattr(self, f'base_image_{i}').fullPath()
                 
-            elif deformation_type == 'identity_shape':
-                deformation_element = composition.Identity()
-                voxel_size = getattr(self, f'voxel_size_{i}')
-                if voxel_size:
-                    deformation_element.voxel_size = voxel_size
-                bounding_box = getattr(self, f'bounding_box_{i}')
-                if bounding_box:
-                    deformation_element.bounding_box = numpy.array(bounding_box)
+        elif deformation_type == 'identity_shape':
+            deformation_element = composition.Identity()
+            voxel_size = getattr(self, f'voxel_size_{i}')
+            if voxel_size:
+                deformation_element.voxel_size = voxel_size
+            bounding_box = getattr(self, f'bounding_box_{i}')
+            if bounding_box:
+                deformation_element.bounding_box = numpy.array(bounding_box)
 
-            elif deformation_type == 'imported_mat':
-                deformation_element = composition.MatFileImported()
-                deformation_element.parameter_file_path = getattr(self, f'param_file_{i}').fullPath()
-                voxel_size = getattr(self, f'voxel_size_{i}')
-                if voxel_size:
-                    deformation_element.voxel_size = voxel_size
-                bounding_box = getattr(self, f'bounding_box_{i}')
-                if bounding_box:
-                    deformation_element.bounding_box = numpy.array(bounding_box)
+        elif deformation_type == 'imported_mat':
+            deformation_element = composition.MatFileImported()
+            deformation_element.parameter_file_path = getattr(self, f'param_file_{i}').fullPath()
+            voxel_size = getattr(self, f'voxel_size_{i}')
+            if voxel_size:
+                deformation_element.voxel_size = voxel_size
+            bounding_box = getattr(self, f'bounding_box_{i}')
+            if bounding_box:
+                deformation_element.bounding_box = numpy.array(bounding_box)
         
-            deformations.appendDeformation(deformation_element)
+        deformations.appendDeformation(deformation_element)
     
-        save_deformation = SaveDeformation()
+    save_deformation = SaveDeformation()
     
-        deformation_tmp = context.temporary('NIFTI-1 image')
-        deformation_name = os.path.basename(deformation_tmp.fullPath())
-        output_dir = os.path.dirname(deformation_tmp.fullPath())
+    deformation_tmp = context.temporary('NIFTI-1 image')
+    deformation_name = os.path.basename(deformation_tmp.fullPath())
+    output_dir = os.path.dirname(deformation_tmp.fullPath())
     
-        save_deformation.setDeformationName(deformation_name)
-        save_deformation.setOutputDestinationToOutputDirectory(output_dir)
-        save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
+    save_deformation.setDeformationName(deformation_name)
+    save_deformation.setOutputDestinationToOutputDirectory(output_dir)
+    save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
 
-        deformations.appendOutput(save_deformation)
+    deformations.appendOutput(save_deformation)
 
-        spm = validation()
-        spm.addModuleToExecutionQueue(deformations)
-        spm.setSPMScriptPath(self.batch_location.fullPath())
-        output = spm.run()
-        context.log(name, html=output)
-
-    finally:
-        shutil.rmtree(temp_directory.fullPath())
+    spm = validation()
+    spm.addModuleToExecutionQueue(deformations)
+    spm.setSPMScriptPath(self.batch_location.fullPath())
+    output = spm.run()
+    context.log(name, html=output)
