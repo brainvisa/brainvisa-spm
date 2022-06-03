@@ -88,7 +88,7 @@ signature = Signature(
     'voxel_sizes', ListOf(Float(), section=inputs),
     'bounding_box', Matrix(length=2, width=3, section=inputs),
     'apply_inverse', Boolean(section=inputs),
-    'inverse_reference_volume', ReadDiskItem(
+    'image_to_base_inverse_on', ReadDiskItem(
         '4D Volume',
         ['NIFTI-1 image', 'SPM image', 'MINC image'],
         section=inputs),
@@ -176,9 +176,9 @@ def updateSignatureAboutDeformation(self, proc):
 
 def updateSignatureAboutInverse(self, proc):
     if self.apply_inverse:
-        self.setEnable('inverse_reference_volume')
+        self.setEnable('image_to_base_inverse_on')
     else:
-        self.setDisable('inverse_reference_volume')
+        self.setDisable('image_to_base_inverse_on')
     self.changeSignature(self.signature)
 
 def updateSignatureAboutMethod(self, proc):
