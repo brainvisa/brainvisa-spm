@@ -119,7 +119,7 @@ signature = Signature(
     'fov_bounding_box', Matrix(length=2, width=3, section=push_options),
     'preserve', Choice(('Preserve Concentrations (no modulation)', 'no_mod'),
                        ('Preserve Amount (modulation)', 'mod'),
-                       #('Preserve labels (categorical data)', 'labels'),
+                       ('Preserve labels (categorical data)', 'labels'),
                        section=push_options),
     'gaussian_fwhm', ListOf(Float(), section=options),
     'output_destination', Choice('Current directory',
@@ -243,7 +243,7 @@ def execution(self, context):
         comp.append(deformation_element)
         inverse = Inverse()
         inverse.setDeformationComposition(comp)
-        inverse.setImageToBaseInverseOn(self.inverse_reference_volume.fullPath())
+        inverse.setImageToBaseInverseOn(self.reference_volume.fullPath())
         deformations.appendDeformation(inverse)
     else:
         deformations.appendDeformation(deformation_element)

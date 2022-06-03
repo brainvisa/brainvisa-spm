@@ -355,6 +355,13 @@ class PushForward(Output):
         correspondingly reduced in intensity. This option is suggested for VBM.
         """
         self.preserve = 1
+    
+    def setPreserveToLabels(self):
+        """
+        Preserve Labels: This is intended for warping label images. While it is quite slow to run, it is
+        intended to give more accurately warped categorical data.
+        """
+        self.preserve = 2
 
     @checkIfArgumentTypeIsAllowed(numbers.Real, 1)
     @checkIfArgumentTypeIsAllowed(numbers.Real, 2)
@@ -373,7 +380,7 @@ class PushForward(Output):
             batch_list = []
             batch_list.append("push.fnames = {%s};" % convertPathListToSPMBatchString(self.volume_list_to_apply,
                                                                                       add_dimension=False))
-            batch_list.append("pull.weight = {'%s'};" % self.weight_image_path)
+            batch_list.append("push.weight = {'%s'};" % self.weight_image_path)
             batch_list.extend(addBatchKeyWordInEachItem(
                 "push", self.output_destination.getStringListForBatch()))
             if self.image_defined_path is not None:
@@ -389,6 +396,7 @@ class PushForward(Output):
             batch_list.append("push.preserve = %i;" % self.preserve)
             batch_list.append("push.fwhm = %s;" %
                               convertlistToSPMString(self.gaussian_fwhm))
+            batch_list.append("push.prefix = 'w';")
             return batch_list
         else:
             raise ValueError("volume list to apply is required")
