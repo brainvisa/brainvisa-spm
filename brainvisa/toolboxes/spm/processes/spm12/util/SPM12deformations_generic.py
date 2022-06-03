@@ -312,6 +312,8 @@ def execution(self, context):
             pback.setPreserveToConcentrations()
         elif self.preserve == 'mod':
             pback.setPreserveToAmount()
+        elif self.preserve == 'labels':
+            pback.setPreserveToLabels()
         else:
             raise ValueError("Unvalid preserve option")
 
