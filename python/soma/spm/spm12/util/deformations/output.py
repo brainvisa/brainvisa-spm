@@ -93,7 +93,7 @@ class PullBack(Output):
         self.volume_list_to_apply = None
         self.output_destination = OutputDestinationWithSources()
         self.interpolation = 4
-        self.gaussian_fwhm = [0, 0, 0]
+        self.fwhm = [0, 0, 0]
 
         self.ouput_path_list = None
 
@@ -238,7 +238,7 @@ class PullBack(Output):
             batch_list.append("pull.interp = %i;" % self.interpolation)
             batch_list.append("pull.mask = %i;" % self.masking)
             batch_list.append("pull.fwhm = %s;" %
-                              convertlistToSPMString(self.gaussian_fwhm))
+                              convertlistToSPMString(self.fwhm))
             return batch_list
         else:
             raise ValueError("volume list to apply is required")
@@ -250,13 +250,16 @@ class PullBack(Output):
     def _moveSPMDefaultPathsIfNeeded(self):
         if self.ouput_path_list is not None:
             if len(self.volume_list_to_apply) == len(self.ouput_path_list):
+                prefix='w'
+                if self.fwhm!=[0,0,0]:
+                    prefix = 's' + prefix
                 for input_path, output_path in zip(self.volume_list_to_apply, self.ouput_path_list):
                     if self.output_destination.sources:
-                        moveSPMPath(input_path, output_path, prefix='w')
+                        moveSPMPath(input_path, output_path, prefix=prefix)
                     else:
                         output_directory = self.output_destination.getOutputDirectory()
                         spm_default_path = os.path.join(
-                            output_directory, 'w' + os.path.basename(input_path))
+                            output_directory, prefix + os.path.basename(input_path))
                         moveFileAndCreateFoldersIfNeeded(
                             spm_default_path, output_path)
             else:
@@ -283,7 +286,7 @@ class PushForward(Output):
         self.user_defined_bouding_box = None
         self.user_defined_voxel_sizes = None
         self.preserve = 0
-        self.gaussian_fwhm = [0, 0, 0]
+        self.fwhm = [0, 0, 0]
 
     @checkIfArgumentTypeIsAllowed(list, 1)
     def setVolumeListToApply(self, volume_list_to_apply):
@@ -395,8 +398,7 @@ class PushForward(Output):
                 raise ValueError("Unvalid Field of View configuration")
             batch_list.append("push.preserve = %i;" % self.preserve)
             batch_list.append("push.fwhm = %s;" %
-                              convertlistToSPMString(self.gaussian_fwhm))
-            batch_list.append("push.prefix = 'w';")
+                              convertlistToSPMString(self.fwhm))
             return batch_list
         else:
             raise ValueError("volume list to apply is required")
@@ -408,13 +410,18 @@ class PushForward(Output):
     def _moveSPMDefaultPathsIfNeeded(self):
         if self.ouput_path_list is not None:
             if len(self.volume_list_to_apply) == len(self.ouput_path_list):
+                prefix='w'
+                if self.preserve:
+                    prefix='mw'
+                if self.fwhm!=[0,0,0]:
+                    prefix = 's' + prefix
                 for input_path, output_path in zip(self.volume_list_to_apply, self.ouput_path_list):
                     if self.output_destination.sources:
-                        moveSPMPath(input_path, output_path, prefix='w')
+                        moveSPMPath(input_path, output_path, prefix=prefix)
                     else:
                         output_directory = self.output_destination.getOutputDirectory()
                         spm_default_path = os.path.join(
-                            output_directory, 'w' + os.path.basename(input_path))
+                            output_directory, prefix + os.path.basename(input_path))
                         moveFileAndCreateFoldersIfNeeded(
                             spm_default_path, output_path)
             else:
