@@ -88,7 +88,7 @@ signature = Signature(
     'voxel_sizes', ListOf(Float(), section=inputs),
     'bounding_box', Matrix(length=2, width=3, section=inputs),
     'apply_inverse', Boolean(section=inputs),
-    'inverse_reference_volume', ReadDiskItem(
+    'image_to_base_inverse_on', ReadDiskItem(
         '4D Volume',
         ['NIFTI-1 image', 'SPM image', 'MINC image'],
         section=inputs),
@@ -119,7 +119,7 @@ signature = Signature(
     'fov_bounding_box', Matrix(length=2, width=3, section=push_options),
     'preserve', Choice(('Preserve Concentrations (no modulation)', 'no_mod'),
                        ('Preserve Amount (modulation)', 'mod'),
-                       #('Preserve labels (categorical data)', 'labels'),
+                       # ('Preserve labels (categorical data)', 'labels'),
                        section=push_options),
     'gaussian_fwhm', ListOf(Float(), section=options),
     'output_destination', Choice('Current directory',
@@ -176,9 +176,9 @@ def updateSignatureAboutDeformation(self, proc):
 
 def updateSignatureAboutInverse(self, proc):
     if self.apply_inverse:
-        self.setEnable('inverse_reference_volume')
+        self.setEnable('image_to_base_inverse_on')
     else:
-        self.setDisable('inverse_reference_volume')
+        self.setDisable('image_to_base_inverse_on')
     self.changeSignature(self.signature)
 
 def updateSignatureAboutMethod(self, proc):
@@ -243,7 +243,7 @@ def execution(self, context):
         comp.append(deformation_element)
         inverse = Inverse()
         inverse.setDeformationComposition(comp)
-        inverse.setImageToBaseInverseOn(self.inverse_reference_volume.fullPath())
+        inverse.setImageToBaseInverseOn(self.image_to_base_inverse_on.fullPath())
         deformations.appendDeformation(inverse)
     else:
         deformations.appendDeformation(deformation_element)
@@ -312,6 +312,8 @@ def execution(self, context):
             pback.setPreserveToConcentrations()
         elif self.preserve == 'mod':
             pback.setPreserveToAmount()
+        elif self.preserve == 'labels':
+            pback.setPreserveToLabels()
         else:
             raise ValueError("Unvalid preserve option")
 
