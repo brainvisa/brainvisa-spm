@@ -71,8 +71,10 @@ class SaveDeformation(Output):
     def _moveSPMDefaultPathsIfNeeded(self):
         if self.deformation_saved_path is not None:
             ouput_directory = self.output_destination.getOutputDirectory()
-            spm_default_output_path = os.path.join(
-                ouput_directory, 'y_'+self.deformation_name)
+            spm_default_output_path = os.path.join(ouput_directory, 'y_' + self.deformation_name)
+            if not spm_default_output_path.endswith('.nii'):
+                spm_default_output_path += '.nii'
+            
             moveFileAndCreateFoldersIfNeeded(
                 spm_default_output_path, self.deformation_saved_path)
         else:

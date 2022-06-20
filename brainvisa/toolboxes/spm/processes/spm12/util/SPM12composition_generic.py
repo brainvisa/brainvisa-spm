@@ -1,11 +1,10 @@
 import numpy
 import os
 import shutil
-from tempfile import mkdtemp
 
 from brainvisa.processes import Application, Signature
 from brainvisa.processes import ReadDiskItem, WriteDiskItem, Choice, Integer
-from brainvisa.processes import ListOf, Float, Matrix
+from brainvisa.processes import ListOf, Float, Matrix, String, Boolean
 from brainvisa.processes import getAllFormats
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.util.deformations import Deformations
@@ -21,6 +20,11 @@ deformations = 'Deformations parameters {}'
 output = 'Output'
 
 OUTPUT_SECTION = {
+    'custom_outputs': Boolean(section=output),
+    'output_destination': Choice(('Current directory', 'current'), ('Output directory', 'output'),
+                                 section=output),
+    'output_directory': WriteDiskItem('Directory', 'Directory', section=output),
+    'save_as': String(section=output),
     'output_deformation': WriteDiskItem('4D Volume', getAllFormats(),
                                         section=output),
     'batch_location': WriteDiskItem('Matlab SPM script', 'Matlab script',
@@ -107,17 +111,23 @@ def imported_mat_params(num):
 
 
 def initialization(self):
+    self.custom_outputs = False
+    self.output_destination = 'output'
     self.addLink(None, 'deformation_number', self.update_deformation_number)
     self.deformation_number = 1
-    self.addLink('batch_location', 'output_deformation', self.update_batch_path)
+    self.addLink('batch_location', ('output_deformation', 'output_directory'), self.update_batch_path)
+    self.addLink(None, 'custom_outputs', self.update_sig_output)
+    self.addLink(None, 'output_destination', self.update_sig_output_directory)
     
 
-def update_batch_path(self, proc):
-    if self.output_deformation:
-        output_dir = os.path.dirname(self.output_deformation.fullPath())
-        return os.path.join(output_dir, 'spm12_deformation_composition_job.m')
+def update_batch_path(self, deformation, directory):
+    if self.custom_outputs and deformation:
+        output_dir = os.path.dirname(deformation.fullPath())
+    elif not self.custom_outputs and directory:
+        output_dir = directory.fullPath()
     else:
         return ''
+    return os.path.join(output_dir, 'spm12_deformation_composition_job.m')
 
 
 def get_param_num(self, param_name: str) -> int:
@@ -184,6 +194,24 @@ def update_defo_type(self, num):
     self.changeSignature(self.signature)
 
 
+def update_sig_output(self, custom_outputs):
+    if custom_outputs:
+        self.setDisable('output_destination', 'output_directory', 'save_as')
+        self.setEnable('output_deformation')
+    else:
+        self.setEnable('output_destination', 'output_directory', 'save_as')
+        self.setDisable('output_deformation')
+    self.changeSignature(self.signature)
+        
+
+def update_sig_output_directory(self, output_destination):
+    if output_destination == 'current':
+        self.setDisable('output_directory')
+    elif output_destination == 'output':
+        self.setEnable('output_directory')
+    self.changeSignature(self.signature)
+
+
 def execution(self, context):
 
     temp_directory = context.temporary('Directory')
@@ -235,13 +263,25 @@ def execution(self, context):
     
     save_deformation = SaveDeformation()
     
-    deformation_tmp = context.temporary('NIFTI-1 image')
-    deformation_name = os.path.basename(deformation_tmp.fullPath())
-    output_dir = os.path.dirname(deformation_tmp.fullPath())
+    if self.custom_outputs:
+        # Do not create temp file if output begin with 'y_'
+        output_def = self.output_deformation.fullPath()
+        if os.path.basename(output_def).startswith('y_'):
+            deformation_name = os.path.basename(output_def)[2:].split('.nii')[0]
+            output_dir = os.path.dirname(output_def)
+            if output_def.endswith('.nii.gz'):
+                save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
+        else:
+            deformation_tmp = context.temporary('NIFTI-1 image')
+            deformation_name = os.path.basename(deformation_tmp.fullPath())
+            output_dir = os.path.dirname(deformation_tmp.fullPath())
+            save_deformation.setOutputDeformationPath(output_def)
+    else:
+        deformation_name = self.save_as
+        output_dir = self.output_directory.fullPath()
     
     save_deformation.setDeformationName(deformation_name)
     save_deformation.setOutputDestinationToOutputDirectory(output_dir)
-    save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
 
     deformations.appendOutput(save_deformation)
 
