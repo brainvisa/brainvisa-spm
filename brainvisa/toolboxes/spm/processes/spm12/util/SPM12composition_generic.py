@@ -203,7 +203,7 @@ def execution(self, context):
             if deformation_file.endswith('.gz'):
                 src_gz = shutil.copy(deformation_file, temp_directory.fullPath())
                 context.system('gunzip', src_gz)
-                source = '.'.join(src_gz.split('.')[:-1])
+                source = src_gz[:-3]
             else:
                 source = deformation_file
             deformation_element.deformation_field_path = source
