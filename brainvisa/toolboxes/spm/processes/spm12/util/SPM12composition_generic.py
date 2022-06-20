@@ -97,7 +97,7 @@ def identity_params(num):
 
 def imported_mat_params(num):
     return {
-        f'param_file_{num}': ReadDiskItem('Any Type', getAllFormats(),
+        f'param_file_{num}': ReadDiskItem('Any Type', 'Matlab file',
                                           section=deformations.format(num)),
         f'voxel_size_{num}': ListOf(Float(),
                                     section=deformations.format(num)),
