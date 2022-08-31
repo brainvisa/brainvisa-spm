@@ -160,8 +160,9 @@ class WriteNormalised(SPM12MainModule):
             batch_list = []
             #input files
             batch_list.append("spm.tools.shoot.norm.template = {'%s'};" % self.final_template_path)
-            batch_list.append("spm.tools.shoot.norm.data.subj.deformation = {%s};" % self.deformation_field_path)
-            batch_list.append("spm.tools.shoot.norm.data.subj.images = {%s};" % convertPathListToSPMBatchString(self.images_path_list))
+            batch_list.append("spm.tools.shoot.norm.data.subj.deformation = {'%s'};" % self.deformation_field_path)
+            batch_list.append("spm.tools.shoot.norm.data.subj.images = {%s};"
+                              % convertPathListToSPMBatchString(self.images_path_list, add_dimension=False))
             #options
             batch_list.append("spm.tools.shoot.norm.vox = %s;" %convertlistToSPMString(self.voxel_sizes))
             batch_list.append("spm.tools.shoot.norm.bb = %s;" %convertNumpyArrayToSPMString(self.bounding_box))
@@ -175,11 +176,11 @@ class WriteNormalised(SPM12MainModule):
         smoothing = (self.fwhm != 0)
         if self.output_images_path_list:
             for image_path, output_image_path in zip(self.images_path_list, self.output_images_path_list):
-                if smoothing and preserve:
+                if smoothing and self.preserve:
                     prefix = "smw"
-                elif smoothing and not preserve:
+                elif smoothing and not self.preserve:
                     prefix = "sw"
-                elif preserve:
+                elif self.preserve:
                     prefix = "mw"
                 else:
                     prefix = "w"
