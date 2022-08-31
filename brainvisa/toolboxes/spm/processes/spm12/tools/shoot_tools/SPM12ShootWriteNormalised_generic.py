@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from brainvisa.tools import spm_utils
 from brainvisa.processes import *
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.tools.shoot_tools import WriteNormalised
@@ -60,24 +60,24 @@ def initialization(self):
                  'deformation_field',
                  self.updateBatchPath)
     #SPM default initialisation
-    self.voxel_sizes = ['NaN', 'NaN', 'NaN']
-    self.bounding_box = [['NaN', 'NaN', 'NaN'],['NaN', 'NaN', 'NaN']]
+    #self.voxel_sizes = ['NaN', 'NaN', 'NaN']
+    #self.bounding_box = [['NaN', 'NaN', 'NaN'],['NaN', 'NaN', 'NaN']]
     self.preserve = 'Preserve Concentrations'
     self.fwhm = 0
 
 
 def updateFinalTemplate(self, final_space, names, parameterized):
-  if final_space == 'MNI':
-    self.setEnable('final_template')
-  else:
-    self.setDisable('final_template')
-  self.changeSignature(self.signature)
+    if final_space == 'MNI':
+        self.setEnable('final_template')
+    else:
+        self.setDisable('final_template')
+    self.changeSignature(self.signature)
 
 
 def updateBatchPath(self, proc):
-  if self.deformation_field is not None:
-    dirname = os.path.dirname(self.deformation_field.fullPath())
-    return os.path.join(dirname, 'spm12_shoot_write_normalised_job.m')
+    if self.deformation_field is not None:
+        dirname = os.path.dirname(self.deformation_field.fullPath())
+        return os.path.join(dirname, 'spm12_shoot_write_normalised_job.m')
 
 
 def execution(self, context):
@@ -97,9 +97,10 @@ def execution(self, context):
         normalise.setPreserveToAmount()
     else:
         raise ValueError("Unvalid preserve")
-
-    normalise.setVoxelSizes(self.voxel_sizes)
-    normalise.setBoundingBox(numpy.array(self.bounding_box))
+    if self.voxel_sizes:
+        normalise.setVoxelSizes(self.voxel_sizes)
+    if self.bounding_box:
+        normalise.setBoundingBox(numpy.array(self.bounding_box))
     normalise.setFWHM(self.fwhm)
 
     spm = validation()

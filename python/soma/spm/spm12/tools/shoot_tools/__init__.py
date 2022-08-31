@@ -156,7 +156,7 @@ class WriteNormalised(SPM12MainModule):
         self.output_images_path_list = output_images_path_list
 
     def getStringListForBatch(self):
-        if not None in [self.flow_field_path_list, self.image_path_list]:
+        if not None in [self.deformation_field_path, self.images_path_list]:
             batch_list = []
             #input files
             batch_list.append("spm.tools.shoot.norm.template = {'%s'};" % self.final_template_path)
