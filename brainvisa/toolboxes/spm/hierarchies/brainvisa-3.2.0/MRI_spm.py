@@ -516,15 +516,9 @@ long_spm_registration = (
             '<subject>_{acquisition}_to_avg_<acquisition_sequence>_jacobian_determinant',
               SetType('Jacobian determinant'),
               SetWeakAttr('space', 'average'),
-            'jd_<subject>_{baseline}_{followup}',
-              SetType('Jacobian rate'),
-              SetWeakAttr('space', 'average'),
               
             '<subject>_{acquisition}_to_avg_<acquisition_sequence>_divergence_map',
               SetType('Divergence map'),
-              SetWeakAttr('space', 'average'),
-            'dv_<subject>_{baseline}_{followup}',
-              SetType('Divergence rate'),
               SetWeakAttr('space', 'average'),
               
             # Native space

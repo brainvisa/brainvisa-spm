@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from brainvisa.processes import *
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.tools.shoot_tools import WriteNormalised
+import numpy
+
 
 configuration = Application().configuration
 

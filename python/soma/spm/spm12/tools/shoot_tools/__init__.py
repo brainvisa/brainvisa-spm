@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 from soma.spm.spm_main_module import SPM12MainModule
 from soma.spm.spm_batch_maker_utils import moveSPMPath, convertlistToSPMString, convertNumpyArrayToSPMString, convertPathListToSPMBatchString
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 import numpy
-import numbers
+
 
 class RunShoot(SPM12MainModule):
     def __init__(self):
@@ -173,6 +172,9 @@ class WriteNormalised(SPM12MainModule):
             raise ValueError("deformation_field_path and images_path_list are required")
 
     def _moveSPMDefaultPathsIfNeeded(self):
+        """
+        Rename and move the output images if asked otherwise default spm outputs will not move.
+        """
         smoothing = (self.fwhm != 0)
         if self.output_images_path_list:
             for image_path, output_image_path in zip(self.images_path_list, self.output_images_path_list):
@@ -187,5 +189,3 @@ class WriteNormalised(SPM12MainModule):
                 moveSPMPath(image_path,
                             output_image_path,
                             prefix=prefix)
-            else:
-                pass #do not move default spm paths
