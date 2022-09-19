@@ -36,7 +36,7 @@ signature = Signature(
         ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     'images_warped', ListOf(WriteDiskItem(
         '4D Volume',
-        ['NIFTI-1 image'])), #'gz compressed NIFTI-1 image'
+        ['NIFTI-1 image', 'gz compressed NIFTI-1 image'])),
     'voxel_sizes', ListOf(Float()),
     'bounding_box', Matrix(length=2, width=3),
     'preserve', Choice('Preserve Concentrations',
