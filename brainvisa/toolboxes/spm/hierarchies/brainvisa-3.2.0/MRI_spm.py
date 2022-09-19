@@ -432,7 +432,8 @@ shoot_analysis_directory = (
     
     'y_{prefix}<subject>_Template',
     SetType('SPM deformation field'),
-    SetWeakAttr('direction', 'forward'),
+    SetWeakAttr('direction', 'forward',
+                'warping_method', 'high-dimensional'),
     
     'j_{prefix}<subject>_Template',
     SetType('Jacobian determinant'),
@@ -519,7 +520,7 @@ long_spm_registration = (
             '<subject>_{acquisition}_to_avg_<acquisition_sequence>_divergence_map',
               SetType('Divergence map'),
               SetWeakAttr('space', 'average'),
-
+              
             # Native space
             '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_proba',
             SetType('T1 MRI tissue probability map'),
