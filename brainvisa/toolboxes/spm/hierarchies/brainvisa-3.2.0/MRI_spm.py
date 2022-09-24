@@ -498,12 +498,6 @@ long_spm_registration = (
                             'tissue_class', 'grey'),
                 
             # SPM12 pairwise/serial
-            'y_<subject>_{acquisition}_to_avg_<acquisition_sequence>_deformation_field',
-              SetType('SPM deformation field'),
-              SetWeakAttr('orientation', 'acquisition_to_average',
-                          'direction', 'forward',
-                          'warping_method', 'none'),
-              
             '<subject>_avg_<acquisition_sequence>_t1mri',
               SetType('T1 MRI mid-point average'),
               SetWeakAttr('space', 'average',
@@ -513,14 +507,25 @@ long_spm_registration = (
               SetWeakAttr('space', 'average',
                           'modality', 'flairmri'),
               
-            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_jacobian_determinant',
+            'j_<subject>_avg_<acquisition_sequence>_to_{acquisition}',
               SetType('Jacobian determinant'),
               SetWeakAttr('space', 'average'),
-              
-            '<subject>_{acquisition}_to_avg_<acquisition_sequence>_divergence_map',
+            'jd_<subject>_{baseline}_{followup}',
+              SetType('Jacobian rate'),
+              SetWeakAttr('space', 'average'),
+            
+            'dv_<subject>_avg_<acquisition_sequence>_to_{acquisition}',
               SetType('Divergence map'),
               SetWeakAttr('space', 'average'),
-              
+            'dv_<subject>_{baseline}_{followup}',
+              SetType('Divergence rate'),
+              SetWeakAttr('space', 'average'), 
+            
+            'y_<subject>_{acquisition}_to_avg_<acquisition_sequence>',
+              SetType('SPM deformation field'),
+              SetWeakAttr('orientation', 'acquisition_to_average',
+                          'direction', 'forward',
+                          'warping_method', 'none'),
             # Native space
             '<subject>_{acquisition}_to_avg_<acquisition_sequence>_grey_proba',
             SetType('T1 MRI tissue probability map'),

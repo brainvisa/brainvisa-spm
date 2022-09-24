@@ -46,16 +46,18 @@ FileType('T1 MRI Bias field', 'SPM field')#Voir avec Morpho
 FileType('TPM HDW DARTEL created template', 'TPM HDW DARTEL template')
 
 FileType('Jacobian determinant', '3D Volume')
+FileType('Jacobian rate', '3D Volume')
 
 FileType('Estimate T1 MRI raw volumes', 'Text file')
 FileType('T1 MRI partial volume estimation', '3D Volume')
 FileType('T1 MRI tissue probability map', '3D Volume')
 FileType('T1 MRI tissue probability mask', 'Label volume')
-
-FileType('T1 MRI mid-point average', 'Raw T1 MRI')  # SPM12 Long
+## SPM12 Long
+FileType('T1 MRI mid-point average', 'Raw T1 MRI')
 FileType('FLAIR MRI mid-point average', '3D Volume')
-FileType('Divergence map', '3D Volume')  # SPM12 Long
-
+FileType('Divergence map', '3D Volume')
+FileType('Divergence rate', '3D Volume')
+##
 FileType('T1 MRI intracranial labels', 'Label volume')
 FileType('T1 MRI intracranial labels translation', 'Text file', 'JSON file')
 FileType('SPM tissue volumes', 'CSV file')
