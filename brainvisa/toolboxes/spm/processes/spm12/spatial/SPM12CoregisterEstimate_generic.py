@@ -65,8 +65,8 @@ reslice_section = "reslice options"
 
 signature = Signature(
     "reference", ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image']),
-    "source", ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image'], enableConversion=False),
-    "others", ListOf(ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image'], enableConversion=False)),
+    "source", ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image']),
+    "others", ListOf(ReadDiskItem("4D Volume", ['NIFTI-1 image', 'SPM image', 'MINC image'])),
     "objective_function", Choice("Mutual Information",
                                  "Normalised Mutual Information",
                                  "Entropy Correlation Coefficient",
