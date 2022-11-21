@@ -66,6 +66,7 @@ signature = Signature(
     "filename_prefix", String(),
     "extract_coregister_matrix", Boolean(),
     "coregister_matrix", WriteDiskItem("Transformation matrix", "Transformation matrix"),
+    "deformation_in_source", Boolean(),
 
     'batch_location', WriteDiskItem('Matlab SPM script', 'Matlab script', section='default SPM outputs'),
 )
@@ -128,12 +129,12 @@ def updateBatchPath(self, proc):
 
 
 def execution(self, context):
-    if not self.source.isTemporary():
+    if self.deformation_in_source:
+        source_diskitem = self.source
+    else:
         source_diskitem = context.temporary(self.source.format)
         shutil.copy2(self.source.fullPath(),
                      source_diskitem.fullPath())
-    else:
-        source_diskitem = self.source
     reference_diskitem = self.reference
 
     if self.others and self.custom_outputs:
