@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 3.10 )
 
 # Keep the list of REQUIRED packages synchronized with
 # cmake/brainvisa-spm-config.cmake.in
