@@ -81,7 +81,7 @@ from soma.qt_gui.qt_backend.QtGui import QDialog
 from soma.qt_gui.qt_backend.QtGui import QVBoxLayout, QHBoxLayout
 from soma.qt_gui.qt_backend.QtGui import QTableWidget, QHeaderView, QTableWidgetItem
 from soma.qt_gui.qt_backend.QtGui import QListWidget, QPushButton, QDialogButtonBox, QGroupBox, QWidget
-from soma.qt_gui.qt_backend.QtGui import QApplication, QDesktopWidget, QAbstractItemView, QMessageBox
+from soma.qt_gui.qt_backend.QtGui import QApplication, QAbstractItemView, QMessageBox
 from soma.qt_gui.qt_backend.QtGui import QLabel, QLineEdit
 from soma.qt_gui.qt_backend.QtGui import QFileDialog
 from soma.qt_gui.qt_backend.QtCore import Qt
@@ -157,13 +157,21 @@ class CSVEditor(QDialog):
         self._fillValueTable()
 
     def _setQDialogSize(self):
-        resolution = QDesktopWidget().screenGeometry()
+        if hasattr(self, 'screen'):
+            screen = self.screen()
+        else:
+            screen = QApplication.primaryScreen()
+        resolution = screen.geometry()
         width = int(float(resolution.width()) * self.factor)
         height = int(float(resolution.height()) * self.factor)
         self.setGeometry(0, 0, width, height)
 
     def _centerOnScreen(self):
-        resolution = QDesktopWidget().screenGeometry()
+        if hasattr(self, 'screen'):
+            screen = self.screen()
+        else:
+            screen = QApplication.primaryScreen()
+        resolution = screen.geometry()
         width = int(float(resolution.width()) * (1 - self.factor) / 2)
         height = int(float(resolution.height()) * (1 - self.factor) / 2)
         self.move(width, height)
