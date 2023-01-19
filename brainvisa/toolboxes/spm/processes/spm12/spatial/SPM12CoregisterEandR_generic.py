@@ -94,6 +94,7 @@ def initialization(self):
     self.extract_coregister_matrix = False
 
     self.custom_outputs = False
+    self.deformation_in_source = True
 
 
 def updateSignatureAboutCustomOutputs(self, proc):
