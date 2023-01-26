@@ -1,4 +1,3 @@
-import os.path as osp
 import shutil
 
 from brainvisa.processes import *
