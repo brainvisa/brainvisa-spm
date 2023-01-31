@@ -889,6 +889,7 @@ def update_deformation_field_signature(self, proc):
 def execution(self, context):
     t1mri_path = self.t1mri.fullPath()
     tmp_dir = context.temporary('Directory').fullPath()
+    os.makedirs(tmp_dir)
     
     t1mri_temp = os.path.join(tmp_dir, '%s.nii' % self.subject)
     if t1mri_path.endswith('.gz'):
