@@ -95,7 +95,7 @@ def moveFileAndCreateFoldersIfNeeded(source_path, destination_path):
   if source_path.endswith(".nii") or source_path.endswith(".nii.gz"):
     moveNifti(source_path, destination_path)
   else:
-    shutil.move(source_path, destination_path)
+    shutil.move(source_path, destination_path, copy_function=shutil.copyfile)
 #==============================================================================
 #
 #==============================================================================
@@ -134,9 +134,9 @@ def moveNifti(input_path, output_path):
       gzipFile(input_path, output_path)
       os.remove(input_path)
     elif input_path.endswith(".nii.gz") and output_path.endswith(".nii.gz"):
-      shutil.move(input_path, output_path)
+      shutil.move(input_path, output_path, copy_function=shutil.copyfile)
     elif input_path.endswith(".nii") and output_path.endswith(".nii"):
-      shutil.move(input_path, output_path)
+      shutil.move(input_path, output_path, copy_function=shutil.copyfile)
     else:
       raise RuntimeError("unvalid extension file")
   except Exception as e:
