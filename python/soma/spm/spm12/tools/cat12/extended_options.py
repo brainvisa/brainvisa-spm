@@ -21,7 +21,7 @@ class RegistrationOptions(object):
         if os.path.exists(template_path):
             self.template = template_path
         else:
-            raise FileNotFoundError('Template file does not exists!')
+            raise FileNotFoundError('Template file does not exist!')
     
     def set_shooting_method_default(self):
         self.method = '4'
