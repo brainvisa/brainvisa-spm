@@ -91,5 +91,5 @@ def extractOffsetBetweenTwoTransformations(self, first_transfo, second_transfo):
                  ]
     norm_sum = 0
     for coord in coord_list:
-        norm_sum += (first_transfo.transformPoint3d(coord) - second_transfo.transformPoint3d(coord)).norm()
+        norm_sum += (first_transfo.transform(aims.Point3d(coord)) - second_transfo.transform(aims.Point3d(coord))).norm()
     return norm_sum/len(coord_list)
