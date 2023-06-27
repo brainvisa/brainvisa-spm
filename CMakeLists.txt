@@ -20,8 +20,8 @@ BRAINVISA_DEPENDENCY( RUN DEPENDS "axon" RUN ">= ${axon_VERSION};<< ${axon_VERSI
 
 BRAINVISA_COPY_PYTHON_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/python"
                                     ${PROJECT_NAME} python )
-BRAINVISA_COPY_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/brainvisa"
-                            brainvisa
-                            ${PROJECT_NAME} )
+BRAINVISA_COPY_PYTHON_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/brainvisa"
+                                 ${PROJECT_NAME} 
+                                 brainvisa )
 
 BRAINVISA_CREATE_CMAKE_CONFIG_FILES()
