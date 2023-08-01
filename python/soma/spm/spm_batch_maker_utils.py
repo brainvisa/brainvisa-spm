@@ -71,8 +71,14 @@ def moveSPMPath(reference_path, output_path, prefix='', suffix='', extension=Non
 def _addFileNamePrefixAndSuffixToPath(path, prefix, suffix):
   current_directory = os.path.dirname(path)
   basename = os.path.basename(path)
+  mult_ext = ['gz', 'minf']
   basename_splitted = basename.split('.')
-  basename_splitted[0] = prefix + basename_splitted[0] + suffix
+  iext = -1
+  while basename_splitted[iext] in mult_ext \
+          and len(basename_splitted) >= -iext:
+      iext -= 1
+  basename_splitted[0] = prefix + basename_splitted[0]
+  basename_splitted[iext-1] = basename_splitted[iext-1] + suffix
   new_basename = '.'.join(basename_splitted)
   new_path = os.path.join(current_directory, new_basename)
   return new_path
