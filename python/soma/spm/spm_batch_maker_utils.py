@@ -52,6 +52,7 @@ def convertPathListToSPMBatchString(path_list, add_dimension=True):
     path_list_for_batch.append(SPM_string_template % path)
 
   return '\n'.join(path_list_for_batch)
+
 #===============================================================================
 # Utils about Paths
 #===============================================================================
@@ -64,6 +65,7 @@ def moveSPMPath(reference_path, output_path, prefix='', suffix='', extension=Non
   if extension is not None:
     default_spm_path = _replaceFilePathExtension(default_spm_path, extension)
   moveFileAndCreateFoldersIfNeeded(default_spm_path, output_path)
+
 
 @checkIfArgumentTypeIsStrOrUnicode(argument_index=0)
 @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
@@ -82,6 +84,7 @@ def _addFileNamePrefixAndSuffixToPath(path, prefix, suffix):
   new_basename = '.'.join(basename_splitted)
   new_path = os.path.join(current_directory, new_basename)
   return new_path
+
 
 @checkIfArgumentTypeIsStrOrUnicode(argument_index=0)
 @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
