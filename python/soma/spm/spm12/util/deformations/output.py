@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsStrOrUnicode, checkIfArgumentTypeIsAllowed
-from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem,\
-    convertlistToSPMString, convertPathListToSPMBatchString,\
-    convertNumpyArrayToSPMString, moveFileAndCreateFoldersIfNeeded,\
+from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem, \
+    convertlistToSPMString, convertPathListToSPMBatchString, \
+    convertNumpyArrayToSPMString, moveFileAndCreateFoldersIfNeeded, \
     moveSPMPath
 
 import abc
@@ -16,10 +16,11 @@ from six.moves import zip
 
 class Output(six.with_metaclass(abc.ABCMeta)):
     """
-    Various  output  options  are  available.    The  deformation  may  be  saved to disk as a ``y_*.nii'' file.Images may be
-    warped  using  the  resulting deformation, either using a ``pullback'' procedure, or a ``pushforward''.The old style of
-    spatial normalisation involved the pullback, whereas the pushforward requires the inverse of the deformation used by
-    the pullback.  Finally, the deformation may be used to warp a GIFTI surface file.
+    Various output options are available. The deformation may be saved to disk as a ``y_*.nii'' file.
+    Images may be warped using the resulting deformation, either using a ``pullback'' procedure, or a ``pushforward''.
+    The old style of spatial normalisation involved the pullback, whereas the pushforward requires
+    the inverse of the deformation used by the pullback.
+    Finally, the deformation may be used to warp a GIFTI surface file.
     """
     pass
 
@@ -74,7 +75,7 @@ class SaveDeformation(Output):
             spm_default_output_path = os.path.join(ouput_directory, 'y_' + self.deformation_name)
             if not spm_default_output_path.endswith('.nii'):
                 spm_default_output_path += '.nii'
-            
+
             moveFileAndCreateFoldersIfNeeded(
                 spm_default_output_path, self.deformation_saved_path)
         else:
@@ -252,8 +253,8 @@ class PullBack(Output):
     def _moveSPMDefaultPathsIfNeeded(self):
         if self.ouput_path_list is not None:
             if len(self.volume_list_to_apply) == len(self.ouput_path_list):
-                prefix='w'
-                if self.fwhm!=[0,0,0]:
+                prefix = 'w'
+                if self.fwhm != [0, 0, 0]:
                     prefix = 's' + prefix
                 for input_path, output_path in zip(self.volume_list_to_apply, self.ouput_path_list):
                     if self.output_destination.sources:
@@ -360,7 +361,7 @@ class PushForward(Output):
         correspondingly reduced in intensity. This option is suggested for VBM.
         """
         self.preserve = 1
-    
+
     def setPreserveToLabels(self):
         """
         Preserve Labels: This is intended for warping label images. While it is quite slow to run, it is
@@ -412,10 +413,10 @@ class PushForward(Output):
     def _moveSPMDefaultPathsIfNeeded(self):
         if self.ouput_path_list is not None:
             if len(self.volume_list_to_apply) == len(self.ouput_path_list):
-                prefix='w'
+                prefix = 'w'
                 if self.preserve:
-                    prefix='mw'
-                if self.fwhm!=[0,0,0]:
+                    prefix = 'mw'
+                if self.fwhm != [0, 0, 0]:
                     prefix = 's' + prefix
                 for input_path, output_path in zip(self.volume_list_to_apply, self.ouput_path_list):
                     if self.output_destination.sources:
@@ -502,15 +503,17 @@ class SaveJacobianDeterminants(Output):
     """
 
     def __init__(self):
-        self.output_filename = ''
+        self.jacobian_name = ''
         self.output_destination = OutputDestination()
 
+        self.jacobian_saved_path = None
+
     @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
-    def setOutputFilename(self, output_filename):
+    def setJacobianName(self, jacobian_name):
         """
         Save the Jacobian determinants as an image.  "j_" will be prepended to the filename.
         """
-        self.output_filename = output_filename
+        self.jacobian_name = jacobian_name
 
     def setOutputDestinationToCurrentDirectory(self):
         self.output_destination.setOutputDestinationToCurrentDirectory()
@@ -520,11 +523,31 @@ class SaveJacobianDeterminants(Output):
             ouput_directory)
 
     def getStringListForBatch(self):
-        batch_list = []
-        batch_list.append("savejac.ofname = '%s';" % self.output_filename)
-        batch_list.extend(addBatchKeyWordInEachItem(
-            "savejac", self.output_destination.getStringListForBatch()))
-        return batch_list
+        if self.output_destination.current_directory or self.output_destination.ouput_directory is not None:
+            batch_list = []
+            batch_list.append("savejac.ofname = '%s';" % self.jacobian_name)
+            batch_list.extend(addBatchKeyWordInEachItem(
+                "savejac", self.output_destination.getStringListForBatch()))
+            return batch_list
+        else:
+            raise ValueError(
+                "ouput directory path is required if output destination is not current directory")
+
+    @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
+    def setOutputJacobianPath(self, jacobian_saved_path):
+        self.jacobian_saved_path = jacobian_saved_path
+
+    def _moveSPMDefaultPathsIfNeeded(self):
+        if self.jacobian_saved_path is not None:
+            ouput_directory = self.output_destination.getOutputDirectory()
+            spm_default_output_path = os.path.join(ouput_directory, 'j_' + self.jacobian_name)
+            if not spm_default_output_path.endswith('.nii'):
+                spm_default_output_path += '.nii'
+
+            moveFileAndCreateFoldersIfNeeded(
+                spm_default_output_path, self.jacobian_saved_path)
+        else:
+            pass  # default spm outputs used
 # ===============================================================================
 # ===============================================================================
 # #
@@ -543,14 +566,16 @@ class OutputDestination(object):
 
     def setOutputDestinationToCurrentDirectory(self):
         """
-        All created files (deformation fields and warped images) are written to the current directory.
+        All created files (deformation fields, jacobian determinants and warped images)
+        are written to the current directory.
         """
         self.current_directory = True
 
     @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
     def setOutputDestinationToOutputDirectory(self, ouput_directory):
         """
-        The combined deformation field and the warped images are written into the specified directory.
+        The combined deformation field, jacobian determinant and the warped images are
+        written into the specified directory.
         """
         self.current_directory = False
         self.ouput_directory = ouput_directory
@@ -587,7 +612,8 @@ class OutputDestinationWithSources(object):
 
     def setOutputDestinationToCurrentDirectory(self):
         """
-        All created files (deformation fields and warped images) are written to the current directory.
+        All created files (deformation fields, jacobian determinants and warped images)
+        are written to the current directory.
         """
         self.current_directory = True
         self.ouput_directory = None
@@ -596,7 +622,8 @@ class OutputDestinationWithSources(object):
     @checkIfArgumentTypeIsStrOrUnicode(argument_index=1)
     def setOutputDestinationToOutputDirectory(self, ouput_directory):
         """
-        The combined deformation field and the warped images are written into the specified directory.
+        The combined deformation field, jacobian determinant and the warped images are
+        written into the specified directory.
         """
         self.current_directory = False
         self.ouput_directory = ouput_directory
@@ -604,7 +631,8 @@ class OutputDestinationWithSources(object):
 
     def setOuputDestinationToSourceDirectories(self):
         """
-        The  combined  deformation  field  is  written  into the directory of the first deformation field
+        The  combined  deformation  field and/or jacobian determinant is  written into
+        the directory of the first deformation field,
         warped images are written to the same directories as the source images.
         """
         self.current_directory = False
