@@ -7,6 +7,7 @@ import sys
 import tempfile
 from collections import deque
 from distutils.spawn import find_executable
+from nipype.interfaces import spm
 
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.custom_decorator_pattern import singleton
@@ -162,6 +163,10 @@ class SPM(SPMLauncher):
 
         return output
 
+    def get_spm_release_version(self):
+        spm.SPMCommand.set_mlab_paths(matlab_cmd=f"{self.matlab_executable_path} {self.matlab_options} -r \"run('script');exit;\"", paths=[self.spm12_path], use_mcr=False)
+        v = spm.SPMCommand().version.split('.')[-1]
+        return v
 
 # ===========================================================================
 # ===============================================================================
@@ -256,6 +261,11 @@ class SPMStandalone(SPMLauncher):
             return output
         else:
             raise ValueError("job path is required")
+    
+    def get_spm_release_version(self):
+        spm.SPMCommand.set_mlab_paths(matlab_cmd=f"{self.standalone_command} {self.standalone_mcr_path} script", use_mcr=True)
+        v = spm.SPMCommand().version.split('.')[-1]
+        return v
 
 
 # ==============================================================================
