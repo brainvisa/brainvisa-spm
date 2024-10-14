@@ -1,3 +1,4 @@
+from pathlib import Path
 import shutil
 
 from brainvisa.processes import *
@@ -203,6 +204,17 @@ def execution(self, context):
             other_output_list = []
             for other_diskitem in self.others_warped:
                 other_output_list.append(other_diskitem.fullPath())
+            estimate_and_reslice.setOtherVolumesWarpedPathList(other_output_list)
+    elif not self.custom_outputs and not self.deformation_in_source:
+        source_path = Path(self.source.fullPath())
+        source_warped_path = source_path.parent / (self.filename_prefix + source_path.name)
+        estimate_and_reslice.setSourceWarpedPath(str(source_warped_path))
+        if self.others:
+            other_output_list = []
+            for other_diskitem in self.others_warped:
+                other_path = Path(other_diskitem.fullPath())
+                other_warped_path = other_path.parent / (self.filename_prefix + other_path.name)
+                other_output_list.append(str(other_warped_path))
             estimate_and_reslice.setOtherVolumesWarpedPathList(other_output_list)
 
     estimate_and_reslice.replaceEstimationOptions(estimation_options)
