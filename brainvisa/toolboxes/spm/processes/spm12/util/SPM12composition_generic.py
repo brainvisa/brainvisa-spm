@@ -9,7 +9,8 @@ from brainvisa.processes import getAllFormats
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 from soma.spm.spm12.util.deformations import Deformations
 from soma.spm.spm12.util.deformations import composition
-from soma.spm.spm12.util.deformations.output import SaveDeformation
+from soma.spm.spm12.util.deformations.output import SaveDeformation, SaveJacobianDeterminants
+
 
 configuration = Application().configuration
 
@@ -21,12 +22,19 @@ output = 'Output'
 
 OUTPUT_SECTION = {
     'custom_outputs': Boolean(section=output),
+    'outputs_type': Choice(('Deformation', 'def'),
+                           ('Jacobian Determinant', 'jac'),
+                           ('Deformation and Jacobian Determinant', 'both'),
+                           section=output),
     'output_destination': Choice(('Current directory', 'current'), ('Output directory', 'output'),
                                  section=output),
     'output_directory': WriteDiskItem('Directory', 'Directory', section=output),
-    'save_as': String(section=output),
+    'save_as_def': String(section=output),
     'output_deformation': WriteDiskItem('4D Volume', getAllFormats(),
                                         section=output),
+    'save_as_jac': String(section=output),
+    'output_jacobian': WriteDiskItem('4D Volume', getAllFormats(),
+                                     section=output),
     'batch_location': WriteDiskItem('Matlab SPM script', 'Matlab script',
                                     section=output),
 }
@@ -116,9 +124,9 @@ def initialization(self):
     self.addLink(None, 'deformation_number', self.update_deformation_number)
     self.deformation_number = 1
     self.addLink('batch_location', ('output_deformation', 'output_directory'), self.update_batch_path)
-    self.addLink(None, 'custom_outputs', self.update_sig_output)
+    self.addLink(None, ('custom_outputs', 'outputs_type'), self.update_sig_output)
     self.addLink(None, 'output_destination', self.update_sig_output_directory)
-    
+
 
 def update_batch_path(self, deformation, directory):
     if self.custom_outputs and deformation:
@@ -135,7 +143,7 @@ def get_param_num(self, param_name: str) -> int:
     if end_name.isdigit():
         return int(end_name)
     return 0
-        
+
 
 def update_deformation_number(self, deformation_number):
     if deformation_number < 1:
@@ -156,53 +164,69 @@ def update_deformation_number(self, deformation_number):
             signature[f'deformation_type_{i}'] = deformation_type_choice(i)
             self.addLink(None, f'deformation_type_{i}', lambda x, num=i: self.update_defo_type(num))
         signature.update(OUTPUT_SECTION)
-        
+
     self.changeSignature(signature)
-    
+
 
 def update_defo_type(self, num):
     deformation_type = getattr(self, f'deformation_type_{num}')
-    
+
     # Empty parameters of the deformation "num" to fill with good parameters
     defo_params = [param for param in self.signature
                    if self.get_param_num(param) == num
                    and not param.startswith('deformation_type_')]
     for param in defo_params:
         del self.signature[param]
-    
+
     # Complete deformation "num" according to deformation_type
     if deformation_type == 'dartel':
         self.signature.update(dartel_params(num))
         setattr(self, f'direction_{num}', 'Backward')
         setattr(self, f'time_step_{num}', 64)
         self.setOptional(f'dartel_template_{num}')
-    
+
     elif deformation_type == 'deformation':
         self.signature.update(deformation_params(num))
-    
+
     elif deformation_type == 'identity_image':
         self.signature.update(identity_image_params(num))
-        
+
     elif deformation_type == 'identity_shape':
         self.signature.update(identity_params(num))
         self.setOptional(f'voxel_size_{num}', f'bounding_box_{num}')
-    
+
     elif deformation_type == 'imported_mat':
         self.signature.update(imported_mat_params(num))
         self.setOptional(f'voxel_size_{num}', f'bounding_box_{num}')
-    
+
     self.changeSignature(self.signature)
 
 
-def update_sig_output(self, custom_outputs):
+def update_sig_output(self, custom_outputs, outputs_type):
     if custom_outputs:
-        self.setDisable('output_destination', 'output_directory', 'save_as')
-        self.setEnable('output_deformation')
+        self.setDisable('output_destination', 'output_directory', 'save_as_def', 'save_as_jac')
+        if outputs_type == 'def':
+            self.setDisable('output_jacobian')
+            self.setEnable('output_deformation')
+        elif outputs_type == 'jac':
+            self.setDisable('output_deformation')
+            self.setEnable('output_jacobian')
+        else:
+            self.setEnable('output_deformation', 'output_jacobian')
     else:
-        self.setEnable('output_destination', 'output_directory', 'save_as')
-        self.setDisable('output_deformation')
+        self.setEnable('output_destination', 'output_directory')
+        self.setDisable('output_deformation', 'output_jacobian')
+        if outputs_type == 'def':
+            self.setDisable('save_as_jac')
+            self.setEnable('save_as_def')
+        elif outputs_type == 'jac':
+            self.setDisable('save_as_def')
+            self.setEnable('save_as_jac')
+        else:
+            self.setEnable('save_as_def', 'save_as_jac')
+
     self.changeSignature(self.signature)
-        
+
 
 def update_sig_output_directory(self, output_destination):
     if output_destination == 'current':
@@ -235,11 +259,11 @@ def execution(self, context):
             else:
                 source = deformation_file
             deformation_element.deformation_field_path = source
-                
+
         elif deformation_type == 'identity_image':
             deformation_element = composition.IdentityFromImage()
             deformation_element.reference_image_path = getattr(self, f'base_image_{i}').fullPath()
-                
+
         elif deformation_type == 'identity_shape':
             deformation_element = composition.Identity()
             voxel_size = getattr(self, f'voxel_size_{i}')
@@ -258,32 +282,55 @@ def execution(self, context):
             bounding_box = getattr(self, f'bounding_box_{i}')
             if bounding_box:
                 deformation_element.bounding_box = numpy.array(bounding_box)
-        
-        deformations.appendDeformation(deformation_element)
-    
-    save_deformation = SaveDeformation()
-    
-    if self.custom_outputs:
-        # Do not create temp file if output begin with 'y_'
-        output_def = self.output_deformation.fullPath()
-        if os.path.basename(output_def).startswith('y_'):
-            deformation_name = os.path.basename(output_def)[2:].split('.nii')[0]
-            output_dir = os.path.dirname(output_def)
-            if output_def.endswith('.nii.gz'):
-                save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
-        else:
-            deformation_tmp = context.temporary('NIFTI-1 image')
-            deformation_name = os.path.basename(deformation_tmp.fullPath())
-            output_dir = os.path.dirname(deformation_tmp.fullPath())
-            save_deformation.setOutputDeformationPath(output_def)
-    else:
-        deformation_name = self.save_as
-        output_dir = self.output_directory.fullPath()
-    
-    save_deformation.setDeformationName(deformation_name)
-    save_deformation.setOutputDestinationToOutputDirectory(output_dir)
 
-    deformations.appendOutput(save_deformation)
+        deformations.appendDeformation(deformation_element)
+
+    if self.outputs_type in ['def', 'both']:
+        save_deformation = SaveDeformation()
+    if self.outputs_type in ['jac', 'both']:
+        save_jacobian = SaveJacobianDeterminants()
+
+    if self.custom_outputs:
+        if self.outputs_type in ['def', 'both']:
+            # Do not create temp file if output begin with 'y_'
+            output_def = self.output_deformation.fullPath()
+            if os.path.basename(output_def).startswith('y_'):
+                deformation_name = os.path.basename(output_def)[2:].split('.nii')[0]
+                output_dir = os.path.dirname(output_def)
+                if output_def.endswith('.nii.gz'):
+                    save_deformation.setOutputDeformationPath(self.output_deformation.fullPath())
+            else:
+                deformation_tmp = context.temporary('NIFTI-1 image')
+                deformation_name = os.path.basename(deformation_tmp.fullPath())
+                output_dir = os.path.dirname(deformation_tmp.fullPath())
+                save_deformation.setOutputDeformationPath(output_def)
+        if self.outputs_type in ['jac', 'both']:
+            output_jac = self.output_jacobian.fullPath()
+            if os.path.basename(output_jac).startswith('j_'):
+                jacobian_name = os.path.basename(output_jac)[2:].split('.nii')[0]
+                output_dir = os.path.dirname(output_jac)
+                if output_jac.endswith('.nii.gz'):
+                    save_jacobian.setOutputJacobianPath(self.output_jacobian.fullPath())
+            else:
+                jacobian_tmp = context.temporary('NIFTI-1 image')
+                jacobian_name = os.path.basename(jacobian_tmp.fullPath())
+                output_dir = os.path.dirname(jacobian_tmp.fullPath())
+                save_jacobian.setOutputJacobianPath(output_jac)
+    else:
+        if self.outputs_type in ['def', 'both']:
+            deformation_name = self.save_as_def
+        if self.outputs_type in ['jac', 'both']:
+            jacobian_name = self.save_as_jac
+        output_dir = self.output_directory.fullPath()
+
+    if self.outputs_type in ['def', 'both']:
+        save_deformation.setDeformationName(deformation_name)
+        save_deformation.setOutputDestinationToOutputDirectory(output_dir)
+        deformations.appendOutput(save_deformation)
+    if self.outputs_type in ['jac', 'both']:
+        save_jacobian.setJacobianName(jacobian_name)
+        save_jacobian.setOutputDestinationToOutputDirectory(output_dir)
+        deformations.appendOutput(save_jacobian)
 
     spm = validation()
     spm.addModuleToExecutionQueue(deformations)
