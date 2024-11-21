@@ -126,7 +126,7 @@ signature = Signature(
                                  'Source directories',
                                  'Output directory',
                                  section=outputs),
-    'ouput_directory', WriteDiskItem(
+    'output_directory', WriteDiskItem(
         'Directory',
         'Directory',
         section=outputs),
@@ -205,15 +205,15 @@ def updateSignatureAboutOutputs(self, proc):
 
 def updateSignatureAboutOutputDestination(self, proc):
     if self.output_destination == 'Output directory':
-        self.setEnable('ouput_directory')
+        self.setEnable('output_directory')
     else:
-        self.setDisable('ouput_directory')
+        self.setDisable('output_directory')
     self.changeSignature(self.signature)
 
 def updateBatchPath(self, proc):
     if self.deformation_field is not None:
-        ouput_directory = os.path.dirname(self.deformation_field.fullPath())
-        return os.path.join(ouput_directory, 'spm12_deformations_job.m')
+        output_directory = os.path.dirname(self.deformation_field.fullPath())
+        return os.path.join(output_directory, 'spm12_deformations_job.m')
 
 def execution(self, context):
     
@@ -264,11 +264,11 @@ def execution(self, context):
     elif self.output_destination == 'Source directories':
         pback.setOuputDestinationToSourceDirectories()
     elif self.output_destination == 'Output directory':
-        if not os.path.exists(self.ouput_directory.fullPath()):
-            os.makedirs(self.ouput_directory.fullPath())
+        if not os.path.exists(self.output_directory.fullPath()):
+            os.makedirs(self.output_directory.fullPath())
         else:
             pass#directory already exists
-        pback.setOutputDestinationToOutputDirectory(self.ouput_directory.fullPath())
+        pback.setOutputDestinationToOutputDirectory(self.output_directory.fullPath())
     else:
         raise ValueError("Unvalid output_destination")
     

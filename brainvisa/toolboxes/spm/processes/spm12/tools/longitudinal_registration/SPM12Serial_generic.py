@@ -163,7 +163,7 @@ def execution( self, context ):
       serial.setOutputJacobians([diskitem.fullPath() for diskitem in self.jacobians])
   else:
     serial.discardJacobians()
-  if self.divergences:
+  if self.save_divergences:
     serial.saveDivergences()
     if self.customs_outputs:
       serial.setOutputDivergences([diskitem.fullPath() for diskitem in self.divergences])
