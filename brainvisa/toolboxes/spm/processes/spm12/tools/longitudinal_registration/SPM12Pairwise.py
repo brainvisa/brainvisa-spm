@@ -96,7 +96,6 @@ def initialization(self):
     self.addLink(None, "save_deformation_fields", self.updateSignatureAboutDeformationField)
     self.addLink(None, "customs_outputs", self.updateSignatureAboutDeformationField)
     self.addLink("batch_location", "time_1_volumes", self.updateBatchPath)
-    
     self.addLink(None, ("time_1_volumes", "time_2_volumes"), self.update_outputs)
     self.addLink(None, "modality", self.update_modality)
 
@@ -176,22 +175,23 @@ def update_outputs(self, *proc):
     divergence_list = []
     deformation1_list = []
     deformation2_list = []
-    
+
     if self.time_1_volumes and self.time_2_volumes and len(self.time_1_volumes) == len(self.time_2_volumes):
         for time_1_vol, time_2_vol in zip(self.time_1_volumes, self.time_2_volumes):
             attr = time_1_vol.hierarchyAttributes()
-            attr['baseline'] = attr.pop('acquisition')
-            attr_2 = time_2_vol.hierarchyAttributes()
-            attr['followup'] = attr_2['acquisition']
-            
-            attr['analysis'] = attr['modality'] + '_default_analysis'
-            
-            mpa_list.append(self.signature['MPA'].contentType.findValue(attr))
-            jacobian_list.append(self.signature['jacobian_rate'].contentType.findValue(attr))
-            divergence_list.append(self.signature['divergence_rate'].contentType.findValue(attr))
-            deformation1_list.append(self.signature['time_1_deformation_fields'].contentType.findValue(attr))
-            deformation2_list.append(self.signature['time_2_deformation_fields'].contentType.findValue(attr))
-            
+            if 'name_serie' in attr.keys():
+                del attr['name_serie']
+            if attr:
+                attr_2 = time_2_vol.hierarchyAttributes()
+                attr['baseline'] = attr.pop('acquisition')
+                attr['followup'] = attr_2['acquisition']
+                attr['analysis'] = attr['modality'] + '_default_analysis'
+
+                mpa_list.append(self.signature['MPA'].contentType.findValue(attr))
+                jacobian_list.append(self.signature['jacobian_rate'].contentType.findValue(attr))
+                divergence_list.append(self.signature['divergence_rate'].contentType.findValue(attr))
+                deformation1_list.append(self.signature['time_1_deformation_fields'].contentType.findValue(attr))
+                deformation2_list.append(self.signature['time_2_deformation_fields'].contentType.findValue(attr))
     self.MPA = mpa_list
     self.jacobian_rate = jacobian_list
     self.divergence_rate = divergence_list
