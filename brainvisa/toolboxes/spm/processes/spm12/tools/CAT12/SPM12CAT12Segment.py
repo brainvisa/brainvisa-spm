@@ -30,14 +30,14 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
-from __future__ import absolute_import
-from brainvisa.processes import *
+from brainvisa.processes import Application
+from brainvisa.processes import Signature, ReadDiskItem, WriteDiskItem, ListOf
+from brainvisa.processes import Float, String, Boolean, Choice
 from soma.spm.spm_launcher import SPM12, SPM12Standalone
 import gzip
 import shutil
 import glob
-from distutils.dir_util import copy_tree
-
+import os
 
 configuration = Application().configuration
 
@@ -56,6 +56,8 @@ def validation():
 
 userLevel = 0
 name = 'CAT12 - Segment'
+
+# Sections
 input_section = 'Inputs'
 option_section = 'Initial options'
 seg_options_section = 'Segmentations options'
@@ -71,14 +73,13 @@ wmh_output = 'White matter intensity'
 other_tissue_output = 'Other tissues (skull+scalp+background)'
 pve_labels_output = 'PVE labels'
 bias_output = 'Bias corrections'
-other_output = "Other outputs"
+other_output = 'Other outputs'
 
 signature = Signature(
     "t1mri", ReadDiskItem('Raw T1 MRI',
                           ['NIFTI-1 image', 'SPM image', 'MINC image', 'gz compressed NIFTI-1 image'],
                           section=input_section),
     "subject", String(section=input_section),
-    
     # --- Options ---
     "template", ReadDiskItem('TPM template', ['NIFTI-1 image', 'SPM image', 'MINC image'],
                              section=option_section),
@@ -91,7 +92,6 @@ signature = Signature(
                                        section=option_section),  # detail more the choice text with values ?
     "processing_accuracy", Choice('average', 'high', 'ultra_high',
                                   section=option_section),
-    
     # --- Extended options ---
     # - Segmentation options -
     "optimal_resolution", Choice(('Optimal resolution', 'optimal'),
@@ -101,12 +101,12 @@ signature = Signature(
                                  section=seg_options_section),
     "optimal_resolution_value", ListOf(Float(),
                                        section=seg_options_section),
-    "COM_to_set_origin", Boolean(section=seg_options_section), #new in CAT12.8 ? more possiblity in CAT than just yes or no
+    "COM_to_set_origin", Boolean(section=seg_options_section),  # new in CAT12.8 ? more possiblity in CAT than just yes or no
     "affine_preprocessing", Choice('none', 'light', 'full', 'default', 'rough',
                                    section=seg_options_section),
     "noise_correction", Choice('none', 'classic', 'light', 'medium',
                                section=seg_options_section),  # , 'strong'),
-    # "initial_segmentation", Choice('SPM unified Segmentation', 'k-means AMAP'),
+    #"initial_segmentation", Choice('SPM unified Segmentation', 'k-means AMAP'),
     "local_adaptative_segmentation", Choice('none', 'ultralight',
                                             'light', 'medium',
                                             'strong', 'heavy',
@@ -126,8 +126,7 @@ signature = Signature(
                                              ("set WMH as WM", "save_as_wm"),
                                              ("set WMH as separate class", "as_separate_class"),
                                              section=seg_options_section),
-    # "stroke_lesion_correction", Choice(),
-    
+    #"stroke_lesion_correction", Choice(),
     # - Spatial registration -
     "spatial_registration_method", Choice('shooting', 'dartel',
                                           section=spatial_options_section),
@@ -142,10 +141,8 @@ signature = Signature(
                               ("Optimized Shooting - medium", 'opt_medium'),
                               ("Optimized Shooting - soft", 'opt_soft'),
                               section=spatial_options_section),
-    
     "voxel_size", Float(section=extended_section),
     #"bounding_box", Float(section=extended_section),
-    
     # - Surface otions - ?
     "surface_thickness_estimation", Boolean(section=surface_options),
     "voxel_size_thickness_est", Float(section=surface_options),
@@ -153,20 +150,17 @@ signature = Signature(
     "cortical_surf_creation", Float(section=surface_options),
     "parahipp_surf_creation", Float(section=surface_options),
     "closing_parahipp", Boolean(section=surface_options),
-    
     # - Admin options -
     "lazy_processing", Boolean(section=admin_options),
     "error_handling", Boolean(section=admin_options),
     "verbose", Choice('none', 'default', 'details',
                       section=admin_options),
     "create_report", Boolean(section=admin_options),
-    
     # --- Writing options ---
     # ROI process
     # ...
     # "ROI_process", Choice("No ROI processings", "Atlases",
     #                       section=output_section),
-    
     "grey_native_space", Boolean(section=grey_output),
     "grey_native", WriteDiskItem('T1 MRI tissue probability map',
                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -220,7 +214,6 @@ signature = Signature(
                                                                    'processing': 'cat12Segment',
                                                                    'analysis': 'default'},
                                                section=grey_output),
-    
     "white_native_space", Boolean(section=white_output),
     "white_native", WriteDiskItem('T1 MRI tissue probability map',
                                   ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -274,7 +267,6 @@ signature = Signature(
                                                                     'processing': 'cat12Segment',
                                                                     'analysis': 'default'},
                                                 section=white_output),
-    
     "csf_native_space", Boolean(section=csf_output),
     "csf_native", WriteDiskItem('T1 MRI tissue probability map',
                                 ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -284,7 +276,7 @@ signature = Signature(
                                                     'warping_method': 'none',
                                                     'processing': 'cat12Segment',
                                                     'analysis': 'default'},
-                                  section=csf_output),
+                                section=csf_output),
     "csf_normalized", Boolean(section=csf_output),
     "csf_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
                                            ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -328,17 +320,16 @@ signature = Signature(
                                                                   'processing': 'cat12Segment',
                                                                   'analysis': 'default'},
                                               section=csf_output),
-    
     "wmh_native_space", Boolean(section=wmh_output),
     "wmh_native", WriteDiskItem('T1 MRI tissue probability map',
-                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
-                                  requiredAttributes={'tissue_class': 'wmh',
-                                                      'transformation': 'none',
-                                                      'modulation': 'none',
-                                                      'warping_method': 'none',
-                                                      'processing': 'cat12Segment',
-                                                      'analysis': 'default'},
-                                  section=wmh_output),
+                                ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
+                                requiredAttributes={'tissue_class': 'wmh',
+                                                    'transformation': 'none',
+                                                    'modulation': 'none',
+                                                    'warping_method': 'none',
+                                                    'processing': 'cat12Segment',
+                                                    'analysis': 'default'},
+                                section=wmh_output),
     "wmh_normalized", Boolean(section=wmh_output),
     "wmh_normalized_output", WriteDiskItem('T1 MRI tissue probability map',
                                            ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -382,12 +373,10 @@ signature = Signature(
                                                                   'processing': 'cat12Segment',
                                                                   'analysis': 'default'},
                                               section=wmh_output),
-    
     # "sls_native_space", Boolean(),
     # "sls_normalized", Boolean(),
     # "sls_modulated_normalized", Choice("no", "affine + non-linear", "non-linear only"),
     # "sls_dartel_export", Choice("no", "rigid", "affine", "both"),
-    
     "other_tissue_proba_map_native_space", Boolean(section=other_tissue_output),
     "skull_native", WriteDiskItem('T1 MRI tissue probability map',
                                   ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -531,15 +520,12 @@ signature = Signature(
                                                                          'processing': 'cat12Segment',
                                                                          'analysis': 'default'},
                                                      section=other_tissue_output),
-    
     # "roi_evaluation_native_space", Boolean(),
     # "roi_evaluation_dartel_export", Choice("no", "rigid", "affine", "both"),
-    
     "pve_labels_native_space", Boolean(section=pve_labels_output),
     "pve_labels_normalized", Boolean(section=pve_labels_output),
     "pve_labels_dartel_export", Choice("no", "rigid", "affine", "both",
                                        section=pve_labels_output),
-    
     "bias_native_space", Boolean(section=bias_output),
     "bias_native", WriteDiskItem('T1 MRI Bias Corrected', ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
                                  requiredAttributes={'transformation': 'none',
@@ -550,12 +536,10 @@ signature = Signature(
     "bias_normalized", Boolean(section=bias_output),
     "bias_dartel_export", Choice("no", "rigid", "affine", "both",
                                  section=bias_output),
-    
     "local_bias_native_space", Boolean(section=bias_output),
     "local_bias_normalized", Boolean(section=bias_output),
     "local_bias_dartel_export", Choice("no", "rigid", "affine", "both",
                                        section=bias_output),
-    
     "jacobian_determinant", Boolean(section=other_output),
     "jacobian_determinant_output", WriteDiskItem('Jacobian determinant',
                                                  ["gz compressed NIFTI-1 image", "NIFTI-1 image"],
@@ -604,7 +588,6 @@ signature = Signature(
                                                                     'processing': 'cat12Segment',
                                                                     'analysis': 'default'},
                                                 section=other_output),
-    
     # "output_options", Choice(("Source directory", 'source'),
     #                          ("Custom output directory", 'custom'),
     #                          section=other_output),
@@ -619,16 +602,19 @@ def initialization(self):
     self.setOptional('template', 'voxel_size', 'spatial_registration_template')
     self.setUserLevel(2, 'create_report', 'lazy_processing', 'error_handling', 'verbose')
     self.setUserLevel(100, 'subject')
-    
+    self.template = self.signature['template'].findValue({'template': 'TPM',
+                                                          'SPM_version': '12',
+                                                          'ontology': 'spm'})
+
     self.addLink('batch_location', 't1mri', self.update_batch_path)
     self.addLink(None, 'surface_thickness_estimation', self.update_surface_selection)
-    
+
     self.inhomogeneity_correction = 'medium'
     self.processing_accuracy = 'average'
-    
+
     self.addLink(None, 'optimal_resolution', self.update_optimal_resolution_choice)
     self.optimal_resolution = 'optimal'
-    self.optimal_resolution_value = [1, 0.3] #[1, 0.1] CAT12.7
+    self.optimal_resolution_value = [1, 0.3]  # [1, 0.1] CAT12.7
     self.COM_to_set_origin = True
     self.affine_preprocessing = 'default'
     self.noise_correction = 'medium'
@@ -642,31 +628,31 @@ def initialization(self):
     self.shooting_method = 'opt_standard'
     self.voxel_size = 1.5
     #self.bounding_box = 12
-    
+
     self.surface_thickness_estimation = False
     self.voxel_size_thickness_est = 0.5
     #self.cortical_myelination_corr = False
     self.cortical_surf_creation = 0.7
     self.parahipp_surf_creation = 0.1
     self.closing_parahipp = False
-    
+
     self.create_report = True
     self.lazy_processing = False
     self.error_handling = True
     self.verbose = 'details'
-    
+
     # self.ROI_process = 'No ROI processings'
-    
+
     self.grey_native_space = False
     self.grey_normalized = False
     self.grey_modulated_normalized = 'affine_non_linear'
     self.grey_dartel_export = 'no'
-    
+
     self.white_native_space = False
     self.white_normalized = False
     self.white_modulated_normalized = 'affine_non_linear'
     self.white_dartel_export = 'no'
-    
+
     self.csf_native_space = False
     self.csf_normalized = False
     self.csf_modulated_normalized = 'no'
@@ -681,7 +667,7 @@ def initialization(self):
     self.other_tissue_proba_map_normalized = False
     self.other_tissue_proba_map_modulated_normalized = 'no'
     self.other_tissue_proba_map_dartel_export = 'no'
-    
+
     self.pve_labels_native_space = True
     self.pve_labels_normalized = False
     self.pve_labels_dartel_export = 'no'
@@ -693,14 +679,14 @@ def initialization(self):
     self.local_bias_native_space = False
     self.local_bias_normalized = False
     self.local_bias_dartel_export = 'no'
-    
+
     self.jacobian_determinant = False
     self.deformation_field_type = 'Neither'
     self.registration_matrix = False
-    
+
     self.linkParameters('subject', 't1mri', self.link_subject)
-    self.addLink(None, 'output_options', self.update_output_dir)    
-        
+    self.addLink(None, 'output_options', self.update_output_dir)
+
     self.addLink(None, 'grey_native_space', lambda x: self.update_bool_output_signature(x, 'grey_native'))
     self.addLink(None, 'grey_normalized', lambda x: self.update_bool_output_signature(x, 'grey_normalized_output'))
     self.addLink(None, 'grey_modulated_normalized', lambda x: self.update_modulation_output_signature(x, 'grey_mod_norm_output'))
@@ -739,7 +725,7 @@ def initialization(self):
                                                                  'inverse_registration_affine',
                                                                  'forward_registration_rigid',
                                                                  'inverse_registration_rigid']))
-    
+
     self.addLink('grey_native', 't1mri', self.update_grey)
     for tissues in ['grey', 'white', 'csf', 'wmh', 'skull', 'scalp', 'background']:
         if tissues != 'grey':
@@ -748,7 +734,7 @@ def initialization(self):
         self.addLink('%s_mod_norm_output' % tissues, 'grey_native')
         self.addLink('%s_dartel_rigid_output' % tissues, 'grey_native')
         self.addLink('%s_dartel_affine_output' % tissues, 'grey_native')
-    
+
     self.addLink('bias_native', 'grey_native')
     self.addLink('jacobian_determinant_output', 'grey_native')
     self.addLink('forward_field', 'grey_native')
@@ -758,21 +744,25 @@ def initialization(self):
     self.addLink('forward_registration_rigid', 'grey_native')
     self.addLink('inverse_registration_rigid', 'grey_native')
 
+
 def update_grey(self, proc):
     if self.t1mri:
         attr = self.t1mri.hierarchyAttributes()
-        if 'acquisition' in attr.keys():
-            acq = attr['acquisition']
-        elif 'acquisition_sequence' in attr.keys():
-            acq = 'avg_' + attr['acquisition_sequence']
-        else:
-            acq = None
-        d = {'acquisition': acq,
-             'center': attr['center'],
-             'subject': attr['subject'],
-             '_database': attr['_database'],
-             }
-        return self.signature['grey_native'].findValue(d)
+        if 'name_serie' in attr.keys():
+            del attr['name_serie']
+        if attr:
+            if 'acquisition' in attr.keys():
+                acq = attr['acquisition']
+            elif 'acquisition_sequence' in attr.keys():
+                acq = 'avg_' + attr['acquisition_sequence']
+            else:
+                acq = None
+            d = {'acquisition': acq,
+                 'center': attr['center'],
+                 'subject': attr['subject'],
+                 '_database': attr['_database'],
+                 }
+            return self.signature['grey_native'].findValue(d)
 
 
 def link_subject(self, proc, dummy):
@@ -788,15 +778,15 @@ def update_batch_path(self, proc):
 
 def update_surface_selection(self, proc):
     if self.surface_thickness_estimation:
-        self.setEnable("voxel_size_thickness_est", #"cortical_myelination_corr",
+        self.setEnable("voxel_size_thickness_est",  # "cortical_myelination_corr",
                        "cortical_surf_creation", "parahipp_surf_creation",
                        "closing_parahipp",)
     else:
-        self.setDisable("voxel_size_thickness_est", #"cortical_myelination_corr",
+        self.setDisable("voxel_size_thickness_est",  # "cortical_myelination_corr",
                         "cortical_surf_creation", "parahipp_surf_creation",
                         "closing_parahipp",)
     self.changeSignature(self.signature)
-        
+
 
 def update_registration_method(self, proc):
     if self.spatial_registration_method == 'shooting':
@@ -804,7 +794,7 @@ def update_registration_method(self, proc):
     elif self.spatial_registration_method == 'dartel':
         self.setDisable('shooting_method')
     self.changeSignature(self.signature)
-        
+
 
 def update_optimal_resolution_choice(self, proc):
     if self.optimal_resolution == 'native':
@@ -812,7 +802,7 @@ def update_optimal_resolution_choice(self, proc):
     else:
         self.setEnable('optimal_resolution_value')
     self.changeSignature(self.signature)
-        
+
 
 def update_output_dir(self, proc):
     if self.output_options == 'source':
@@ -847,12 +837,12 @@ def update_modulation_output_signature(self, proc, output):
                 self.signature[output].requiredAttributes['modulation'] = 'affine and non-linear'
             elif proc == 'non_linear':
                 self.signature[output].requiredAttributes['modulation'] = 'non-linear only'
-            
+
             # Update param value with new required attributes
             if self.t1mri:
                 setattr(self, output, self.signature[output].findValue(self.t1mri.hierarchyAttributes()))
         self.changeSignature(signature)
-            
+
 
 def update_dartel_export_signature(self, proc, output_rigid, output_affine):
     if isinstance(output_rigid, list) and isinstance(output_affine, list):
@@ -869,40 +859,36 @@ def update_dartel_export_signature(self, proc, output_rigid, output_affine):
             self.setDisable(output_rigid)
         else:
             self.setEnable(output_rigid, output_affine)
-            
+
         self.changeSignature(signature)
-    
+
 
 def update_deformation_field_signature(self, proc):
     if 'Forward' in proc:
         self.setEnable('forward_field')
     else:
         self.setDisable('forward_field')
-        
+
     if 'Inverse' in proc:
         self.setEnable('inverse_field')
     else:
         self.setDisable('inverse_field')
     self.changeSignature(signature)
-    
-    
+
+
 def execution(self, context):
     t1mri_path = self.t1mri.fullPath()
-    tmp_dir = context.temporary('Directory').fullPath()
-    os.makedirs(tmp_dir)
-    
-    t1mri_temp = os.path.join(tmp_dir, '%s.nii' % self.subject)
+    tmp_dir = context.temporary('Directory')
+    t1mri_temp = os.path.join(tmp_dir.fullPath(), '%s.nii' % self.subject)
     if t1mri_path.endswith('.gz'):
         with gzip.open(t1mri_path, 'rb') as t1mri:
             with open(t1mri_temp, 'wb') as t1mri_unzip:
                 shutil.copyfileobj(t1mri, t1mri_unzip)
     else:
         shutil.copyfile(t1mri_path, t1mri_temp)
-        
-    
+
     output_path = os.path.dirname(os.path.dirname(self.grey_native.fullPath()))
-    print('OUTPUT', output_path)
-    
+
     context.runProcess('SPM12CAT12Segment_generic',
                        t1mri=t1mri_temp,
                        template=self.template,
@@ -911,7 +897,7 @@ def execution(self, context):
                        processing_accuracy=self.processing_accuracy,
                        optimal_resolution=self.optimal_resolution,
                        optimal_resolution_value=self.optimal_resolution_value,
-                       COM_to_set_origin = self.COM_to_set_origin,
+                       COM_to_set_origin=self.COM_to_set_origin,
                        affine_preprocessing=self.affine_preprocessing,
                        noise_correction=self.noise_correction,
                        local_adaptative_segmentation=self.local_adaptative_segmentation,
@@ -969,8 +955,6 @@ def execution(self, context):
                        output_directory=output_path,
                        batch_location=self.batch_location)
 
-    shutil.rmtree(tmp_dir)
-    
     # Check to gzip nifti in output_path
     if self.t1mri.fullPath().endswith('.gz'):
         for nifti_path in glob.glob(os.path.join(output_path, '*', '*.nii')):

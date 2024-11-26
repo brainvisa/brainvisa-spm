@@ -165,29 +165,35 @@ def updateSignatureAboutDeformationField(self, proc):
 def update_MPA(self, proc):
     if self.volumes:
         attr = self.volumes[0].hierarchyAttributes()
-        acquisitions = sorted([a.get('acquisition') for a in self.volumes])
-        del attr['acquisition']
-        del attr['normalized']
-        attr['analysis'] = attr['modality'] + '_default_analysis'
-        attr['acquisition_sequence'] = '_'.join(acquisitions)
-        attr['space'] = 'average'
-        return self.signature['MPA'].findValue(attr)
+        if 'name_serie' in attr.keys():
+                del attr['name_serie']
+        if attr:
+            acquisitions = sorted([a.get('acquisition') for a in self.volumes])
+            del attr['acquisition']
+            del attr['normalized']
+            attr['analysis'] = attr['modality'] + '_default_analysis'
+            attr['acquisition_sequence'] = '_'.join(acquisitions)
+            attr['space'] = 'average'
+            return self.signature['MPA'].findValue(attr)
 
 
 def update_outputs(self, proc, param):
     if self.volumes:
         attr = self.volumes[0].hierarchyAttributes()
-        acquisitions = sorted([a.get('acquisition') for a in self.volumes])
-        del attr['normalized']
-        attr['analysis'] = attr['modality'] + '_default_analysis'
-        del attr['modality']
-        attr['acquisition_sequence'] = '_'.join(acquisitions)
-        attr['space'] = 'average'
-        param_list = []
-        for vol in self.volumes:
-            attr['acquisition'] = vol.get('acquisition')
-            param_list.append(self.signature[param].contentType.findValue(attr))
-        return param_list
+        if 'name_serie' in attr.keys():
+                del attr['name_serie']
+        if attr:
+            acquisitions = sorted([a.get('acquisition') for a in self.volumes])
+            del attr['normalized']
+            attr['analysis'] = attr['modality'] + '_default_analysis'
+            del attr['modality']
+            attr['acquisition_sequence'] = '_'.join(acquisitions)
+            attr['space'] = 'average'
+            param_list = []
+            for vol in self.volumes:
+                attr['acquisition'] = vol.get('acquisition')
+                param_list.append(self.signature[param].contentType.findValue(attr))
+            return param_list
 
 
 def updateBatchPath(self, proc):
