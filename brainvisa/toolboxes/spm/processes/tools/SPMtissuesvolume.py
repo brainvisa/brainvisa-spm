@@ -140,7 +140,7 @@ def execution(self, context):
         grey_w = aims.read(self.grey_warped_unmodulated_proba_map.fullPath())
         csf_w = aims.read(self.csf_warped_unmodulated_proba_map.fullPath())
         tiv_mask = white_w + grey_w + csf_w
-        tiv_mask.astype('int16')  # e > 0.5 = 1
+        tiv_mask = tiv_mask.astype('int16')  # e > 0.5 = 1
     elif self.mode == 'default+mask':
         tiv_mask = aims.read(self.tiv_mask.fullPath())
 
@@ -209,7 +209,7 @@ def execution(self, context):
         tiv = white + grey + csf
         aims.AimsConnectedComponent(tiv, aims.Connectivity.CONNECTIVITY_26_XYZ,
                                     0, True, 0, 0, 1)
-        cltiv = aimsalgo.AimsMorphoClosing(tiv, 1)
+        cltiv = aimsalgo.AimsMorphoClosing(tiv, white.header()['voxel_size'][0])
         white[np.where(cltiv.np == 0)] = 0
         grey[np.where(cltiv.np == 0)] = 0
         csf[np.where(cltiv.np == 0)] = 0
@@ -220,7 +220,7 @@ def execution(self, context):
         csf_vol = compute_vol(csf)
 
     #Write in the output file
-    f.write(f'{subject},{str(gm_vol)},{str(wm_vol)},{str(csf_vol)},{str(tiv)}\n')
+    f.write(f'{subject},{gm_vol},{wm_vol},{csf_vol},{tiv}\n')
     f.close()
 
 
