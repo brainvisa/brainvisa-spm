@@ -1,0 +1,17 @@
+package:
+  name: soma-spm
+
+soma-dev:
+  type: interpreted
+
+  internal-dependencies:
+    - soma
+    - anatomist
+
+requirements:
+  run:
+    - nipype <1.9
+    - xlrd
+    - xlwt
+    - openpyxl
+
