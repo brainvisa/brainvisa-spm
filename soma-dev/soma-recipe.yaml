@@ -10,7 +10,7 @@ soma-dev:
 
 requirements:
   run:
-    - nipype <1.9
+    - nipype
     - xlrd
     - xlwt
     - openpyxl
