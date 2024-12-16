@@ -40,11 +40,9 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
-from __future__ import absolute_import
-from __future__ import print_function
-from brainvisa.processes import *
+from brainvisa.processes import Signature, ReadDiskItem, WriteDiskItem, ListOf, Boolean
+from soma import aims
 import numpy as np
-from six.moves import zip
 
 name = 'compute one tissue mask'
 userLevel = 1
@@ -61,7 +59,6 @@ signature = Signature(
         'T1 MRI tissue probability mask',
         ['gz compressed NIFTI-1 image', 'NIFTI-1 image']),
     'resolve_equal_probability', Boolean()
-
 )
 
 
@@ -76,7 +73,7 @@ def execution(self, context):
     prob_map_vol = aims.read(self.native_prob_map.fullPath())
     prob_map_arr = np.array(prob_map_vol, copy=False)
     prob_map_arr[prob_map_arr < 0] = 0
-    
+
     comp_prob_map_max = []
     for other_prob_map in self.others_prob_maps:
         # comp_prob_map_arr = np.array(aims.read(other_prob_map.fullPath()), copy=False)
@@ -85,14 +82,15 @@ def execution(self, context):
     self.compare_probability_map(prob_map_arr, comp_prob_map_max)
 
     prob_map_arr[prob_map_arr > 10e-5] = 1
-    aims.write(prob_map_vol, self.native_mask.fullPath(), format='S16')
+    prob_map_vol = prob_map_vol.astype('int16')
+    aims.write(prob_map_vol, self.native_mask.fullPath())
 
 
 def compare_probability_map(self, prob_map, comp_prob_map):
 
     if self.resolve_equal_probability:
         self._resolve_equal_probability(prob_map, comp_prob_map)
-        
+
     prob_map[prob_map < np.max(comp_prob_map, axis=0)] = 0
 
 
@@ -152,7 +150,7 @@ def _computeNeighborsMean(arr, x, y, z, t):
             [x, y + 1, z - 1, t],
             [x + 1, y, z - 1, t]
         ]
-        
+
         neighbors_sum = 0
         for n in neighbors_18:
             neighbors_sum += arr[n[0]][n[1]][n[2]][n[3]]

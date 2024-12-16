@@ -425,7 +425,7 @@ cat12_analysis_directory = (
 )
 
 shoot_analysis_directory = (
-    '{analysis}_using_{template}', SetContent(
+    '{analysis}_using_{template}GS', SetContent(
         'v_{prefix}<subject>_Template',
         SetType('Velocity field'),
 
