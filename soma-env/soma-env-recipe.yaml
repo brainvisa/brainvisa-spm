@@ -2,6 +2,7 @@ package:
   name: soma-spm
 
 soma-env:
+  publication: neuro-forge
   type: interpreted
 
   internal-dependencies:
@@ -14,4 +15,3 @@ requirements:
     - xlrd
     - xlwt
     - openpyxl
-
