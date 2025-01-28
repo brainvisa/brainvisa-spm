@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
+
 import os
 import soma.subprocess
 import sys
 import tempfile
 from collections import deque
-from distutils.spawn import find_executable
 from nipype.interfaces import spm
-
 from soma.spm.custom_decorator_pattern import checkIfArgumentTypeIsAllowed, checkIfArgumentTypeIsStrOrUnicode
 from soma.spm.custom_decorator_pattern import singleton
 from soma.spm.spm_batch_maker_utils import addBatchKeyWordInEachItem
 from soma.spm.spm_main_module import SPM8MainModule, SPM12MainModule
+import shutil
 
 
 class SPMLauncher(object):
@@ -63,7 +61,7 @@ class SPMLauncher(object):
 # ===========================================================================
 class SPM(SPMLauncher):
     def _getMatlabPathFromExecutable(self, matlab_executable):
-        matlab_executable_path = find_executable(matlab_executable)
+        matlab_executable_path = shutil.which(matlab_executable)
         if matlab_executable_path:
             return matlab_executable_path
         else:
