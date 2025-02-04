@@ -130,8 +130,11 @@ signature = Signature(
     # - Spatial registration -
     "spatial_registration_method", Choice('shooting', 'dartel',
                                           section=spatial_options_section),
-    "spatial_registration_template", ReadDiskItem('CAT shooting template', ['NIFTI-1 image', 'SPM image', 'MINC image'],
-                                                  section=spatial_options_section),
+    "spatial_registration_template", ReadDiskItem(
+        'CAT shooting template',
+        ['NIFTI-1 image', 'SPM image', 'MINC image'],
+        requiredAttributes={'step': '0'},
+        section=spatial_options_section),
     "shooting_method", Choice(("Default Shooting", 'default'),
                               ("Optimized Shooting - vox", 'opt_vox'),
                               ("Optimized Shooting - fast", 'opt_fast'),
