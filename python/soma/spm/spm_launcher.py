@@ -249,6 +249,11 @@ class SPMStandalone(SPMLauncher):
             current_execution_module_deque = deque(self.execution_module_deque)
             self.resetExecutionQueue()
             print('running SPM standalone command:', standalone_command)
+            # print('cwd:', job_directory)
+            # print('script:')
+            # with open(self.spm_script_path) as f:
+            #     print(f.read())
+            # print('-----')
             output = runCommand(standalone_command, cwd=job_directory)
             try:
                 checkIfSpmHasFailed(output)
@@ -409,11 +414,17 @@ def checkIfSpmHasFailed(output):
 
 def runCommand(command_list, cwd=None):
     # Popen run spm in background
+    env = None
+    if 'LD_PRELOAD' in os.environ:
+        # LD_PRELOAD may load OpenGL or VirtualGL with a different version
+        # of libc/libstdc++, so remove it.
+        env = {x: y for x, y in os.environ.items() if x != 'LD_PRELOAD'}
     process = soma.subprocess.Popen(command_list,
                                cwd=cwd,
                                stdin=open(os.devnull),
                                stdout=soma.subprocess.PIPE,
-                               stderr=soma.subprocess.PIPE)
+                               stderr=soma.subprocess.PIPE,
+                               env=env)
     # Poll process for new output until finished
     output_lines = []
     while True:
