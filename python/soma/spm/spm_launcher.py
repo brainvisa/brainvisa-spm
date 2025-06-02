@@ -437,4 +437,9 @@ def runCommand(command_list, cwd=None):
         sys.stdout.write(nextline)
         sys.stdout.flush()
 
+    process.communicate()
+    if process.returncode != 0:
+        raise RuntimeError('SPM process has failed, '
+                           f'exit code: {process.returncode}')
+
     return ''.join(output_lines)
