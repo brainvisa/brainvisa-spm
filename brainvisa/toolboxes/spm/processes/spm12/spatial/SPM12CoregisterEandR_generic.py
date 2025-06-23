@@ -132,10 +132,19 @@ def updateBatchPath(self, proc):
 def execution(self, context):
     if self.deformation_in_source:
         source_diskitem = self.source
+        others_diskitem = self.others
     else:
         source_diskitem = context.temporary(self.source.format)
         shutil.copy2(self.source.fullPath(),
                      source_diskitem.fullPath())
+        
+        others_diskitem = []
+        if self.others:
+            for other in self.others:
+                new_other_path = context.temporary(other.format, suffix=Path(other.fullPath()).name)
+                others_diskitem.append(new_other_path)
+                shutil.copy2(other.fullPath(), new_other_path.fullPath())
+            
     reference_diskitem = self.reference
 
     if self.others and self.custom_outputs:
@@ -195,7 +204,7 @@ def execution(self, context):
     estimate_and_reslice.setReferenceVolumePath(reference_diskitem.fullPath())
     estimate_and_reslice.setSourceVolumePath(source_diskitem.fullPath())
     if self.others:
-        for other_diskitem in self.others:
+        for other_diskitem in others_diskitem:
             estimate_and_reslice.addOtherVolumePath(other_diskitem.fullPath())
 
     if self.custom_outputs:
@@ -211,7 +220,7 @@ def execution(self, context):
         estimate_and_reslice.setSourceWarpedPath(str(source_warped_path))
         if self.others:
             other_output_list = []
-            for other_diskitem in self.others_warped:
+            for other_diskitem in self.others:
                 other_path = Path(other_diskitem.fullPath())
                 other_warped_path = other_path.parent / (self.filename_prefix + other_path.name)
                 other_output_list.append(str(other_warped_path))
