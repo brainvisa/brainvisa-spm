@@ -10,6 +10,7 @@ soma-env:
   internal-dependencies:
     - soma
     - anatomist
+    - axon
 
 requirements:
   run:
@@ -17,3 +18,4 @@ requirements:
     - xlrd
     - xlwt
     - openpyxl
+    - spm12
