@@ -151,8 +151,7 @@ class SPM(SPMLauncher):
         # it still takes care to quote the argument to '-r' correctly so eval
         # does not mess it up.
         matlab_commmand = [
-            # bv_unenv is needed for CentOs 7 (LIB & Pitie)
-            'bv_unenv', self.matlab_executable_path,
+            self.matlab_executable_path,
             matlab_run_options,
             '-r', "run('%s');" % matlab_script_path
         ]
