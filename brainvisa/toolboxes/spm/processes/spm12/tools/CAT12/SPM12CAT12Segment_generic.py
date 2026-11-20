@@ -495,7 +495,13 @@ def execution(self, context):
     estimate_and_write.writing_options.set_registration_matrix_choice(self.registration_matrix)
     
     context.write('<br>'.join(estimate_and_write.getStringListForBatch()))
-    spm = validation()
+    spm = validation()   
+    # Matlab launcher only (SPM12 is a singleton factory, so isinstance can't be used)
+    if hasattr(spm, 'addMatlabCommandBeforeSPMRunning'):
+        spm.addMatlabCommandBeforeSPMRunning([
+            "addpath(fullfile(spm('Dir'), 'toolbox', 'cat12'));",
+            "cat12('expert');",
+        ])
     spm.addModuleToExecutionQueue(estimate_and_write)
     spm.setSPMScriptPath(self.batch_location.fullPath())
     output = spm.run()
