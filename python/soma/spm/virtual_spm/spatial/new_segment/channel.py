@@ -443,7 +443,7 @@ class Channel(object):
     self.bias_corrected_path_list = output_path_list
 
   @checkIfArgumentTypeIsAllowed(list, 1)
-  def setBiasFieldPath(self, output_path_list):
+  def setBiasFieldPathList(self, output_path_list):
     self.bias_field_path_list = output_path_list
 
   def getStringListForBatch(self):
@@ -465,7 +465,7 @@ class Channel(object):
                     bias_corrected_path,
                     prefix=self.bias_corrected_prefix)
     if self.bias_field_path_list:
-      for volume_path, bias_field_path in zip(self.volume_path_path,
+      for volume_path, bias_field_path in zip(self.volume_path_list,
                                               self.bias_field_path_list):
         moveSPMPath(volume_path,
                     bias_field_path,
